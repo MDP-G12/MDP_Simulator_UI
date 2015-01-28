@@ -18,12 +18,12 @@ class Simulator:
 
         map_widget = []
 
-        robot_n = PhotoImage(file='icon_N.gif')
-        robot_s = PhotoImage(file='icon_S.gif')
-        robot_e = PhotoImage(file='icon_E.gif')
-        robot_w = PhotoImage(file='icon_W.gif')
-        map_free = PhotoImage(file='green.gif')
-        map_obstacle = PhotoImage(file='red.gif')
+        robot_n = PhotoImage(file='images/icon_N.gif')
+        robot_s = PhotoImage(file='images/icon_S.gif')
+        robot_e = PhotoImage(file='images/icon_E.gif')
+        robot_w = PhotoImage(file='images/icon_W.gif')
+        map_free = PhotoImage(file='images/green.gif')
+        map_obstacle = PhotoImage(file='images/red.gif')
 
         # cell_N = ttk.Label(map_pane, image=image_N, borderwidth=1, relief="solid")
         # cell_S = ttk.Label(map_pane, image=image_S, borderwidth=1, relief="solid")
