@@ -4,26 +4,29 @@ from map import Map
 
 
 class Simulator:
-    def __init__(self, map_info):
-        root = Tk()
-        root.title("Map Simulator")
+    def __init__(self):
+
+        self.root = Tk()
+        self.root.title("Map Simulator")
 
         # s = ttk.Style()
         # s.theme_use('aqua')
 
-        map_pane = ttk.Frame(root, borderwidth=1, relief="solid")
-        map_pane.grid(column=0, row=0, sticky=(N, S, E, W))
-        control_pane = ttk.Frame(root, padding=(12, 10))
-        control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
-
-        map_widget = []
-
-        robot_n = PhotoImage(file='images/icon_N.gif')
-        robot_s = PhotoImage(file='images/icon_S.gif')
-        robot_e = PhotoImage(file='images/icon_E.gif')
-        robot_w = PhotoImage(file='images/icon_W.gif')
-        map_free = PhotoImage(file='images/green.gif')
-        map_obstacle = PhotoImage(file='images/red.gif')
+        # left side map panel
+        self.map_pane = ttk.Frame(self.root, borderwidth=1, relief="solid")
+        self.map_pane.grid(column=0, row=0, sticky=(N, S, E, W))
+        # right side control panel
+        self.control_pane = ttk.Frame(self.root, padding=(12, 10))
+        self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
+        # stores instances of widgets on the map
+        self.map_widget = [[None]*15]*10
+        # photo instances
+        self.robot_n = PhotoImage(file='images/icon_N.gif')
+        self.robot_s = PhotoImage(file='images/icon_S.gif')
+        self.robot_e = PhotoImage(file='images/icon_E.gif')
+        self.robot_w = PhotoImage(file='images/icon_W.gif')
+        self.map_free = PhotoImage(file='images/green.gif')
+        self.map_obstacle = PhotoImage(file='images/red.gif')
 
         # cell_N = ttk.Label(map_pane, image=image_N, borderwidth=1, relief="solid")
         # cell_S = ttk.Label(map_pane, image=image_S, borderwidth=1, relief="solid")
@@ -31,37 +34,36 @@ class Simulator:
         # cell_W = ttk.Label(map_pane, image=image_W, borderwidth=1, relief="solid")
 
         for i in range(10):
-            row = []
             for j in range(15):
                 if map_info.robot[0] <= i <= map_info.robot[0]+2 and map_info.robot[1] <= j <= map_info.robot[1]+2:
                     if map_info.robot_direction == 'N':
-                        robot_image = robot_n
+                        self.put_robot(i, j, 'N')
                     elif map_info.robot_direction == 'S':
-                        robot_image = robot_s
+                        self.put_robot(i, j, 'S')
                     elif map_info.robot_direction == 'W':
-                        robot_image = robot_w
+                        self.put_robot(i, j, 'W')
                     else:
-                        robot_image = robot_e
-                    cell = ttk.Label(map_pane, image=robot_image, borderwidth=1, relief="solid")
-                elif map_info.map_real[i][j] == 0:
-                    cell = ttk.Label(map_pane, image=map_free, borderwidth=1, relief="solid")
+                        self.put_robot(i, j, 'E')
                 else:
-                    cell = ttk.Label(map_pane, image=map_obstacle, borderwidth=1, relief="solid")
-                cell.grid(column=j, row=i)
-                row.append(cell)
-            map_widget.append(row)
+                    self.put_map(i, j)
 
-        control_pane_window = ttk.Panedwindow(control_pane, orient=VERTICAL)
+        control_pane_window = ttk.Panedwindow(self.control_pane, orient=VERTICAL)
         control_pane_window.grid(column=0, row=0, sticky=(N, S, E, W))
         parameter_pane = ttk.Labelframe(control_pane_window, text='Parameters')
         action_pane = ttk.Labelframe(control_pane_window, text='Action')
-        control_pane_window.add(parameter_pane, weight=20)
+        control_pane_window.add(parameter_pane, weight=4)
         control_pane_window.add(action_pane, weight=1)
 
-        explore_button = ttk.Button(action_pane, text='Explore', padding=(20, 10))
-        explore_button.grid(column=0, row=0, sticky=(W, E), pady=(0, 10))
-        fastest_path_button = ttk.Button(action_pane, text='Fastest Path', padding=(20, 10))
-        fastest_path_button.grid(column=0, row=1, stick=(W, E))
+        explore_button = ttk.Button(action_pane, text='Explore', width=16)
+        explore_button.grid(column=0, row=0, sticky=(W, E))
+        fastest_path_button = ttk.Button(action_pane, text='Fastest Path')
+        fastest_path_button.grid(column=0, row=1, sticky=(W, E))
+        move_button = ttk.Button(action_pane, text='Move', command=self.move)
+        move_button.grid(column=0, row=2, sticky=(W, E))
+        left_button = ttk.Button(action_pane, text='Left', command=self.left)
+        left_button.grid(column=0, row=3, sticky=(W, E))
+        right_button = ttk.Button(action_pane, text='Right', command=self.right)
+        right_button.grid(column=0, row=4, sticky=(W, E))
 
         step_per_second = StringVar()
         step_per_second_label = ttk.Label(parameter_pane, text="Step Per Second:")
@@ -81,18 +83,116 @@ class Simulator:
         time_limit_entry = ttk.Entry(parameter_pane, textvariable=time_limit)
         time_limit_entry.grid(column=0, row=5, pady=(0, 10))
 
-        root.columnconfigure(0, weight=1)
-        root.rowconfigure(0, weight=1)
-        control_pane.columnconfigure(0, weight=1)
-        control_pane.rowconfigure(0, weight=1)
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        self.control_pane.columnconfigure(0, weight=1)
+        self.control_pane.rowconfigure(0, weight=1)
 
         # for i in range(10):
         #     map_pane.rowconfigure(i, weight=1)
         # for j in range(15):
         #     map_pane.columnconfigure(j, weight=1)
 
-        root.mainloop()
+        self.root.bind("<Left>", lambda e: self.left())
+        self.root.bind("<Right>", lambda e: self.right())
+        self.root.bind("<Up>", lambda e: self.move())
+        self.root.mainloop()
 
+    def put_robot(self, x, y, direction):
+        if direction == 'N':
+            robot_image = self.robot_n
+        elif direction == 'S':
+            robot_image = self.robot_s
+        elif direction == 'W':
+            robot_image = self.robot_w
+        else:
+            robot_image = self.robot_e
+        cell = ttk.Label(self.map_pane, image=robot_image, borderwidth=1, relief="solid")
+        try:
+            self.map_pane[x][y].destroy()
+        except Exception:
+            pass
+        cell.grid(column=y, row=x)
+        self.map_widget[x][y] = cell
+
+    def put_map(self, x, y):
+        map_image = self.map_obstacle if map_info.map_real[x][y] else self.map_free
+        cell = ttk.Label(self.map_pane, image=map_image, borderwidth=1, relief="solid")
+        try:
+            self.map_pane[x][y].destroy()
+        except Exception:
+            pass
+        cell.grid(column=y, row=x)
+        self.map_widget[x][y] = cell
+
+    def move(self):
+        print("Action: move forward")
+        if map_info.robot_direction == 'N':
+            if map_info.robot[0] > 0:
+                self.put_map(map_info.robot[0]+2, map_info.robot[1])
+                self.put_map(map_info.robot[0]+2, map_info.robot[1]+1)
+                self.put_map(map_info.robot[0]+2, map_info.robot[1]+2)
+
+                self.put_robot(map_info.robot[0]-1, map_info.robot[1], 'N')
+                self.put_robot(map_info.robot[0]-1, map_info.robot[1]+1, 'N')
+                self.put_robot(map_info.robot[0]-1, map_info.robot[1]+2, 'N')
+
+                map_info.robot[0] -= 1
+        elif map_info.robot_direction == 'S':
+            if map_info.robot[0] < 7:
+                self.put_map(map_info.robot[0], map_info.robot[1])
+                self.put_map(map_info.robot[0], map_info.robot[1]+1)
+                self.put_map(map_info.robot[0], map_info.robot[1]+2)
+
+                self.put_robot(map_info.robot[0]+3, map_info.robot[1], 'S')
+                self.put_robot(map_info.robot[0]+3, map_info.robot[1]+1, 'S')
+                self.put_robot(map_info.robot[0]+3, map_info.robot[1]+2, 'S')
+
+                map_info.robot[0] += 1
+
+        elif map_info.robot_direction == 'W':
+            if map_info.robot[1] > 0:
+                self.put_map(map_info.robot[0], map_info.robot[1]+2)
+                self.put_map(map_info.robot[0]+1, map_info.robot[1]+2)
+                self.put_map(map_info.robot[0]+2, map_info.robot[1]+2)
+
+                self.put_robot(map_info.robot[0], map_info.robot[1]-1, 'W')
+                self.put_robot(map_info.robot[0]+1, map_info.robot[1]-1, 'W')
+                self.put_robot(map_info.robot[0]+2, map_info.robot[1]-1, 'W')
+
+                map_info.robot[1] -= 1
+        elif map_info.robot_direction == 'E':
+            if map_info.robot[1] < 12:
+                self.put_map(map_info.robot[0], map_info.robot[1])
+                self.put_map(map_info.robot[0]+1, map_info.robot[1])
+                self.put_map(map_info.robot[0]+2, map_info.robot[1])
+
+                self.put_robot(map_info.robot[0], map_info.robot[1]+3, 'E')
+                self.put_robot(map_info.robot[0]+1, map_info.robot[1]+3, 'E')
+                self.put_robot(map_info.robot[0]+2, map_info.robot[1]+3, 'E')
+
+                map_info.robot[1] += 1
+
+    def left(self):
+        print("Action: turn left")
+        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+3) % 4]
+        for i in range(3):
+            for j in range(3):
+                self.put_robot(map_info.robot[0]+i, map_info.robot[1]+j, map_info.robot_direction)
+
+    def right(self):
+        print("Action: turn right")
+        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+5) % 4]
+        for i in range(3):
+            for j in range(3):
+                self.put_robot(map_info.robot[0]+i, map_info.robot[1]+j, map_info.robot_direction)
+
+DIRECTIONS = ['N', 'E', 'S', 'W']
 
 map_info = Map()
-map_simulator = Simulator(map_info)
+map_simulator = Simulator()
+
+# while True:
+#     command = input("Please issue a command:")
+#     if command == "move":
+#         map_simulator.move()
