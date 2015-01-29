@@ -16,5 +16,5 @@ map_detail 	= dict(
 )
 
 robot_detail = dict (
-	size	= 3,
+	size	= 2,
 )
