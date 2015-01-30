@@ -11,8 +11,8 @@ icon_path = dict(
 )
 
 map_detail 	= dict(
-	height	= 10,
-	width	= 15,
+	height	= 15,
+	width	= 20,
 )
 
 robot_detail = dict (

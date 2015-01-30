@@ -5,7 +5,7 @@ except ImportError:
     from Tkinter import *
     import ttk
 
-from Map import *
+from map import *
 import config
 
 
