@@ -19,7 +19,7 @@ class Simulator:
         self.control_pane = ttk.Frame(self.root, padding=(12, 10))
         self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
         # stores instances of widgets on the map
-        self.map_widget = [[None]*15]*10
+        self.map_widget = [[None]*20]*15
         # photo instances
         self.robot_n = PhotoImage(file='images/icon_N.gif')
         self.robot_s = PhotoImage(file='images/icon_S.gif')
@@ -33,8 +33,8 @@ class Simulator:
         # cell_E = ttk.Label(map_pane, image=image_E, borderwidth=1, relief="solid")
         # cell_W = ttk.Label(map_pane, image=image_W, borderwidth=1, relief="solid")
 
-        for i in range(10):
-            for j in range(15):
+        for i in range(15):
+            for j in range(20):
                 if map_info.robot[0] <= i <= map_info.robot[0]+2 and map_info.robot[1] <= j <= map_info.robot[1]+2:
                     if map_info.robot_direction == 'N':
                         self.put_robot(i, j, 'N')
@@ -139,7 +139,7 @@ class Simulator:
 
                 map_info.robot[0] -= 1
         elif map_info.robot_direction == 'S':
-            if map_info.robot[0] < 7:
+            if map_info.robot[0] < 12:
                 self.put_map(map_info.robot[0], map_info.robot[1])
                 self.put_map(map_info.robot[0], map_info.robot[1]+1)
                 self.put_map(map_info.robot[0], map_info.robot[1]+2)
@@ -162,7 +162,7 @@ class Simulator:
 
                 map_info.robot[1] -= 1
         elif map_info.robot_direction == 'E':
-            if map_info.robot[1] < 12:
+            if map_info.robot[1] < 17:
                 self.put_map(map_info.robot[0], map_info.robot[1])
                 self.put_map(map_info.robot[0]+1, map_info.robot[1])
                 self.put_map(map_info.robot[0]+2, map_info.robot[1])
