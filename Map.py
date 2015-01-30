@@ -46,4 +46,4 @@ class Map:
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                              [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
         self.robot = [0, 0]
-        self.robot_direction = 'S'
+        self.robot_direction = 'E'
