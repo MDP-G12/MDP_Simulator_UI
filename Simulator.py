@@ -7,24 +7,28 @@ except ImportError:
 
 from map import *
 import config
+import threading
 
 
 class Simulator:
-    def __init__(self):
+    def __init__(self, master):
 
-        self.root = Tk()
-        self.root.title("Map Simulator")
+        self.master = master
+
+        t = Toplevel(master)
+        t.title("Control Panel")
+        t.geometry('180x360+1050+28')
 
         # s = ttk.Style()
         # s.theme_use('aqua')
 
         # left side map panel
-        self.map_pane = ttk.Frame(self.root, borderwidth=1, relief="solid")
+        self.map_pane = ttk.Frame(self.master, borderwidth=1, relief="solid")
         self.map_pane.grid(column=0, row=0, sticky=(N, S, E, W))
         # right side control panel
-        self.control_pane = ttk.Frame(self.root, padding=(12, 10))
+        self.control_pane = ttk.Frame(t, padding=(12, 10))
         self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
-        
+
         # map size
         self.map_height     = config.map_detail['height']
         self.map_width      = config.map_detail['width']
@@ -40,6 +44,8 @@ class Simulator:
         self.robot_w        = PhotoImage(file=config.icon_path['west'])
         self.map_free       = PhotoImage(file=config.icon_path['free'])
         self.map_obstacle   = PhotoImage(file=config.icon_path['obstacle'])
+        self.map_start      = PhotoImage(file=config.icon_path['start'])
+        self.map_end        = PhotoImage(file=config.icon_path['end'])
 
         # cell_N = ttk.Label(map_pane, image=image_N, borderwidth=1, relief="solid")
         # cell_S = ttk.Label(map_pane, image=image_S, borderwidth=1, relief="solid")
@@ -101,8 +107,8 @@ class Simulator:
         time_limit_entry = ttk.Entry(parameter_pane, textvariable=time_limit)
         time_limit_entry.grid(column=0, row=5, pady=(0, 10))
 
-        self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=1)
+        # self.root.columnconfigure(0, weight=1)
+        # self.root.rowconfigure(0, weight=1)
         self.control_pane.columnconfigure(0, weight=1)
         self.control_pane.rowconfigure(0, weight=1)
 
@@ -111,10 +117,9 @@ class Simulator:
         # for j in range(15):
         #     map_pane.columnconfigure(j, weight=1)
 
-        self.root.bind("<Left>", lambda e: self.left())
-        self.root.bind("<Right>", lambda e: self.right())
-        self.root.bind("<Up>", lambda e: self.move())
-        self.root.mainloop()
+        self.master.bind("<Left>", lambda e: self.left())
+        self.master.bind("<Right>", lambda e: self.right())
+        self.master.bind("<Up>", lambda e: self.move())
 
     def put_robot(self, x, y, direction):
         if direction == 'N':
@@ -134,7 +139,15 @@ class Simulator:
         self.map_widget[x][y] = cell
 
     def put_map(self, x, y):
-        map_image = self.map_obstacle if map_info.map_real[x][y] else self.map_free
+        if map_info.map_real[x][y]:
+            map_image = self.map_obstacle
+        elif 0 <= x <= 2 and 0 <= y <=2:
+            map_image = self.map_start
+        elif 17 <= y <= 19 and 12 <= x <= 14:
+            map_image = self.map_end
+        else:
+            map_image = self.map_free
+        # map_image = self.map_obstacle if map_info.map_real[x][y] else self.map_free
         cell = ttk.Label(self.map_pane, image=map_image, borderwidth=1, relief="solid")
         try:
             self.map_pane[x][y].destroy()
@@ -164,7 +177,7 @@ class Simulator:
 
     def move(self):
         print("Action: move forward")
-        
+
         # Getting the next position
         if map_info.robot_direction == 'N':
             robot_next = [map_info.robot[0]-1, map_info.robot[1]]
@@ -207,7 +220,7 @@ class Simulator:
             for z in range (map_info.robot[0], map_info.robot[0] + self.robot_size):
                 self.put_map  (z, map_info.robot[1]-1                   )
                 self.put_robot(z, map_info.robot[1]+self.robot_size-1   , 'E')
-        
+
 
 
 
@@ -228,7 +241,14 @@ class Simulator:
 DIRECTIONS = ['N', 'E', 'S', 'W']
 
 map_info = Map()
-map_simulator = Simulator()
+
+root = Tk()
+root.title("Map Simulator")
+
+map_simulator = Simulator(root)
+
+root.mainloop()
+
 
 # while True:
 #     command = input("Please issue a command:")

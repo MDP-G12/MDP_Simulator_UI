@@ -4,10 +4,12 @@ icon_path = dict(
     south = 'images/icon_S.gif',
     west  = 'images/icon_W.gif',
     
-    free  				= 'images/green.gif',
+    free  				= 'images/blue.gif',
     obstacle 			= 'images/red.gif',
     explored_free		= '',
     explored_obstacle	= '',
+    start               = 'images/d_blue.gif',
+    end                 = 'images/green.gif'
 )
 
 map_detail 	= dict(
