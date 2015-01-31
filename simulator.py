@@ -6,14 +6,18 @@ except ImportError:
     import ttk
 
 from map import *
+from sensor_simulator import SensorSimulator
 import config
 import threading
+import queue
+import time
 
 
-class Simulator:
-    def __init__(self, master):
+class SimulatorUI:
+    def __init__(self, master, event_queue):
 
         self.master = master
+        self.event_queue = event_queue
 
         t = Toplevel(master)
         t.title("Control Panel")
@@ -174,7 +178,6 @@ class Simulator:
                         return False
         return ret
 
-
     def move(self):
         print("Action: move forward")
 
@@ -221,9 +224,6 @@ class Simulator:
                 self.put_map  (z, map_info.robot[1]-1                   )
                 self.put_robot(z, map_info.robot[1]+self.robot_size-1   , 'E')
 
-
-
-
     def left(self):
         print("Action: turn left")
         map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+3) % 4]
@@ -238,15 +238,52 @@ class Simulator:
             for j in range(self.robot_size):
                 self.put_robot(map_info.robot[0]+i, map_info.robot[1]+j, map_info.robot_direction)
 
+    def action(self):
+        while self.event_queue.qsize():
+            try:
+                command = self.event_queue.get()
+                if command == 'move':
+                    self.move()
+                elif command == 'left':
+                    self.left()
+                elif command == 'right':
+                    self.right()
+                else:
+                    print("Invalid command.")
+            except queue.Empty:
+                pass
+        time.sleep(0)
+
+
+class ThreadedClient():
+    def __init__(self, master):
+        self.master = master
+
+        self.event_queue = queue.Queue()
+
+        self.simulator_UI = SimulatorUI(self.master, self.event_queue)
+
+        self.sensor_simulator = SensorSimulator(self.event_queue)
+
+        self.sensor_thread = threading.Thread(name="sensor thread", target=self.sensor_simulator.issue_command)
+
+        self.sensor_thread.start()
+
+        self.periodic_call()
+
+    def periodic_call(self):
+        self.simulator_UI.action()
+        self.master.after(500, self.periodic_call)
+
+
+
 DIRECTIONS = ['N', 'E', 'S', 'W']
 
 map_info = Map()
 
 root = Tk()
 root.title("Map Simulator")
-
-map_simulator = Simulator(root)
-
+client = ThreadedClient(root)
 root.mainloop()
 
 
