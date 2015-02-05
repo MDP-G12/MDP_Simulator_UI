@@ -7,6 +7,7 @@ except ImportError:
 
 from map import *
 from sensor_simulator import SensorSimulator
+from algo import *
 import config
 import threading
 import queue
@@ -15,6 +16,12 @@ import time
 
 class SimulatorUI:
     def __init__(self, master, event_queue):
+
+    # ----------------------------------------------------------------------
+    #   Algo initialization.
+    # ----------------------------------------------------------------------
+        self.algoObject = algoFactory(self)
+    # ----------------------------------------------------------------------
 
         self.master = master
         self.event_queue = event_queue
@@ -82,7 +89,7 @@ class SimulatorUI:
         control_pane_window.add(parameter_pane, weight=4)
         control_pane_window.add(action_pane, weight=1)
 
-        explore_button = ttk.Button(action_pane, text='Explore', width=16)
+        explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algoObject.explore)
         explore_button.grid(column=0, row=0, sticky=(W, E))
         fastest_path_button = ttk.Button(action_pane, text='Fastest Path')
         fastest_path_button.grid(column=0, row=1, sticky=(W, E))
@@ -145,9 +152,11 @@ class SimulatorUI:
     def put_map(self, x, y):
         if map_info.map_real[x][y]:
             map_image = self.map_obstacle
-        elif 0 <= x <= 2 and 0 <= y <=2:
+        elif ((0 <= y < 3) and
+              (0 <= x < 3)):
             map_image = self.map_start
-        elif 17 <= y <= 19 and 12 <= x <= 14:
+        elif ((self.map_width -3 <= y < self.map_width ) and
+              (self.map_height-3 <= x < self.map_height)):
             map_image = self.map_end
         else:
             map_image = self.map_free
@@ -177,6 +186,21 @@ class SimulatorUI:
                     if (map_info.map_real[i][j] == 1):
                         return False
         return ret
+    # ----------------------------------------------------------------------
+
+
+    # ----------------------------------------------------------------------
+    #   Function delay
+    # ----------------------------------------------------------------------
+    # Delay for moving the robot. (Hardware delay)
+    # ----------------------------------------------------------------------
+    def move_delay(self, mult):
+        self.master.after(config.robot_detail['delay']*mult, self.move)
+    def left_delay(self, mult):
+        self.master.after(config.robot_detail['delay']*mult, self.left)
+    def right_delay(self, mult):
+        self.master.after(config.robot_detail['delay']*mult, self.right)
+    # ----------------------------------------------------------------------
 
     def move(self):
         print("Action: move forward")
@@ -201,7 +225,6 @@ class SimulatorUI:
 
         # Updating robot position value
         [map_info.robot[0], map_info.robot[1]] = robot_next
-
 
         # Updating the map
         if map_info.robot_direction == 'N':
@@ -233,7 +256,7 @@ class SimulatorUI:
 
     def right(self):
         print("Action: turn right")
-        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+5) % 4]
+        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+1) % 4]
         for i in range(self.robot_size):
             for j in range(self.robot_size):
                 self.put_robot(map_info.robot[0]+i, map_info.robot[1]+j, map_info.robot_direction)
@@ -284,7 +307,13 @@ map_info = Map()
 root = Tk()
 root.title("Map Simulator")
 client = ThreadedClient(root)
+
+# map_simulator = Simulator(root)
+
+# map_simulator.algoObject.explore()
+
 root.mainloop()
+
 
 
 # while True:

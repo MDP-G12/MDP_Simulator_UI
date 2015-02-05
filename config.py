@@ -19,4 +19,5 @@ map_detail 	= dict(
 
 robot_detail = dict (
 	size	= 2,
+    delay   = 200,
 )
