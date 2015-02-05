@@ -18,7 +18,7 @@ class SensorSimulator():
 
     def issue_command(self):
         while self.next_command_index < len(self.command_sequence):
-            time.sleep(1)
+            time.sleep(0)
             next_command = self.command_sequence[self.next_command_index]
             self.event_queue.put(next_command)
             self.next_command_index += 1

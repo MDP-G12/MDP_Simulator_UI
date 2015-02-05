@@ -13,17 +13,16 @@ import time
 #		robot starts running according shortest path algorithm
 # ----------------------------------------------------------------------
 class algoAbstract:
-	# def __init__(self):
+    # def __init__(self):
 
-	def explore(self):
-		raise NotImplementedError
+    def explore(self):
+        raise NotImplementedError
 
-	def findSP(self):
-		raise NotImplementedError
+    def findSP(self):
+        raise NotImplementedError
 
-	def run(self):
-		raise NotImplementedError
-
+    def run(self):
+        raise NotImplementedError
 
 
 # ----------------------------------------------------------------------
@@ -39,15 +38,14 @@ class algoAbstract:
 #		robot starts running according shortest path algorithm
 # ----------------------------------------------------------------------
 class algoFactory:
-	def __init__(self, simulator, algoName="BF1"):
-		if (algoName == "BF1"):
-			self.algo = algoBF1(simulator)
-		else:
-			raise NameError('algoName not found')
+    def __init__(self, simulator, algoName="BF1"):
+        if (algoName == "BF1"):
+            self.algo = algoBF1(simulator)
+        else:
+            raise NameError('algoName not found')
 
-	def explore(self):
-		self.algo.explore()
-
+    def explore(self):
+        self.algo.explore()
 
 
 # ----------------------------------------------------------------------
@@ -55,16 +53,16 @@ class algoFactory:
 # Implementation class of algoAbstract using algorithm Brute Force #1
 # ----------------------------------------------------------------------
 class algoBF1(algoAbstract):
-	def __init__(self, simulator):
-		self.sim = simulator
+    def __init__(self, simulator):
+        self.sim = simulator
 
-	def explore(self):
-		i = 1
-		while (True):
-			if ((i%20) > 0):
-				self.sim.move_delay(i)
-			else:
-				self.sim.right_delay(i)
-			i = i + 1
-			if (i > 200):
-				break
+    def explore(self):
+        i = 1
+        while (True):
+            if ((i%20) > 0):
+                self.sim.move_delay(i)
+            else:
+                self.sim.right_delay(i)
+            i = i + 1
+            if (i > 200):
+                break

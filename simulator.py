@@ -196,8 +196,10 @@ class SimulatorUI:
     # ----------------------------------------------------------------------
     def move_delay(self, mult):
         self.master.after(config.robot_detail['delay']*mult, self.move)
+
     def left_delay(self, mult):
         self.master.after(config.robot_detail['delay']*mult, self.left)
+
     def right_delay(self, mult):
         self.master.after(config.robot_detail['delay']*mult, self.right)
     # ----------------------------------------------------------------------
@@ -275,7 +277,7 @@ class SimulatorUI:
                     print("Invalid command.")
             except queue.Empty:
                 pass
-        time.sleep(0)
+            time.sleep(0)
 
 
 class ThreadedClient():
@@ -296,8 +298,7 @@ class ThreadedClient():
 
     def periodic_call(self):
         self.simulator_UI.action()
-        self.master.after(500, self.periodic_call)
-
+        self.master.after(50, self.periodic_call)
 
 
 DIRECTIONS = ['N', 'E', 'S', 'W']
