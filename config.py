@@ -4,12 +4,12 @@ icon_path = dict(
     south = 'images/icon_S.gif',
     west  = 'images/icon_W.gif',
     
-    free  				= 'images/blue.gif',
-    obstacle 			= 'images/red.gif',
-    explored_free		= '',
-    explored_obstacle	= '',
-    start               = 'images/d_blue.gif',
-    end                 = 'images/green.gif'
+    free  				= 'images/d_blue.gif',
+    obstacle 			= 'images/d_red.gif',
+    explored_free		= 'images/l_blue.gif',
+    explored_obstacle	= 'images/l_red.gif',
+    start               = 'images/l_green.gif',
+    end                 = 'images/d_green.gif'
 )
 
 map_detail 	= dict(
@@ -18,5 +18,6 @@ map_detail 	= dict(
 )
 
 robot_detail = dict (
-	size	= 2,
+	size	= 3,
+    delay   = 500,
 )

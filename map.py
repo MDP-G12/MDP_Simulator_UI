@@ -13,6 +13,7 @@
 #           character that contains the direction of robot is heading to
 # ----------------------------------------------------------------------
 
+
 class Map:
     def __init__(self):
         self.map_real = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
