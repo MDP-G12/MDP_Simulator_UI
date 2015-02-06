@@ -6,8 +6,8 @@ icon_path = dict(
     
     free  				= 'images/blue.gif',
     obstacle 			= 'images/red.gif',
-    explored_free		= 'asdf',
-    explored_obstacle	= 'asdf',
+    explored_free		= '',
+    explored_obstacle	= '',
     start               = 'images/d_blue.gif',
     end                 = 'images/green.gif'
 )
