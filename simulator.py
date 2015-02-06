@@ -17,11 +17,11 @@ import time
 class SimulatorUI:
     def __init__(self, master, event_queue):
 
-    # ----------------------------------------------------------------------
-    #   Algo initialization.
-    # ----------------------------------------------------------------------
+        # ----------------------------------------------------------------------
+        #   Algo initialization.
+        # ----------------------------------------------------------------------
+
         self.algoObject = algoFactory(self)
-    # ----------------------------------------------------------------------
 
         self.master = master
         self.event_queue = event_queue
@@ -49,14 +49,16 @@ class SimulatorUI:
         self.map_widget     = [[None]*self.map_width]*self.map_height
 
         # photo instances
-        self.robot_n        = PhotoImage(file=config.icon_path['north'])
-        self.robot_s        = PhotoImage(file=config.icon_path['south'])
-        self.robot_e        = PhotoImage(file=config.icon_path['east'])
-        self.robot_w        = PhotoImage(file=config.icon_path['west'])
-        self.map_free       = PhotoImage(file=config.icon_path['free'])
-        self.map_obstacle   = PhotoImage(file=config.icon_path['obstacle'])
-        self.map_start      = PhotoImage(file=config.icon_path['start'])
-        self.map_end        = PhotoImage(file=config.icon_path['end'])
+        self.robot_n                = PhotoImage(file=config.icon_path['north'])
+        self.robot_s                = PhotoImage(file=config.icon_path['south'])
+        self.robot_e                = PhotoImage(file=config.icon_path['east'])
+        self.robot_w                = PhotoImage(file=config.icon_path['west'])
+        self.map_free               = PhotoImage(file=config.icon_path['free'])
+        self.map_free_explored      = PhotoImage(file=config.icon_path['explored_free'])
+        self.map_obstacle           = PhotoImage(file=config.icon_path['obstacle'])
+        self.map_obstacle_explored  = PhotoImage(file=config.icon_path['explored_obstacle'])
+        self.map_start              = PhotoImage(file=config.icon_path['start'])
+        self.map_end                = PhotoImage(file=config.icon_path['end'])
 
         # cell_N = ttk.Label(map_pane, image=image_N, borderwidth=1, relief="solid")
         # cell_S = ttk.Label(map_pane, image=image_S, borderwidth=1, relief="solid")
@@ -151,15 +153,21 @@ class SimulatorUI:
 
     def put_map(self, x, y):
         if map_info.map_real[x][y]:
-            map_image = self.map_obstacle
+            if map_info.map_explored[x][y]:
+                map_image = self.map_obstacle_explored
+            else:
+                map_image = self.map_obstacle
         elif ((0 <= y < 3) and
               (0 <= x < 3)):
             map_image = self.map_start
-        elif ((self.map_width -3 <= y < self.map_width ) and
+        elif ((self.map_width -3 <= y < self.map_width) and
               (self.map_height-3 <= x < self.map_height)):
             map_image = self.map_end
         else:
-            map_image = self.map_free
+            if map_info.map_explored[x][y]:
+                map_image = self.map_free_explored
+            else:
+                map_image = self.map_free
         # map_image = self.map_obstacle if map_info.map_real[x][y] else self.map_free
         cell = ttk.Label(self.map_pane, image=map_image, borderwidth=1, relief="solid")
         try:
