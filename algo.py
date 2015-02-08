@@ -47,6 +47,12 @@ class algoFactory:
     def explore(self):
         self.algo.explore()
 
+    def findSP(self):
+        self.algo.findSP()
+
+    def run(self):
+        self.algo.run()
+
 
 # ----------------------------------------------------------------------
 # class definition of algoBF1.
@@ -66,3 +72,9 @@ class algoBF1(algoAbstract):
             i = i + 1
             if (i > 200):
                 break
+
+    def findSP(self):
+        pass
+
+    def run(self):
+        pass
