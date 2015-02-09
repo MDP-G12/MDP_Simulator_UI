@@ -17,14 +17,11 @@ import time
 class SimulatorUI:
     def __init__(self, master, event_queue):
 
-        # ----------------------------------------------------------------------
-        #   Algo initialization.
-        # ----------------------------------------------------------------------
-
-        self.algoObject = algoFactory(self, map_info)
-
         self.master = master
         self.event_queue = event_queue
+
+        self.algo = algoFactory(map_info, self)
+
 
         t = Toplevel(master)
         t.title("Control Panel")
@@ -101,9 +98,9 @@ class SimulatorUI:
         control_pane_window.add(parameter_pane, weight=4)
         control_pane_window.add(action_pane, weight=1)
 
-        explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algoObject.explore)
+        explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algo.explore)
         explore_button.grid(column=0, row=0, sticky=(W, E))
-        fastest_path_button = ttk.Button(action_pane, text='Fastest Path', command=self.algoObject.run)
+        fastest_path_button = ttk.Button(action_pane, text='Fastest Path', command=self.algo.run)
         fastest_path_button.grid(column=0, row=1, sticky=(W, E))
         move_button = ttk.Button(action_pane, text='Move', command=self.move)
         move_button.grid(column=0, row=2, sticky=(W, E))
@@ -165,24 +162,29 @@ class SimulatorUI:
                 self.map_widget[x+i-1][y+j-1] = cell
 
     def put_map(self, x, y):
-        if map_info.map_real[x][y]:
-            if map_info.map_explored[x][y]:
-                map_image = self.map_obstacle_explored
-            else:
-                map_image = self.map_obstacle
-        elif ((0 <= y < 3) and
+        # Start & End box
+        if   ((0 <= y < 3) and
               (0 <= x < 3)):
-            map_image = self.map_start
-        elif ((self.map_width -3 <= y < self.map_width) and
-              (self.map_height-3 <= x < self.map_height)):
-            map_image = self.map_end
-        else:
-            if map_info.map_explored[x][y]:
-                map_image = self.map_free_explored
+                map_image = self.map_start
+        elif ((map_info.width -3 <= y < map_info.width) and
+              (map_info.height-3 <= x < map_info.height)):
+                map_image = self.map_end
+
+        # Map Unexplored
+        elif map_info.map[x][y] == 0:
+            if map_info.map_real[x][y] == 1:
+                map_image = self.map_obstacle
             else:
                 map_image = self.map_free
-        # map_image = self.map_obstacle if map_info.map_real[x][y] else self.map_free
-        # cell = ttk.Label(self.map_pane, image=map_image, borderwidth=1, relief="solid")
+
+        # Map Explored
+        else:
+            if map_info.map[x][y] == 1:
+                map_image = self.map_free_explored
+            else:
+                map_image = self.map_obstacle_explored
+
+        # Change map
         cell = ttk.Label(self.map_pane, image=map_image, borderwidth=1)
         try:
             self.map_pane[x][y].destroy()
@@ -190,6 +192,7 @@ class SimulatorUI:
             pass
         cell.grid(column=y, row=x)
         self.map_widget[x][y] = cell
+
 
 
     # ----------------------------------------------------------------------
@@ -295,12 +298,27 @@ class SimulatorUI:
                     print("Invalid command.")
             except queue.Empty:
                 pass
+            print('[Thread] ', threading.current_thread(), 'Giving up control')
             time.sleep(0)
+    #
+    # def on_command(self, command):
+    #     if command == 'move':
+    #         self.move()
+    #     elif command == 'left':
+    #         self.left()
+    #     elif command == 'right':
+    #         self.right()
+    #     else:
+    #         print("[Error] Wrong command!")
 
 
 class ThreadedClient():
     def __init__(self, master):
         self.master = master
+
+        # ----------------------------------------------------------------------
+        #   Algo initialization.
+        # ----------------------------------------------------------------------
 
         self.event_queue = queue.Queue()
 
