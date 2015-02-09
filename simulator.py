@@ -21,7 +21,7 @@ class SimulatorUI:
         #   Algo initialization.
         # ----------------------------------------------------------------------
 
-        self.algoObject = algoFactory(self)
+        self.algoObject = algoFactory(self, map_info)
 
         self.master = master
         self.event_queue = event_queue
@@ -306,7 +306,7 @@ class ThreadedClient():
 
         self.simulator_UI = SimulatorUI(self.master, self.event_queue)
 
-        self.sensor_simulator = SensorSimulator(map_info, self.event_queue)
+        # self.sensor_simulator = SensorSimulator(map_info, self.event_queue)
 
         # self.sensor_thread = threading.Thread(name="sensor thread", target=self.sensor_simulator.issue_command)
 
