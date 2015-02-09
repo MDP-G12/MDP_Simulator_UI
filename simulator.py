@@ -147,6 +147,8 @@ class SimulatorUI:
         self.master.bind("<Up>", lambda e: self.move())
         self.master.bind("<Down>", lambda e: self.back())
 
+        self.update_sensor()
+
 
     def put_robot(self, x, y, direction):
         if direction == 'N':
@@ -346,10 +348,22 @@ class SimulatorUI:
             for dis in range(sens[1]):
                 sens[0][0] -= 1
                 map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
-                self.put_map(sens[0][0], sens[0][1])            
-        # elif map_info.robot_direction == 'S':
-        # elif map_info.robot_direction == 'W':
-        # elif map_info.robot_direction == 'E':
+                self.put_map(sens[0][0], sens[0][1])
+        elif map_info.robot_direction == 'S':
+            for dis in range(sens[1]):
+                sens[0][0] += 1
+                map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
+                self.put_map(sens[0][0], sens[0][1])
+        elif map_info.robot_direction == 'W':
+            for dis in range(sens[1]):
+                sens[0][1] -= 1
+                map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
+                self.put_map(sens[0][0], sens[0][1])
+        elif map_info.robot_direction == 'E':
+            for dis in range(sens[1]):
+                sens[0][1] += 1
+                map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
+                self.put_map(sens[0][0], sens[0][1])
 
 
 
