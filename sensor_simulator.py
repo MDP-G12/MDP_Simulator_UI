@@ -5,12 +5,10 @@ import threading
 
 
 class SensorSimulator():
-    def __init__(self, map_info, buffer, buffer_lock):
+    def __init__(self, map_info, buffer):
 
         self.map_info = map_info
         self.buffer = buffer
-        self.buffer_lock = buffer_lock
-
 
     def get_robot_location(self):
         return self.map_info.robot_location
@@ -76,10 +74,42 @@ class SensorSimulator():
             print("    [ERROR] Invalid direction!")
 
     def get_left(self):
-        pass
+        detect_range = sensor_range['left']
+        robot_location = self.get_robot_location()
+        direction = self.get_robot_direction()
+        if direction == 'E':
+            sensor_location = [robot_location[0]-1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'N', detect_range)
+        elif direction == 'W':
+            sensor_location = [robot_location[0]+1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'S', detect_range)
+        elif direction == 'S':
+            sensor_location = [robot_location[0], robot_location[1]+1]
+            return self.get_sensor_data(sensor_location, 'E', detect_range)
+        elif direction == 'N':
+            sensor_location = [robot_location[0], robot_location[1]-1]
+            return self.get_sensor_data(sensor_location, 'W', detect_range)
+        else:
+            print("    [ERROR] Invalid direction!")
 
     def get_right(self):
-        pass
+        detect_range = sensor_range['right']
+        robot_location = self.get_robot_location()
+        direction = self.get_robot_direction()
+        if direction == 'E':
+            sensor_location = [robot_location[0]+1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'S', detect_range)
+        elif direction == 'W':
+            sensor_location = [robot_location[0]-1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'N', detect_range)
+        elif direction == 'S':
+            sensor_location = [robot_location[0], robot_location[1]-1]
+            return self.get_sensor_data(sensor_location, 'W', detect_range)
+        elif direction == 'N':
+            sensor_location = [robot_location[0], robot_location[1]+1]
+            return self.get_sensor_data(sensor_location, 'E', detect_range)
+        else:
+            print("    [ERROR] Invalid direction!")
 
     def get_sensor_data(self, location, direction, detect_range):
         dis = 0
@@ -96,27 +126,38 @@ class SensorSimulator():
             while location[0]+dis < 14 and not self.map_info.map_real[location[0]+dis+1][location[1]] and dis < detect_range:
                 dis += 1
         if direction == 'N':
-            while location[1]-dis > 0 and not self.map_info.map_real[location[0]-dis-1][location[0]] and dis < detect_range:
+            while location[0]-dis > 0 and not self.map_info.map_real[location[0]-dis-1][location[1]] and dis < detect_range:
                 dis += 1
         print("dis:", dis)
         return dis
 
     def send_sendsor_data(self):
-        last_robot_location = [0, 0]
+        last_robot_location = []
         last_robot_direction = ''
         while True:
             self.map_info.map_lock.acquire()
             print("[Map Lock] Locked by ", threading.current_thread())
+            print("[Map Info] Location: ", self.map_info.robot_location)
+            print("[Map Info] Direction: ", self.map_info.robot_direction)
+            print("[Map Info] Last location: ", last_robot_location)
+            print("[Map Info] Last direction: ", last_robot_direction)
             if not (self.map_info.robot_location == last_robot_location and self.map_info.robot_direction == last_robot_direction):
                 data_to_send = SensorData(self.get_robot_location(), self.get_robot_direction(),
                                           {'front_middle': self.get_front_middle(),
                                            'front_left': self.get_front_left(),
-                                           'front_right': self.get_front_right()})
-                self.buffer_lock.acquire()
+                                           'front_right': self.get_front_right(),
+                                           'left': self.get_left(),
+                                           'right': self.get_right()})
+                last_robot_direction = self.get_robot_direction()
+                last_robot_location = []+self.get_robot_location()
+                print("Robot position updated!")
+                # self.buffer_lock.acquire()
                 print("[Sensor] Sending data to buffer")
-                self.buffer += [data_to_send]
-                print("[Buffer] size = ", len(self.buffer))
-                self.buffer_lock.release()
+                self.buffer.put(data_to_send)
+                print("[Buffer] size = ", self.buffer.qsize())
+                # self.buffer_lock.release()
+            else:
+                print("[Sensor] Robot is not moving")
             self.map_info.map_lock.release()
             print("[Map Lock] Released by ", threading.current_thread())
             print('[Thread] ', threading.current_thread(), 'Giving up control')
