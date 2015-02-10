@@ -2,6 +2,7 @@ import threading
 import time
 from config import *
 
+
 class SensorDataHandler:
     def __init__(self, map_info, simulator):
         self.map_info = map_info
@@ -25,7 +26,6 @@ class SensorDataHandler:
     #     return self.sensor_simulator.get_front_right()
 
     def update_map(self, sensor_data):
-        print("[Thread] ", threading.current_thread())
         print("Updating map...")
         direction = sensor_data.robot_direction
         robot_location = sensor_data.robot_location
@@ -53,7 +53,7 @@ class SensorDataHandler:
         time.sleep(1)
 
     def update_map_by_sensor_data(self, sensor_location, direction, distance, sensor_capability):
-        print("distance:", distance)
+        # print("distance:", distance)
         if direction == 'E':
             for i in range(distance):
                 print("x=", sensor_location[0], " y=", sensor_location[1]+i+1)

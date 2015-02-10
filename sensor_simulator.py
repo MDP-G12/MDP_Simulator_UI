@@ -5,12 +5,10 @@ import threading
 
 
 class SensorSimulator():
-    def __init__(self, map_info, buffer, buffer_lock):
+    def __init__(self, map_info, buffer):
 
         self.map_info = map_info
         self.buffer = buffer
-        self.buffer_lock = buffer_lock
-
 
     def get_robot_location(self):
         return self.map_info.robot_location
@@ -105,19 +103,21 @@ class SensorSimulator():
         last_robot_location = [0, 0]
         last_robot_direction = ''
         while True:
-            self.map_info.map_lock.acquire()
-            print("[Map Lock] Locked by ", threading.current_thread())
+            # self.map_info.map_lock.acquire()
+            # print("[Map Lock] Locked by ", threading.current_thread())
             if not (self.map_info.robot_location == last_robot_location and self.map_info.robot_direction == last_robot_direction):
                 data_to_send = SensorData(self.get_robot_location(), self.get_robot_direction(),
                                           {'front_middle': self.get_front_middle(),
                                            'front_left': self.get_front_left(),
                                            'front_right': self.get_front_right()})
-                self.buffer_lock.acquire()
-                print("[Sensor] Sending data to buffer")
-                self.buffer += [data_to_send]
-                print("[Buffer] size = ", len(self.buffer))
-                self.buffer_lock.release()
-            self.map_info.map_lock.release()
-            print("[Map Lock] Released by ", threading.current_thread())
+                last_robot_direction = self.map_info.robot_direction
+                last_robot_location = self.map_info.robot_location
+                # self.buffer_lock.acquire()
+                # print("[Sensor] Sending data to buffer")
+                self.buffer.put(data_to_send)
+                print("[Buffer] size = ", self.buffer.qsize())
+                # self.buffer_lock.release()
+            # self.map_info.map_lock.release()
+            # print("[Map Lock] Released by ", threading.current_thread())
             print('[Thread] ', threading.current_thread(), 'Giving up control')
             time.sleep(1)

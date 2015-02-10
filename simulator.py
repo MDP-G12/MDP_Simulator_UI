@@ -12,15 +12,16 @@ import config
 import threading
 import queue
 import time
+from sensor_data import *
 
 
 class SimulatorUI:
-    def __init__(self, master, event_queue):
+    def __init__(self, master, client):
 
         self.master = master
-        self.event_queue = event_queue
+        # self.event_queue = event_queue
 
-        self.algo = algoFactory(map_info, self)
+        self.algo = algoFactory(map_info, client)
 
 
         t = Toplevel(master)
@@ -284,22 +285,23 @@ class SimulatorUI:
         map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+1) % 4]
         self.put_robot(map_info.robot_location[0], map_info.robot_location[1], map_info.robot_direction)
 
-    def action(self):
-        while self.event_queue.qsize():
-            try:
-                command = self.event_queue.get()
-                if command == 'move':
-                    self.move()
-                elif command == 'left':
-                    self.left()
-                elif command == 'right':
-                    self.right()
-                else:
-                    print("Invalid command.")
-            except queue.Empty:
-                pass
-            print('[Thread] ', threading.current_thread(), 'Giving up control')
-            time.sleep(0)
+    # def action(self):
+    #     while self.event_queue.qsize():
+    #         print("[EventQueue] Qsize = ", self.event_queue.qsize)
+    #         try:
+    #             command = self.event_queue.get()
+    #             if command == 'move':
+    #                 self.move()
+    #             elif command == 'left':
+    #                 self.left()
+    #             elif command == 'right':
+    #                 self.right()
+    #             else:
+    #                 print("Invalid command.")
+    #         except queue.Empty:
+    #             pass
+    #         print('[Thread] ', threading.current_thread(), 'Giving up control')
+    #         time.sleep(0)
     #
     # def on_command(self, command):
     #     if command == 'move':
@@ -320,21 +322,33 @@ class ThreadedClient():
         #   Algo initialization.
         # ----------------------------------------------------------------------
 
-        self.event_queue = queue.Queue()
+        # self.event_queue = queue.Queue()
+        print("[Current Thread] ", threading.current_thread())
+        self.simulator_UI = SimulatorUI(self.master, self)
+        self.sensor_buffer = queue.Queue()
+        self.sensor_simulator = SensorSimulator(map_info, self.sensor_buffer)
 
-        self.simulator_UI = SimulatorUI(self.master, self.event_queue)
+        self.sensor_thread = threading.Thread(name="SensorThread", target=self.sensor_simulator.send_sendsor_data)
+        self.sensor_thread.start()
+        self.sensor_data_handler = SensorDataHandler(map_info, self.simulator_UI)
 
-        # self.sensor_simulator = SensorSimulator(map_info, self.event_queue)
+        print("[Current Thread] ", threading.current_thread())
+        sensor_data_test = SensorData([1, 1], 'E',
+                                          {'front_middle': 10,
+                                           'front_left': 10,
+                                           'front_right': 10})
+        self.sensor_data_handler.update_map(sensor_data_test)
 
         # self.sensor_thread = threading.Thread(name="sensor thread", target=self.sensor_simulator.issue_command)
 
         # self.sensor_thread.start()
 
-        self.periodic_call()
-
-    def periodic_call(self):
-        self.simulator_UI.action()
-        self.master.after(50, self.periodic_call)
+    #     self.periodic_call()
+    #
+    # def periodic_call(self):
+    #     print("[Periodic Run]")
+    #     self.simulator_UI.action()
+    #     self.master.after(50, self.periodic_call)
 
 
 DIRECTIONS = ['N', 'E', 'S', 'W']

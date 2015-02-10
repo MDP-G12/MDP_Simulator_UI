@@ -19,7 +19,6 @@ import threading
 
 class Map:
     def __init__(self):
-        self.map_lock = threading.Lock()
         # ----------------------------------------------------------------------
         #   Map_real Legend:
         #       0 - free
