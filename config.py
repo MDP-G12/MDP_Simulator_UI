@@ -55,7 +55,7 @@ robot_detail = dict (
 )
 
 sensor_range = dict (
-    front_middle    = 10,
+    front_middle    = 20,
     front_left      = 4,
     front_right     = 4,
     left            = 6,

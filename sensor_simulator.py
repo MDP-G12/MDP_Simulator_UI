@@ -94,14 +94,13 @@ class SensorSimulator():
             while location[0]+dis < 14 and not self.map_info.map_real[location[0]+dis+1][location[1]] and dis < detect_range:
                 dis += 1
         if direction == 'N':
-            while location[1]-dis > 0 and not self.map_info.map_real[location[0]-dis-1][location[0]] and dis < detect_range:
+            while location[0]-dis > 0 and not self.map_info.map_real[location[0]-dis-1][location[0]] and dis < detect_range:
                 dis += 1
         print("dis:", dis)
         return dis
 
     def send_sendsor_data(self):
-        last_robot_location_1 = '0'
-        last_robot_location_2 = '0'
+        last_robot_location = []
         last_robot_direction = ''
         while True:
             self.map_info.map_lock.acquire()
@@ -116,7 +115,7 @@ class SensorSimulator():
                                            'front_left': self.get_front_left(),
                                            'front_right': self.get_front_right()})
                 last_robot_direction = self.get_robot_direction()
-                last_robot_location = self.get_robot_location()
+                last_robot_location = []+self.get_robot_location()
                 print("Robot position updated!")
                 # self.buffer_lock.acquire()
                 print("[Sensor] Sending data to buffer")

@@ -50,13 +50,13 @@ class SensorDataHandler:
             print("    [ERROR] Invalid direction!")
             return
         print('[Thread] ', threading.current_thread(), 'Giving up control')
-        time.sleep(1)
 
     def update_map_by_sensor_data(self, sensor_location, direction, distance, sensor_capability):
         # print("distance:", distance)
+        print('sensor location: ', sensor_location)
         if direction == 'E':
             for i in range(distance):
-                print("x=", sensor_location[0], " y=", sensor_location[1]+i+1)
+                # print("x=", sensor_location[0], " y=", sensor_location[1]+i+1)
                 self.map_info.map[sensor_location[0]][sensor_location[1]+i+1] = 1
                 self.simulator.put_map(sensor_location[0], sensor_location[1]+i+1)
             if distance + sensor_location[1] < 19 and distance < sensor_capability:
@@ -72,15 +72,15 @@ class SensorDataHandler:
         elif direction == 'S':
             for i in range(distance):
                 self.map_info.map[sensor_location[0]+i+1][sensor_location[1]] = 1
-                self.simulator.put_map(sensor_location[0]+i+1, sensor_location[1]+i+1)
-            if distance + sensor_location[1] < 14 and distance < sensor_capability:
+                self.simulator.put_map(sensor_location[0]+i+1, sensor_location[1])
+            if distance + sensor_location[0] < 14 and distance < sensor_capability:
                 self.map_info.map[sensor_location[0]+distance+1][sensor_location[1]] = 1
                 self.simulator.put_map(sensor_location[0]+distance+1, sensor_location[1])
         elif direction == 'N':
             for i in range(distance):
                 self.map_info.map[sensor_location[0]-i-1][sensor_location[1]] = 1
                 self.simulator.put_map(sensor_location[0]-i-1, sensor_location[1])
-            if distance + sensor_location[1] > 0 and distance < sensor_capability:
+            if -distance + sensor_location[0] > 0 and distance < sensor_capability:
                 self.map_info.map[sensor_location[0]-distance-1][sensor_location[1]] = 1
                 self.simulator.put_map(sensor_location[0]-distance-1, sensor_location[1])
         else:
