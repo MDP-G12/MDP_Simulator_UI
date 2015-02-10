@@ -67,6 +67,7 @@ class algoBF1(algoAbstract):
     def __init__(self, map_info, client):
         self.client = client
         self.map_info = map_info
+        self.counter = 0
 
     def explore(self):
         self.periodic_check()
@@ -74,6 +75,14 @@ class algoBF1(algoAbstract):
     def periodic_check(self):
         if self.client.sensor_buffer.qsize():
             self.client.sensor_data_handler.update_map(self.client.sensor_buffer.get())
+            if self.counter < 30:
+                self.counter += 1
+                if self.counter % 18 == 0:
+                    self.client.simulator.right()
+                else:
+                    self.client.simulator.move()
+            else:
+                return
         self.client.master.after(100, self.periodic_check)
 
     def findSP(self):

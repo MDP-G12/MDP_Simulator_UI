@@ -334,13 +334,12 @@ class ThreadedClient():
 
         # self.event_queue = queue.Queue()
         print("[Current Thread] ", threading.current_thread())
-        self.simulator_UI = SimulatorUI(self.master, self)
+        self.simulator = SimulatorUI(self.master, self)
         self.sensor_buffer = queue.Queue()
         self.sensor_simulator = SensorSimulator(map_info, self.sensor_buffer)
-
         self.sensor_thread = threading.Thread(name="SensorThread", target=self.sensor_simulator.send_sendsor_data)
         self.sensor_thread.start()
-        self.sensor_data_handler = SensorDataHandler(map_info, self.simulator_UI)
+        self.sensor_data_handler = SensorDataHandler(map_info, self.simulator)
 
         print("[Current Thread] ", threading.current_thread())
         # sensor_data_test = SensorData([1, 1], 'E',
