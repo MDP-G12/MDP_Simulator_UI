@@ -78,11 +78,12 @@ class algoBF1(algoAbstract):
         #     time.sleep(1)
 
         print("[Current Thread] ", threading.current_thread())
-        if self.client.sensor_buffer.qsize():
-            sensor_data = self.client.sensor_buffer.get()
+        self.periodic_check()
+        # if self.client.sensor_buffer.qsize():
+            # sensor_data = self.client.sensor_buffer.get()
             # self.map_info.map_lock.acquire()
             # print("[Map Lock] Locked by ", threading.current_thread())
-            self.client.sensor_data_handler.update_map(sensor_data)
+            # self.client.sensor_data_handler.update_map(sensor_data)
             # if count > 0:
             #     self.client.simulator_UI.move()
             #     # self.sim.move()
@@ -92,8 +93,8 @@ class algoBF1(algoAbstract):
             # self.map_info.map_lock.release()
             # print("[Map Lock] Released by ", threading.current_thread())
 
-        print('[Thread] ', threading.current_thread(), 'Giving up control')
-        time.sleep(0.5)
+        # print('[Thread] ', threading.current_thread(), 'Giving up control')
+        # time.sleep(0.5)
 
         # i = 1
         # while (True):
@@ -108,8 +109,10 @@ class algoBF1(algoAbstract):
         #         break
         # while
 
-    def buffer_data_available(self):
-        if 
+    def periodic_check(self):
+        if self.client.sensor_buffer.qsize():
+            self.client.sensor_data_handler.update_map(self.client.sensor_buffer.get())
+        self.client.master.after(100, self.periodic_check)
 
     def findSP(self):
         pass

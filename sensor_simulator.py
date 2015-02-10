@@ -100,24 +100,32 @@ class SensorSimulator():
         return dis
 
     def send_sendsor_data(self):
-        last_robot_location = [0, 0]
+        last_robot_location_1 = '0'
+        last_robot_location_2 = '0'
         last_robot_direction = ''
         while True:
-            # self.map_info.map_lock.acquire()
-            # print("[Map Lock] Locked by ", threading.current_thread())
+            self.map_info.map_lock.acquire()
+            print("[Map Lock] Locked by ", threading.current_thread())
+            print("[Map Info] Location: ", self.map_info.robot_location)
+            print("[Map Info] Direction: ", self.map_info.robot_direction)
+            print("[Map Info] Last location: ", last_robot_location)
+            print("[Map Info] Last direction: ", last_robot_direction)
             if not (self.map_info.robot_location == last_robot_location and self.map_info.robot_direction == last_robot_direction):
                 data_to_send = SensorData(self.get_robot_location(), self.get_robot_direction(),
                                           {'front_middle': self.get_front_middle(),
                                            'front_left': self.get_front_left(),
                                            'front_right': self.get_front_right()})
-                last_robot_direction = self.map_info.robot_direction
-                last_robot_location = self.map_info.robot_location
+                last_robot_direction = self.get_robot_direction()
+                last_robot_location = self.get_robot_location()
+                print("Robot position updated!")
                 # self.buffer_lock.acquire()
-                # print("[Sensor] Sending data to buffer")
+                print("[Sensor] Sending data to buffer")
                 self.buffer.put(data_to_send)
                 print("[Buffer] size = ", self.buffer.qsize())
                 # self.buffer_lock.release()
-            # self.map_info.map_lock.release()
-            # print("[Map Lock] Released by ", threading.current_thread())
+            else:
+                print("[Sensor] Robot is not moving")
+            self.map_info.map_lock.release()
+            print("[Map Lock] Released by ", threading.current_thread())
             print('[Thread] ', threading.current_thread(), 'Giving up control')
             time.sleep(1)

@@ -230,6 +230,8 @@ class SimulatorUI:
     # ----------------------------------------------------------------------
 
     def move(self):
+        map_info.map_lock.acquire()
+        print("[Map Lock] Locked by ", threading.current_thread())
         print("Action: move forward")
 
         # Getting the next position
@@ -273,6 +275,9 @@ class SimulatorUI:
             self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'E')
             for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
                 self.put_map(z, map_info.robot_location[1]-2)
+
+        map_info.map_lock.release()
+        print("[Map Lock] Released by ", threading.current_thread())
 
     def left(self):
         print("Action: turn left")
@@ -333,11 +338,11 @@ class ThreadedClient():
         self.sensor_data_handler = SensorDataHandler(map_info, self.simulator_UI)
 
         print("[Current Thread] ", threading.current_thread())
-        sensor_data_test = SensorData([1, 1], 'E',
-                                          {'front_middle': 10,
-                                           'front_left': 10,
-                                           'front_right': 10})
-        self.sensor_data_handler.update_map(sensor_data_test)
+        # sensor_data_test = SensorData([1, 1], 'E',
+        #                                   {'front_middle': 10,
+        #                                    'front_left': 10,
+        #                                    'front_right': 10})
+        # self.sensor_data_handler.update_map(sensor_data_test)
 
         # self.sensor_thread = threading.Thread(name="sensor thread", target=self.sensor_simulator.issue_command)
 
