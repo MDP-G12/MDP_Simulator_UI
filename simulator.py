@@ -21,7 +21,9 @@ class SimulatorUI:
         self.master = master
         # self.event_queue = event_queue
 
+        # Unfinished merging process
         # self.algo = algoFactory(map_info, client)
+        self.algo = algoDum()
 
 
         if 'sensor' in kwargs:

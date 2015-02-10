@@ -31,6 +31,18 @@ class algoAbstract:
 
 
 # ----------------------------------------------------------------------
+# this part here is created as helper for merging proses
+class algoDum(algoAbstract):
+    def explore(self):
+        pass
+    def findSP(self):
+        pass
+    def run(self):
+        pass
+# ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
 # class definition of algoFactory.
 # 
 #   - explore()
