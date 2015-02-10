@@ -180,7 +180,7 @@ class SimulatorUI:
 
         # Map Explored
         else:
-            if map_info.map[x][y] == 1:
+            if map_info.map_real[x][y] == 0:
                 map_image = self.map_free_explored
             else:
                 map_image = self.map_obstacle_explored

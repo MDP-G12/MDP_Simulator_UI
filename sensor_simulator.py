@@ -94,7 +94,7 @@ class SensorSimulator():
             while location[0]+dis < 14 and not self.map_info.map_real[location[0]+dis+1][location[1]] and dis < detect_range:
                 dis += 1
         if direction == 'N':
-            while location[0]-dis > 0 and not self.map_info.map_real[location[0]-dis-1][location[0]] and dis < detect_range:
+            while location[0]-dis > 0 and not self.map_info.map_real[location[0]-dis-1][location[1]] and dis < detect_range:
                 dis += 1
         print("dis:", dis)
         return dis
