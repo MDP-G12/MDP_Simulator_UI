@@ -32,20 +32,36 @@ class SensorDataHandler:
         front_middle = sensor_data.distance['front_middle']
         front_left = sensor_data.distance['front_left']
         front_right = sensor_data.distance['front_right']
-        print("front middle: ", front_middle)
+        # print("front middle: ", front_middle)
         # if front_middle:
         if direction == 'E':
             sensor_location = [robot_location[0], robot_location[1]+1]
             self.update_map_by_sensor_data(sensor_location, 'E', front_middle, sensor_range['front_middle'])
+            sensor_location = [robot_location[0]-1, robot_location[1]+1]
+            self.update_map_by_sensor_data(sensor_location, 'E', front_left, sensor_range['front_left'])
+            sensor_location = [robot_location[0]+1, robot_location[1]+1]
+            self.update_map_by_sensor_data(sensor_location, 'E', front_right, sensor_range['front_right'])
         elif direction == 'W':
             sensor_location = [robot_location[0], robot_location[1]-1]
             self.update_map_by_sensor_data(sensor_location, 'W', front_middle, sensor_range['front_middle'])
+            sensor_location = [robot_location[0]+1, robot_location[1]-1]
+            self.update_map_by_sensor_data(sensor_location, 'W', front_left, sensor_range['front_left'])
+            sensor_location = [robot_location[0]-1, robot_location[1]-1]
+            self.update_map_by_sensor_data(sensor_location, 'W', front_right, sensor_range['front_right'])
         elif direction == 'N':
             sensor_location = [robot_location[0]-1, robot_location[1]]
             self.update_map_by_sensor_data(sensor_location, 'N', front_middle, sensor_range['front_middle'])
+            sensor_location = [robot_location[0]-1, robot_location[1]-1]
+            self.update_map_by_sensor_data(sensor_location, 'N', front_left, sensor_range['front_left'])
+            sensor_location = [robot_location[0]-1, robot_location[1]+1]
+            self.update_map_by_sensor_data(sensor_location, 'N', front_right, sensor_range['front_right'])
         elif direction == 'S':
             sensor_location = [robot_location[0]+1, robot_location[1]]
             self.update_map_by_sensor_data(sensor_location, 'S', front_middle, sensor_range['front_middle'])
+            sensor_location = [robot_location[0]+1, robot_location[1]+1]
+            self.update_map_by_sensor_data(sensor_location, 'S', front_left, sensor_range['front_left'])
+            sensor_location = [robot_location[0]+1, robot_location[1]-1]
+            self.update_map_by_sensor_data(sensor_location, 'S', front_right, sensor_range['front_right'])
         else:
             print("    [ERROR] Invalid direction!")
             return

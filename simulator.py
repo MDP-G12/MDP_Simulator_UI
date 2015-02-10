@@ -245,50 +245,55 @@ class SimulatorUI:
             robot_next = [map_info.robot_location[0], map_info.robot_location[1]+1]
         else:
             print("    [ERROR] Direction undefined!")
-            return
 
         # Validating the next position
-        if not self.valid_pos(robot_next[0], robot_next[1]):
+        if self.valid_pos(robot_next[0], robot_next[1]):
+            # Updating robot position value
+            [map_info.robot_location[0], map_info.robot_location[1]] = robot_next
+
+            # Updating the map
+            if map_info.robot_direction == 'N':
+                self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'N')
+                for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
+                    self.put_map(map_info.robot_location[0]+2, z)
+
+            elif map_info.robot_direction == 'S':
+                self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'S')
+                for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
+                    self.put_map(map_info.robot_location[0]-2, z)
+
+            elif map_info.robot_direction == 'W':
+                self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'W')
+                for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
+                    self.put_map(z, map_info.robot_location[1]+2)
+
+            elif map_info.robot_direction == 'E':
+                self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'E')
+                for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
+                    self.put_map(z, map_info.robot_location[1]-2)
+        else:
             print("    [WARNING] Not moving due to obstacle or out of bound")
-            return
-
-        # Updating robot position value
-        [map_info.robot_location[0], map_info.robot_location[1]] = robot_next
-
-        # Updating the map
-        if map_info.robot_direction == 'N':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'N')
-            for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
-                self.put_map(map_info.robot_location[0]+2, z)
-
-        elif map_info.robot_direction == 'S':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'S')
-            for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
-                self.put_map(map_info.robot_location[0]-2, z)
-
-        elif map_info.robot_direction == 'W':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'W')
-            for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
-                self.put_map(z, map_info.robot_location[1]+2)
-
-        elif map_info.robot_direction == 'E':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'E')
-            for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
-                self.put_map(z, map_info.robot_location[1]-2)
 
         map_info.map_lock.release()
         print("[Map Lock] Released by ", threading.current_thread())
 
     def left(self):
+        map_info.map_lock.acquire()
+        print("[Map Lock] Locked by ", threading.current_thread())
         print("Action: turn left")
         map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+3) % 4]
+        map_info.map_lock.release()
+        print("[Map Lock] Released by ", threading.current_thread())
 
         self.put_robot(map_info.robot_location[0], map_info.robot_location[1], map_info.robot_direction)
 
     def right(self):
+        map_info.map_lock.acquire()
         print("Action: turn right")
         map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+1) % 4]
         self.put_robot(map_info.robot_location[0], map_info.robot_location[1], map_info.robot_direction)
+        map_info.map_lock.release()
+        print("[Map Lock] Released by ", threading.current_thread())
 
     # def action(self):
     #     while self.event_queue.qsize():
