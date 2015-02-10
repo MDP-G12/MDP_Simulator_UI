@@ -74,10 +74,42 @@ class SensorSimulator():
             print("    [ERROR] Invalid direction!")
 
     def get_left(self):
-        pass
+        detect_range = sensor_range['left']
+        robot_location = self.get_robot_location()
+        direction = self.get_robot_direction()
+        if direction == 'E':
+            sensor_location = [robot_location[0]-1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'N', detect_range)
+        elif direction == 'W':
+            sensor_location = [robot_location[0]+1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'S', detect_range)
+        elif direction == 'S':
+            sensor_location = [robot_location[0], robot_location[1]+1]
+            return self.get_sensor_data(sensor_location, 'E', detect_range)
+        elif direction == 'N':
+            sensor_location = [robot_location[0], robot_location[1]-1]
+            return self.get_sensor_data(sensor_location, 'W', detect_range)
+        else:
+            print("    [ERROR] Invalid direction!")
 
     def get_right(self):
-        pass
+        detect_range = sensor_range['right']
+        robot_location = self.get_robot_location()
+        direction = self.get_robot_direction()
+        if direction == 'E':
+            sensor_location = [robot_location[0]+1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'S', detect_range)
+        elif direction == 'W':
+            sensor_location = [robot_location[0]-1, robot_location[1]]
+            return self.get_sensor_data(sensor_location, 'N', detect_range)
+        elif direction == 'S':
+            sensor_location = [robot_location[0], robot_location[1]-1]
+            return self.get_sensor_data(sensor_location, 'W', detect_range)
+        elif direction == 'N':
+            sensor_location = [robot_location[0], robot_location[1]+1]
+            return self.get_sensor_data(sensor_location, 'E', detect_range)
+        else:
+            print("    [ERROR] Invalid direction!")
 
     def get_sensor_data(self, location, direction, detect_range):
         dis = 0
@@ -113,7 +145,9 @@ class SensorSimulator():
                 data_to_send = SensorData(self.get_robot_location(), self.get_robot_direction(),
                                           {'front_middle': self.get_front_middle(),
                                            'front_left': self.get_front_left(),
-                                           'front_right': self.get_front_right()})
+                                           'front_right': self.get_front_right(),
+                                           'left': self.get_left(),
+                                           'right': self.get_right()})
                 last_robot_direction = self.get_robot_direction()
                 last_robot_location = []+self.get_robot_location()
                 print("Robot position updated!")

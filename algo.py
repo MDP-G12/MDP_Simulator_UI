@@ -69,45 +69,7 @@ class algoBF1(algoAbstract):
         self.map_info = map_info
 
     def explore(self):
-
-        count = 10
-        # for i in range(count):
-        #     sensor_data = sensor_buffer.pop(0)
-        #     sensor_data_handler.update_map(sensor_data)
-        #     self.sim.move()
-        #     time.sleep(1)
-
-        print("[Current Thread] ", threading.current_thread())
         self.periodic_check()
-        # if self.client.sensor_buffer.qsize():
-            # sensor_data = self.client.sensor_buffer.get()
-            # self.map_info.map_lock.acquire()
-            # print("[Map Lock] Locked by ", threading.current_thread())
-            # self.client.sensor_data_handler.update_map(sensor_data)
-            # if count > 0:
-            #     self.client.simulator_UI.move()
-            #     # self.sim.move()
-            #     count -= 1
-            # else:
-            #     return
-            # self.map_info.map_lock.release()
-            # print("[Map Lock] Released by ", threading.current_thread())
-
-        # print('[Thread] ', threading.current_thread(), 'Giving up control')
-        # time.sleep(0.5)
-
-        # i = 1
-        # while (True):
-        #     if ((i%13) > 0):
-        #         # self.sim.move_delay(i)
-        #         self.issue_command('move')
-        #     else:
-        #         # self.sim.right_delay(i)
-        #         self.issue_command('right')
-        #     i = i + 1
-        #     if (i > 200):
-        #         break
-        # while
 
     def periodic_check(self):
         if self.client.sensor_buffer.qsize():
