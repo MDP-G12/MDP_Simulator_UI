@@ -1,39 +1,35 @@
 from config import *
 from sensor_data import *
+import queue
 import time
 import threading
 
 
 class SensorSimulator():
     def __init__(self, map_info, buffer):
-
-        self.map_info = map_info
-        self.buffer = buffer
-
-    def get_robot_location(self):
-        return self.map_info.robot_location
-
-    def get_robot_direction(self):
-        return self.map_info.robot_direction
+        self.map_info       = map_info
+        self.event_buffer   = buffer
 
     def get_front_middle(self):
-        detect_range = sensor_range['front_middle']
-        robot_location = self.get_robot_location()
-        direction = self.get_robot_direction()
+        detect_range    = sensor_range['front_middle']
+        robot_location  = self.get_robot_location()
+        direction       = self.get_robot_direction()
         if direction == 'E':
             sensor_location = [robot_location[0], robot_location[1]+1]
-            return self.get_sensor_data(sensor_location, 'E', detect_range)
-        if direction == 'W':
+            ret = self.get_sensor_data(sensor_location, 'E', detect_range)
+        elif direction == 'W':
             sensor_location = [robot_location[0], robot_location[1]-1]
-            return self.get_sensor_data(sensor_location, 'W', detect_range)
-        if direction == 'S':
+            ret = self.get_sensor_data(sensor_location, 'W', detect_range)
+        elif direction == 'S':
             sensor_location = [robot_location[0]+1, robot_location[1]]
-            return self.get_sensor_data(sensor_location, 'S', detect_range)
-        if direction == 'N':
+            ret = self.get_sensor_data(sensor_location, 'S', detect_range)
+        elif direction == 'N':
             sensor_location = [robot_location[0]-1, robot_location[1]]
-            return self.get_sensor_data(sensor_location, 'N', detect_range)
+            ret = self.get_sensor_data(sensor_location, 'N', detect_range)
         else:
-            print("    [ERROR] Invalid direction!")
+            print("    [ERROR] Invalid direction!", self.get_robot_direction(), sep='; ')
+            return
+        return [sensor_location, ret]
 
     def get_front_left(self):
         detect_range = sensor_range['front_left']
@@ -41,18 +37,20 @@ class SensorSimulator():
         direction = self.get_robot_direction()
         if direction == 'E':
             sensor_location = [robot_location[0]-1, robot_location[1]+1]
-            return self.get_sensor_data(sensor_location, 'E', detect_range)
+            ret = self.get_sensor_data(sensor_location, 'E', detect_range)
         elif direction == 'W':
             sensor_location = [robot_location[0]+1, robot_location[1]-1]
-            return self.get_sensor_data(sensor_location, 'W', detect_range)
+            ret = self.get_sensor_data(sensor_location, 'W', detect_range)
         elif direction == 'S':
             sensor_location = [robot_location[0]+1, robot_location[1]+1]
-            return self.get_sensor_data(sensor_location, 'S', detect_range)
+            ret = self.get_sensor_data(sensor_location, 'S', detect_range)
         elif direction == 'N':
             sensor_location = [robot_location[0]-1, robot_location[1]-1]
-            return self.get_sensor_data(sensor_location, 'N', detect_range)
+            ret = self.get_sensor_data(sensor_location, 'N', detect_range)
         else:
             print("    [ERROR] Invalid direction!")
+            return
+        return [sensor_location, ret]
 
     def get_front_right(self):
         detect_range = sensor_range['front_right']
@@ -111,27 +109,56 @@ class SensorSimulator():
         else:
             print("    [ERROR] Invalid direction!")
 
+    # ----------------------------------------------------------------------
+    #   Function get_sensor_data
+    # ----------------------------------------------------------------------
+    # return:
+    #   integer value indicating distance of first obstacle before the sensor
+    #   negative integer value if no obstacles is detected
+    # 
+    # parameter:
+    #   location        -  [row, column]; location of sensor
+    #   direction       -  char; direction where the sensor is facing to
+    #   detect_range    -  max dist. the sensor can detect in a straight line
+    # ----------------------------------------------------------------------
     def get_sensor_data(self, location, direction, detect_range):
-        dis = 0
-        # print("location:", location)
-        # print("direction:", direction)
-        # print("detect range:", detect_range)
+        dis = 1
         if direction == 'E':
-            while location[1]+dis < 19 and not self.map_info.map_real[location[0]][location[1]+dis+1] and dis < detect_range:
+            # while (within boundary) and (block is free) and (not exceeding sensor range)
+            while location[1]+dis < 19  and self.map_info.isFree(location[0],location[1]+dis)  and dis <= detect_range:
                 dis += 1
-        if direction == 'W':
-            while location[1]-dis > 0 and not self.map_info.map_real[location[0]][location[1]-dis-1] and dis < detect_range:
+        elif direction == 'W':
+            while location[1]-dis > 0   and self.map_info.isFree(location[0],location[1]-dis)  and dis <= detect_range:
                 dis += 1
-        if direction == 'S':
-            while location[0]+dis < 14 and not self.map_info.map_real[location[0]+dis+1][location[1]] and dis < detect_range:
+        elif direction == 'S':
+            while location[0]+dis < 14  and self.map_info.isFree(location[0]+dis,location[1])  and dis <= detect_range:
                 dis += 1
-        if direction == 'N':
-            while location[0]-dis > 0 and not self.map_info.map_real[location[0]-dis-1][location[1]] and dis < detect_range:
+        elif direction == 'N':
+            while location[0]-dis > 0   and self.map_info.isFree(location[0]-dis,location[1])  and dis <= detect_range:
                 dis += 1
-        print("dis:", dis)
+        if (dis > detect_range):
+            dis = -detect_range
+
+        if verboseLv >= verbose[]:
+            print("    >> get_sensor_data", "loc="+location, "dir="+direction, "ran="+detect_range, "ret="+dis sep="; ")
         return dis
 
-    def send_sendsor_data(self):
+
+    # ----------------------------------------------------------------------
+    # a thread-safe queue implementation from Phyton
+    # a testing function
+    def execute_command(self):
+        command_queue = queue.Queue()
+        for x in self.command_sequence:
+            command_queue.put(x)
+
+        while not command_queue.empty():
+            next_command = command_queue.get()
+            self.event_buffer.put(next_command)
+            print("Command: " + next_command)
+
+
+def send_sendsor_data(self):
         last_robot_location = []
         last_robot_direction = ''
         while True:
@@ -151,11 +178,11 @@ class SensorSimulator():
                 last_robot_direction = self.get_robot_direction()
                 last_robot_location = []+self.get_robot_location()
                 print("Robot position updated!")
-                # self.buffer_lock.acquire()
+                # self.event_buffer_lock.acquire()
                 print("[Sensor] Sending data to buffer")
-                self.buffer.put(data_to_send)
-                print("[Buffer] size = ", self.buffer.qsize())
-                # self.buffer_lock.release()
+                self.event_buffer.put(data_to_send)
+                print("[Buffer] size = ", self.event_buffer.qsize())
+                # self.event_buffer_lock.release()
             else:
                 print("[Sensor] Robot is not moving")
             self.map_info.map_lock.release()

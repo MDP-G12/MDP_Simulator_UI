@@ -72,6 +72,12 @@ class Map:
         self.robot_location = [1, 1]
         self.robot_direction = 'E'
 
+    def get_robot_location(self):
+        return self.map_info.robot_location
+
+    def get_robot_direction(self):
+        return self.map_info.robot_direction
+
     def isObstacle(self, y, x):
         return self.map_real[y][x] == 1;
 

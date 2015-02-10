@@ -25,6 +25,10 @@ class SensorDataHandler:
     # def get_front_right(self):
     #     return self.sensor_simulator.get_front_right()
 
+    direction_ref   = ['N', 'E', 'S', 'W']
+    sensor_loc      = [[ 0,-1], [-1, 0], [ 0, 1], [ 1, 0]]  # displacement of sensor relative to robot location
+    sensor_locd     = [[-1,-1], [-1, 1], [ 1, 1], [ 1,-1]]  # displacement of diagonal sensor relative to robot location
+
     def update_map(self, sensor_data):
         print("Updating map...")
         direction = sensor_data.robot_direction

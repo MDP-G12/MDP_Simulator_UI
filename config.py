@@ -46,18 +46,25 @@ icon_path = dict(
 
 map_detail 	= dict(
     height	= 15,
-    width	= 20,
+    width	= 20
 )
 
 robot_detail = dict (
     size	= 3,
-    delay   = 500,
+    delay   = 500
 )
 
 sensor_range = dict (
-    front_middle    = 20,
+    front_middle    = 10,
     front_left      = 4,
     front_right     = 4,
     left            = 6,
     right           = 6
 )
+
+verbose = dict (
+    silent  = 0,
+    normal  = 1,
+    debug   = 2
+)
+verboseLv = verbose['normal']
