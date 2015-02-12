@@ -156,6 +156,7 @@ class SensorSimulator():
             next_command = command_queue.get()
             self.event_buffer.put(next_command)
             print("Command: " + next_command)
+    # ----------------------------------------------------------------------
 
 
     def send_sendsor_data(self):

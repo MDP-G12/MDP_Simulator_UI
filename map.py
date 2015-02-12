@@ -1,9 +1,9 @@
 # ----------------------------------------------------------------------
 # class definition of Map.
 # 
-#   - self.map_real
+#   - self.__map_real
 #           2 dimensional array that defines the map
-#   - self.map
+#   - self.__map
 #           2 dimensional array that defines the eplored part of the map
 # 
 #   - self.robot
@@ -15,7 +15,7 @@
 
 import config
 import threading
-
+from logger import *
 
 class Map:
     def __init__(self):
@@ -25,7 +25,7 @@ class Map:
         #       0 - free
         #       1 - obstacle
         # ----------------------------------------------------------------------
-        self.map_real   =  [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        self.__map_real =  [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
@@ -47,7 +47,7 @@ class Map:
         #       1 - explored; free
         #       2 - explored; obstacle
         # ----------------------------------------------------------------------
-        self.map        =  [[1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        self.__map      =  [[1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
                             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -65,26 +65,103 @@ class Map:
 
         self.height     = config.map_detail['height']
         self.width      = config.map_detail['width']
+        self.mapStat    = ['unexplored', 'free', 'obstacle']
         
         # ----------------------------------------------------------------------
         #   Robot
         # ----------------------------------------------------------------------
-        self.robot_location = [1, 1]
-        self.robot_direction = 'E'
+        self.__robot_location = [1, 1]
+        self.__robot_direction = 'E'
+        DIRECTIONS = ['N', 'E', 'S', 'W']
 
+
+    # ----------------------------------------------------------------------
+    #   Encapsulation functions
+    # ----------------------------------------------------------------------
     def get_robot_location(self):
-        return self.robot_location
+        return self.__robot_location
 
     def get_robot_direction(self):
-        return self.robot_direction
+        return self.__robot_direction
+
+    def set_robot_location(self, loc):
+        if ((0 <= loc[0] < self.height) and
+            (0 <= loc[1] < self.width )):
+            self.__robot_location = loc
+        else:
+            verbose( "Error: Location update out of range", tag="Map" )
+
+    def set_robot_direction(self, direction):
+        if (direction in DIRECTIONS):
+            self.__robot_direction = direction
+        else:
+            verbose( "Error: Direction update invalid!", tag="Map" )
+
+    def set_map(self, y, x, stat):
+        if not valid_range(y, x):
+            verbose( "Error: map to be set is out of bound!", tag="Map" )
+            return
+
+        if (stat in self.mapStat):
+            self.__map[y][x] = self.mapStat.index(stat)
+        else:
+            verbose( "Error: set map wrong status!", tag="Map" )           
+    # ----------------------------------------------------------------------
+
+
+    # ----------------------------------------------------------------------
+    #   Function valid_pos
+    # ----------------------------------------------------------------------
+    # parameter:
+    #   y   -   row position to be validated of robot
+    #   x   -   coloumn position to be validated of robot
+    # ----------------------------------------------------------------------
+    def valid_pos(self, y, x):
+        if not (0 < y < 14 and 0 < x < 19):
+            return False
+        for i in range(y-1, y+2):
+            for j in range(x-1, x+2):
+                if not valid_range(i,j) or isObstacle(i,j):
+                    return False
+        return True
+    # ----------------------------------------------------------------------
+
+
+
+    # ----------------------------------------------------------------------
+    # map checking functions
+    #     isExplored, isFree, isObstacle, valid_range
+    # ----------------------------------------------------------------------
+    # parameter:
+    #     y, x    - row index and coloumn index respectively
+    # ----------------------------------------------------------------------
+    def isExplored(self, y, x):
+        try:
+            return self.__map[y][x]
+        except IndexError:
+            print(y,x,sep="; ")
 
     def isObstacle(self, y, x):
-        return self.map_real[y][x] == 1;
+        if (self.__map[y][x] == 0):
+            return self.__map_real[y][x] == 1;
+        return self.__map[y][x] == 2
 
     def isFree(self, y, x):
-        return self.map_real[y][x] == 0;
+        if (self.__map[y][x] == 0):
+            return self.__map_real[y][x] == 1;
+        return self.__map[y][x] == 1
 
-    # map to be descripted need to be rotated 90 degrees clockwise
+    # to check whether the location is within range
+    def valid_range(self, y, x):
+        return (0 <= y < self.height) and (0 <= x < self.width)
+    # ----------------------------------------------------------------------
+
+
+
+    # ----------------------------------------------------------------------
+    # Grading criteria functions
+    #   map to be descripted need to be rotated 90 degrees clockwise
+    # ----------------------------------------------------------------------
     def descripted_map(self, printThis=False, form='x'):
         part1 = 3           # the first '11'
         part2 = 3           # the second '11' - Part 1
@@ -93,11 +170,11 @@ class Map:
         for x in range(self.width):
             for y in range(self.height):
                 part1 <<= 1
-                if (self.map[y][x] != 0) :
+                if (self.__map[y][x] != 0) :
                     part1  |= 1
                     part2 <<= 1
                     cnt += 1
-                    if (self.map[y][x] == 2):
+                    if (self.__map[y][x] == 2):
                         part2 |= 1
         
         
@@ -113,3 +190,6 @@ class Map:
 
         return [part1, part2]
 
+    # ----------------------------------------------------------------------
+
+#################### End of Class ####################
