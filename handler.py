@@ -1,20 +1,21 @@
 from logger import *
-import simulator
+# import simulator
+import config
+import algo
 import map
 
 class Handler:
-    def __init__(self):
-        self.map = map.Map()
-        self.createSimulator()
+    def __init__(self, simulator):
+        self.simulator  = simulator
+        self.map        = map.Map()
+        self.algo       = algo.algoDum()
+        # self.createSimulator()
 
-    def createSimulator(self):
-        self.simulator = simulator.SimulatorUI(self)
-
-        # map_simulator = Simulator(root)
-
-        # map_simulator.algoObject.explore()
-
-        self.simulator.master.mainloop()
+    # def createSimulator(self):
+    #     self.simulator = simulator.SimulatorUI(self)
+    #     # map_simulator = Simulator(root)
+    #     # map_simulator.algoObject.explore()
+    #     self.simulator.master.mainloop()
 
 
     def get_robot_location(self):
@@ -30,126 +31,89 @@ class Handler:
     # List of actions that robot can receive
     # ----------------------------------------------------------------------
     def move(self):
-        # self.event_queue.put('move')
+        verbose("Action: move forward", tag='Handler')
         self.__do_move()
 
     def back(self):
-        self.event_queue.put('back')
+        verbose("Action: move backward", tag='Handler')
+        cur_dir = self.map.get_robot_direction()
+        self.map.set_robot_direction( self.map.get_robot_direction_back() )
+        self.__do_move()
+        self.map.set_robot_direction( cur_dir )
 
     def left(self):
-        self.event_queue.put('left')
+        # ===== Threading =====
+        # map_info.map_lock.acquire()
+        # verbose("Locked by "+threading.current_thread(),
+        #     tag='Map Lock', lv='debug')
+        # ===== ========= =====
+        verbose("Action: turn left", tag='Handler')
+        self.map.set_robot_direction( self.map.get_robot_direction_left() )
+        # ===== Threading =====
+        # map_info.map_lock.release()
+        # print("[Map Lock] Released by ", threading.current_thread())
+        # ===== ========= =====
 
     def right(self):
-        self.event_queue.put('right')
-
-    def read_sensor(self):
-        self.event_queue.put('read')
+        # ===== Threading =====
+        # map_info.map_lock.acquire()
+        # verbose("Locked by "+threading.current_thread(),
+        #     tag='Map Lock', lv='debug')
+        # ===== ========= =====
+        verbose("Action: turn right", tag='Handler')
+        self.map.set_robot_direction( self.map.get_robot_direction_right() )
+        # ===== Threading =====
+        # map_info.map_lock.release()
+        # print("[Map Lock] Released by ", threading.current_thread())
+        # ===== ========= =====
     # ----------------------------------------------------------------------
 
-    def __move(self):
-        # map_info.map_lock.acquire()
-        # print("[Map Lock] Locked by ", threading.current_thread())
-        print("Action: move forward")
-        self.__do_move()
+    # def __move(self):
+    #     verbose("Action: move forward", tag='Handler')
+    #     self.__do_move()
 
-    # unfinished;
-    def __back(self):
-        print("Action: move backward")
-        cur_dir = map_info.robot_direction
-        if   map_info.robot_direction == 'N':
-            map_info.robot_direction = 'S'
-        elif map_info.robot_direction == 'S':
-            map_info.robot_direction = 'N'
-        elif map_info.robot_direction == 'E':
-            map_info.robot_direction = 'W'
-        elif map_info.robot_direction == 'W':
-            map_info.robot_direction = 'E'
-        else:
-            print("    [ERROR] Direction undefined!")
-        self.__do_move()
-        map_info.robot_direction = cur_dir
+    # def __back(self):
+    #     verbose("Action: move backward", tag='Handler')
+    #     cur_dir = self.map.get_robot_direction()
+    #     self.map.set_robot_direction( self.map.get_robot_direction_back() )
+    #     self.__do_move()
+    #     self.map.set_robot_direction( cur_dir )
 
 
     def __do_move(self):
+        # Threading
+        # map_info.map_lock.acquire()
+        # verbose("Locked by "+threading.current_thread(),
+        #     tag='Map Lock', lv='debug')
+        
         # Getting the next position
-        robot_location = self.map.get_robot_location()
-        if   map_info.robot_direction == 'N':
+        robot_location  = self.map.get_robot_location()
+        robot_direction = self.map.get_robot_direction()
+        if   robot_direction == 'N':
                 robot_next = [robot_location[0]-1, robot_location[1]]
-        elif map_info.robot_direction == 'S':
+        elif robot_direction == 'S':
                 robot_next = [robot_location[0]+1, robot_location[1]]
-        elif map_info.robot_direction == 'W':
+        elif robot_direction == 'W':
                 robot_next = [robot_location[0], robot_location[1]-1]
-        elif map_info.robot_direction == 'E':
+        elif robot_direction == 'E':
                 robot_next = [robot_location[0], robot_location[1]+1]
         else:
-            print("    [ERROR] Direction undefined!")
+            verbose("ERROR: Direction undefined! __do_move",
+                tag='Handler', pre='   >> ', lv='quiet')
 
         # Validating the next position
-        if self.valid_pos(robot_next[0], robot_next[1]):
+        if self.map.valid_pos(robot_next[0], robot_next[1]):
             # Updating robot position value
-            [map_info.robot_location[0], map_info.robot_location[1]] = robot_next
-
-            # Updating the map
-                # if map_info.robot_direction == 'N':
-                #     self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'N')
-                #     for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
-                #         self.put_map(map_info.robot_location[0]+2, z)
-
-                # elif map_info.robot_direction == 'S':
-                #     self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'S')
-                #     for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
-                #         self.put_map(map_info.robot_location[0]-2, z)
-
-                # elif map_info.robot_direction == 'W':
-                #     self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'W')
-                #     for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
-                #         self.put_map(z, map_info.robot_location[1]+2)
-
-                # elif map_info.robot_direction == 'E':
-                #     self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'E')
-                #     for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
-                #         self.put_map(z, map_info.robot_location[1]-2)
+            self.map.set_robot_location( robot_next )
         else:
-            print("    [WARNING] Not moving due to obstacle or out of bound")
+            verbose("WARNING: Not moving due to obstacle or out of bound",
+                tag='Handler', pre='    ', lv='debug')
 
-        map_info.map_lock.release()
-        print("[Map Lock] Released by ", threading.current_thread())
+        # map_info.map_lock.release()
+        # print("[Map Lock] Released by ", threading.current_thread())
 
-    def __left(self):
-        map_info.map_lock.acquire()
-        print("[Map Lock] Locked by ", threading.current_thread())
-        print("Action: turn left")
-        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+3) % 4]
-        self.put_robot(map_info.robot_location[0], map_info.robot_location[1], map_info.robot_direction)
 
-    def __right(self):
-        map_info.map_lock.acquire()
-        print("Action: turn right")
-        print("Action: turn right")
-        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+1) % 4]
-        self.put_robot(map_info.robot_location[0], map_info.robot_location[1], map_info.robot_direction)
 
-    def action(self):
-        while not self.event_queue.empty():
-            try:
-                command = self.event_queue.get()
-                if   command == 'move':
-                    self.__move()
-                elif command == 'left':
-                    self.__left()
-                elif command == 'right':
-                    self.__right()
-                # elif command == 'back':
-                #     self.__back()
-                elif command == 'read':
-                    self.__read()
-                else:
-                    print("Invalid command.")
-                self.update_sensor()
-                # map_info.descripted_map(printThis=True, form='b')
-            except queue.Empty:
-                pass
-            time.sleep(0)
 
 
     def update_sensor(self):
@@ -182,4 +146,4 @@ class Handler:
                 self.put_map(sens[0][0], sens[0][1])
 
 
-x = Handler()
+# x = Handler()

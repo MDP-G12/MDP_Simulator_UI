@@ -16,8 +16,11 @@
 import config
 import threading
 from logger import *
+from map import *
 
 class Map:
+    DIRECTIONS = ['N', 'E', 'S', 'W']
+
     def __init__(self):
         self.map_lock = threading.Lock()
         # ----------------------------------------------------------------------
@@ -72,7 +75,6 @@ class Map:
         # ----------------------------------------------------------------------
         self.__robot_location = [1, 1]
         self.__robot_direction = 'E'
-        DIRECTIONS = ['N', 'E', 'S', 'W']
 
 
     # ----------------------------------------------------------------------
@@ -84,28 +86,41 @@ class Map:
     def get_robot_direction(self):
         return self.__robot_direction
 
+    def get_robot_direction_right(self):
+        return Map.DIRECTIONS[ (Map.DIRECTIONS.index(self.__robot_direction)+1) % 4 ]
+    def get_robot_direction_left(self):
+        return Map.DIRECTIONS[ (Map.DIRECTIONS.index(self.__robot_direction)+3) % 4 ]
+    def get_robot_direction_back(self):
+        return Map.DIRECTIONS[ (Map.DIRECTIONS.index(self.__robot_direction)+2) % 4 ]
+
     def set_robot_location(self, loc):
         if ((0 <= loc[0] < self.height) and
             (0 <= loc[1] < self.width )):
             self.__robot_location = loc
         else:
-            verbose( "Error: Location update out of range", tag="Map" )
+            verbose( "Error: Location update out of range", tag="Map", lv='quiet' )
 
     def set_robot_direction(self, direction):
-        if (direction in DIRECTIONS):
+        if (direction in Map.DIRECTIONS):
             self.__robot_direction = direction
         else:
-            verbose( "Error: Direction update invalid!", tag="Map" )
+            verbose( "Error: Direction update invalid!", tag="Map", lv='quiet' )
 
     def set_map(self, y, x, stat):
         if not valid_range(y, x):
-            verbose( "Error: map to be set is out of bound!", tag="Map" )
+            verbose( "Error: map to be set is out of bound!", tag="Map", lv='quiet' )
             return
 
         if (stat in self.mapStat):
             self.__map[y][x] = self.mapStat.index(stat)
         else:
-            verbose( "Error: set map wrong status!", tag="Map" )           
+            verbose( "Error: set map wrong status!", tag="Map", lv='quiet' )
+
+    def get_map(self):
+        return self.__map
+
+    def isSameMap(self, cmpmap):
+        return cmpmap == self.__map
     # ----------------------------------------------------------------------
 
 
@@ -121,7 +136,7 @@ class Map:
             return False
         for i in range(y-1, y+2):
             for j in range(x-1, x+2):
-                if not valid_range(i,j) or isObstacle(i,j):
+                if not self.valid_range(i,j) or self.isObstacle(i,j):
                     return False
         return True
     # ----------------------------------------------------------------------

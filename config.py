@@ -64,7 +64,8 @@ sensor_range = dict (
 
 verbose = dict (
     silent  = 0,
-    normal  = 1,
-    debug   = 2
+    quiet   = 1,
+    normal  = 2,
+    debug   = 3
 )
-verboseLv = verbose['normal']
+verboseLv = verbose['debug']
