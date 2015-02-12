@@ -42,8 +42,8 @@ class SimulatorUI:
         self.map_pane = ttk.Frame(self.master, borderwidth=0, relief="solid")
         self.map_pane.grid(column=0, row=0, sticky=(N, S, E, W))
         # right side control panel
-        self.control_pane = ttk.Frame(t, padding=(12, 10))
-        self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
+        # self.control_pane = ttk.Frame(t, padding=(12, 10))
+        # self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
 
         # robot size
         self.robot_size     = config.robot_detail['size']
@@ -60,10 +60,6 @@ class SimulatorUI:
             self.robot_s += [PhotoImage(file=config.icon_path['south'][i])]
             self.robot_w += [PhotoImage(file=config.icon_path['west'][i])]
             self.robot_e += [PhotoImage(file=config.icon_path['east'][i])]
-        # self.robot_n                = PhotoImage(file=config.icon_path['north'])
-        # self.robot_s                = PhotoImage(file=config.icon_path['south'])
-        # self.robot_e                = PhotoImage(file=config.icon_path['east'])
-        # self.robot_w                = PhotoImage(file=config.icon_path['west'])
         self.map_free               = PhotoImage(file=config.icon_path['free'])
         self.map_free_explored      = PhotoImage(file=config.icon_path['explored_free'])
         self.map_obstacle           = PhotoImage(file=config.icon_path['obstacle'])
@@ -71,10 +67,6 @@ class SimulatorUI:
         self.map_start              = PhotoImage(file=config.icon_path['start'])
         self.map_end                = PhotoImage(file=config.icon_path['end'])
 
-        # cell_N = ttk.Label(map_pane, image=image_N, borderwidth=1, relief="solid")
-        # cell_S = ttk.Label(map_pane, image=image_S, borderwidth=1, relief="solid")
-        # cell_E = ttk.Label(map_pane, image=image_E, borderwidth=1, relief="solid")
-        # cell_W = ttk.Label(map_pane, image=image_W, borderwidth=1, relief="solid")
 
         # ----------------------------------------------------------------------
         # map initialization.
@@ -96,46 +88,46 @@ class SimulatorUI:
                 else:
                     self.put_map(i, j)
 
-        control_pane_window = ttk.Panedwindow(self.control_pane, orient=VERTICAL)
-        control_pane_window.grid(column=0, row=0, sticky=(N, S, E, W))
-        parameter_pane = ttk.Labelframe(control_pane_window, text='Parameters')
-        action_pane = ttk.Labelframe(control_pane_window, text='Action')
-        control_pane_window.add(parameter_pane, weight=4)
-        control_pane_window.add(action_pane, weight=1)
+        # control_pane_window = ttk.Panedwindow(self.control_pane, orient=VERTICAL)
+        # control_pane_window.grid(column=0, row=0, sticky=(N, S, E, W))
+        # parameter_pane = ttk.Labelframe(control_pane_window, text='Parameters')
+        # action_pane = ttk.Labelframe(control_pane_window, text='Action')
+        # control_pane_window.add(parameter_pane, weight=4)
+        # control_pane_window.add(action_pane, weight=1)
 
-        explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algo.explore)
-        explore_button.grid(column=0, row=0, sticky=(W, E))
-        fastest_path_button = ttk.Button(action_pane, text='Fastest Path', command=self.algo.run)
-        fastest_path_button.grid(column=0, row=1, sticky=(W, E))
-        move_button = ttk.Button(action_pane, text='Move', command=self.move)
-        move_button.grid(column=0, row=2, sticky=(W, E))
-        left_button = ttk.Button(action_pane, text='Left', command=self.left)
-        left_button.grid(column=0, row=3, sticky=(W, E))
-        right_button = ttk.Button(action_pane, text='Right', command=self.right)
-        right_button.grid(column=0, row=4, sticky=(W, E))
+        # explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algo.explore)
+        # explore_button.grid(column=0, row=0, sticky=(W, E))
+        # fastest_path_button = ttk.Button(action_pane, text='Fastest Path', command=self.algo.run)
+        # fastest_path_button.grid(column=0, row=1, sticky=(W, E))
+        # move_button = ttk.Button(action_pane, text='Move', command=self.move)
+        # move_button.grid(column=0, row=2, sticky=(W, E))
+        # left_button = ttk.Button(action_pane, text='Left', command=self.left)
+        # left_button.grid(column=0, row=3, sticky=(W, E))
+        # right_button = ttk.Button(action_pane, text='Right', command=self.right)
+        # right_button.grid(column=0, row=4, sticky=(W, E))
 
-        step_per_second = StringVar()
-        step_per_second_label = ttk.Label(parameter_pane, text="Step Per Second:")
-        step_per_second_label.grid(column=0, row=0, sticky=W)
-        step_per_second_entry = ttk.Entry(parameter_pane, textvariable=step_per_second)
-        step_per_second_entry.grid(column=0, row=1, pady=(0, 10))
+        # step_per_second = StringVar()
+        # step_per_second_label = ttk.Label(parameter_pane, text="Step Per Second:")
+        # step_per_second_label.grid(column=0, row=0, sticky=W)
+        # step_per_second_entry = ttk.Entry(parameter_pane, textvariable=step_per_second)
+        # step_per_second_entry.grid(column=0, row=1, pady=(0, 10))
 
-        coverage_figure = StringVar()
-        coverage_figure_label = ttk.Label(parameter_pane, text="Coverage Figure(%):")
-        coverage_figure_label.grid(column=0, row=2, sticky=W)
-        coverage_figure_entry = ttk.Entry(parameter_pane, textvariable=coverage_figure)
-        coverage_figure_entry.grid(column=0, row=3, pady=(0, 10))
+        # coverage_figure = StringVar()
+        # coverage_figure_label = ttk.Label(parameter_pane, text="Coverage Figure(%):")
+        # coverage_figure_label.grid(column=0, row=2, sticky=W)
+        # coverage_figure_entry = ttk.Entry(parameter_pane, textvariable=coverage_figure)
+        # coverage_figure_entry.grid(column=0, row=3, pady=(0, 10))
 
-        time_limit = StringVar()
-        time_limit_label = ttk.Label(parameter_pane, text="Time Limit(s):")
-        time_limit_label.grid(column=0, row=4, sticky=W)
-        time_limit_entry = ttk.Entry(parameter_pane, textvariable=time_limit)
-        time_limit_entry.grid(column=0, row=5, pady=(0, 10))
+        # time_limit = StringVar()
+        # time_limit_label = ttk.Label(parameter_pane, text="Time Limit(s):")
+        # time_limit_label.grid(column=0, row=4, sticky=W)
+        # time_limit_entry = ttk.Entry(parameter_pane, textvariable=time_limit)
+        # time_limit_entry.grid(column=0, row=5, pady=(0, 10))
 
         # self.root.columnconfigure(0, weight=1)
         # self.root.rowconfigure(0, weight=1)
-        self.control_pane.columnconfigure(0, weight=1)
-        self.control_pane.rowconfigure(0, weight=1)
+        # self.control_pane.columnconfigure(0, weight=1)
+        # self.control_pane.rowconfigure(0, weight=1)
 
         # for i in range(10):
         #     map_pane.rowconfigure(i, weight=1)
@@ -379,7 +371,7 @@ class ThreadedClient():
     def __init__(self, master):
         self.master = master
 
-        # self.event_queue = queue.Queue()
+        self.event_queue = queue.Queue()
         print("[Current Thread] ", threading.current_thread())
         self.simulator = SimulatorUI(self.master, self)
         self.sensor_buffer = queue.Queue()
