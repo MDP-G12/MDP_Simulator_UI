@@ -1,7 +1,7 @@
 import time
 import threading
 from sensor_data_handler import *
-from sensor_simulator import *
+from sensor import *
 from sensor_data import *
 
 
@@ -31,7 +31,6 @@ class algoAbstract:
 
 
 # ----------------------------------------------------------------------
-# this part here is created as helper for merging proses
 class algoDum(algoAbstract):
     def explore(self):
         pass
@@ -55,9 +54,11 @@ class algoDum(algoAbstract):
 #		robot starts running according shortest path algorithm
 # ----------------------------------------------------------------------
 class algoFactory:
-    def __init__(self, map_info, client, algoName="BF1"):
+    def __init__(self, handler, algoName="BF1"):
         if (algoName == "BF1"):
-            self.algo = algoBF1(map_info, client)
+            self.algo = algoBF1(handler)
+        elif (algoName == "dum"):
+            self.algo = algoDum()
         else:
             raise NameError('algoName not found')
 

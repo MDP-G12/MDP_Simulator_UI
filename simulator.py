@@ -5,7 +5,7 @@ except ImportError:
     from Tkinter import *
     import ttk
 
-from sensor_simulator import SensorSimulator
+# from sensor_simulator import SensorSimulator
 import threading
 import queue
 import time
@@ -14,6 +14,7 @@ import config
 import handler
 from sensor_data import *
 from logger import *
+from copy import deepcopy
 
 
 class SimulatorUI:
@@ -60,7 +61,7 @@ class SimulatorUI:
 
 
         # map initialization.
-        self.currentMap      = None
+        self.currentMap      = deepcopy(self.map.get_map())
         self.robot_location  = self.map.get_robot_location()
         self.robot_direction = self.map.get_robot_direction()
         self.update_map(init=True)
@@ -218,9 +219,9 @@ class SimulatorUI:
     # ----------------------------------------------------------------------
     def update_map(self, init=False):
         if init:
-            next_map         = self.currentMap = self.map.get_map()
-        else:
             next_map         = self.currentMap
+        else:
+            next_map         = self.map.get_map()
         next_robot_location  = self.map.get_robot_location()
         next_robot_direction = self.map.get_robot_direction()
 

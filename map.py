@@ -107,8 +107,8 @@ class Map:
             verbose( "Error: Direction update invalid!", tag="Map", lv='quiet' )
 
     def set_map(self, y, x, stat):
-        if not valid_range(y, x):
-            verbose( "Error: map to be set is out of bound!", tag="Map", lv='quiet' )
+        if not self.valid_range(y, x):
+            verbose( "Warning: map to be set is out of bound!", tag="Map" )
             return
 
         if (stat in self.mapStat):
@@ -152,7 +152,7 @@ class Map:
     # ----------------------------------------------------------------------
     def isExplored(self, y, x):
         try:
-            return self.__map[y][x]
+            return (self.__map[y][x] != 0)
         except IndexError:
             print(y,x,sep="; ")
 
@@ -162,8 +162,9 @@ class Map:
         return self.__map[y][x] == 2
 
     def isFree(self, y, x):
+        verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='debug' )
         if (self.__map[y][x] == 0):
-            return self.__map_real[y][x] == 1;
+            return self.__map_real[y][x] == 0;
         return self.__map[y][x] == 1
 
     # to check whether the location is within range

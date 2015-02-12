@@ -68,4 +68,6 @@ verbose = dict (
     normal  = 2,
     debug   = 3
 )
-verboseLv = verbose['debug']
+verboseLv = verbose['normal']
+
+sensorSimulation = True
