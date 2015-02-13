@@ -12,7 +12,6 @@ import time
 
 import config
 import handler
-from sensor_data import *
 from logger import *
 from copy import deepcopy
 
@@ -224,6 +223,9 @@ class SimulatorUI:
             next_map         = self.map.get_map()
         next_robot_location  = self.map.get_robot_location()
         next_robot_direction = self.map.get_robot_direction()
+
+        verbose('Update map robo loc:', next_robot_location, self.robot_location,
+            tag='Simulator', lv='debug')
 
         # if robot position changed, change the left out part to map
         if (self.robot_location != next_robot_location):

@@ -9,7 +9,7 @@ class Handler:
     def __init__(self, simulator):
         self.simulator  = simulator
         self.map        = map.Map()
-        self.algo       = algo.algoDum()
+        self.algo       = algo.algoFactory(self, algoName='BF1')
         if (config.sensorSimulation):
             self.sensor = sensor.SensorSimulator(self)
             self.__do_read()

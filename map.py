@@ -108,7 +108,7 @@ class Map:
 
     def set_map(self, y, x, stat):
         if not self.valid_range(y, x):
-            verbose( "Warning: map to be set is out of bound!", tag="Map" )
+            verbose( "Warning: map to be set is out of bound!", tag="Map", lv='debug' )
             return
 
         if (stat in self.mapStat):

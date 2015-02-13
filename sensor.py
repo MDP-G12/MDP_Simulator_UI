@@ -1,4 +1,3 @@
-from sensor_data import *
 import queue
 import time
 import threading
