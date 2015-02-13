@@ -254,7 +254,12 @@ class SimulatorUI:
         self.robot_direction = next_robot_direction
     # ----------------------------------------------------------------------
 
+
+
 x = SimulatorUI()
+
+
+##### Ignore beyond this line #####
 
 # # ----------------------------------------------------------------------
 # # class SimulatorThread

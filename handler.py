@@ -13,14 +13,6 @@ class Handler:
         if (config.sensorSimulation):
             self.sensor = sensor.SensorSimulator(self)
             self.__do_read()
-        # self.createSimulator()
-
-    # def createSimulator(self):
-    #     self.simulator = simulator.SimulatorUI(self)
-    #     # map_simulator = Simulator(root)
-    #     # map_simulator.algoObject.explore()
-    #     self.simulator.master.mainloop()
-
 
     def get_robot_location(self):
         return self.map.get_robot_location()
@@ -75,17 +67,6 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
         # ===== ========= =====
     # ----------------------------------------------------------------------
-
-    # def __move(self):
-    #     verbose("Action: move forward", tag='Handler')
-    #     self.__do_move()
-
-    # def __back(self):
-    #     verbose("Action: move backward", tag='Handler')
-    #     cur_dir = self.map.get_robot_direction()
-    #     self.map.set_robot_direction( self.map.get_robot_direction_back() )
-    #     self.__do_move()
-    #     self.map.set_robot_direction( cur_dir )
 
 
     # ----------------------------------------------------------------------
@@ -178,38 +159,3 @@ class Handler:
 
     # ----------------------------------------------------------------------
 
-
-
-
-
-    def update_sensor(self):
-        sens  = self.sensor.get_front_middle()
-        if (sens[1] < 0) :
-            sens[1] *= -1
-            obs = False
-        else:
-            obs = True
-        print(sens)
-        if map_info.robot_direction == 'N':
-            for dis in range(sens[1]):
-                sens[0][0] -= 1
-                map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
-                self.put_map(sens[0][0], sens[0][1])
-        elif map_info.robot_direction == 'S':
-            for dis in range(sens[1]):
-                sens[0][0] += 1
-                map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
-                self.put_map(sens[0][0], sens[0][1])
-        elif map_info.robot_direction == 'W':
-            for dis in range(sens[1]):
-                sens[0][1] -= 1
-                map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
-                self.put_map(sens[0][0], sens[0][1])
-        elif map_info.robot_direction == 'E':
-            for dis in range(sens[1]):
-                sens[0][1] += 1
-                map_info.map[sens[0][0]][sens[0][1]] = 1 if map_info.isFree(sens[0][0], sens[0][1]) else 2
-                self.put_map(sens[0][0], sens[0][1])
-
-
-# x = Handler()
