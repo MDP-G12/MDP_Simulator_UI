@@ -130,27 +130,50 @@ class Handler:
         robot_direction = self.map.get_robot_direction()
         robot_location  = self.map.get_robot_location()
 
+        verbose('__do_read from sensor', sensor_data, tag='Handler', lv='debug')
+
         dis_y = [-1, 0, 1, 0]
         dis_x = [ 0, 1, 0,-1]
+        direction_ref   = ['N', 'E', 'S', 'W']
+        sensor_loc      = [[-1, 0], [ 0, 1], [ 1, 0], [ 0,-1]]  # displacement of sensor relative to robot location
+        sensor_locd     = [[-1,-1], [-1, 1], [ 1, 1], [ 1,-1]]  # displacement of diagonal sensor relative to robot location
+        idx_disp        = [0, -4, -1, 3, 1]                     # index displacement
+        idx_dire        = [0,  0,  0, 3, 1]                     # direction displacement index
+        sensor_nbr      = 5
 
         # front sensor
         idx = map.Map.DIRECTIONS.index(robot_direction)
-        loc = [robot_location[0]+dis_y[idx], robot_location[1]+dis_x[idx]]
-        dis = sensor_data[0]
-        # see the criteria on sensor.py
-        if (dis < 0):
-            dis *= -1
-            obs = False
-        else:
-            obs = True
-        # set the free boxes
-        for i in range(dis):
-            loc[0] += dis_y[idx]
-            loc[1] += dis_x[idx]
-            self.map.set_map(loc[0], loc[1], 'free')
-        # set if obstacle
-        if (obs):
-            self.map.set_map(loc[0], loc[1], 'obstacle')
+        for i in range(sensor_nbr):
+            if (idx_disp[i] < 0):
+                # diagonal sensor. front_right, front_left. using sensor_locd
+                sid =  (idx - idx_disp[i]) % 4
+                loc =  [robot_location[0] + sensor_locd[sid][0],
+                        robot_location[1] + sensor_locd[sid][1]]
+            else:
+                # axis sensor. front, left, right. using sensor_loc
+                sid =  (idx + idx_disp[i]) % 4
+                loc =  [robot_location[0] + sensor_loc[sid][0],
+                        robot_location[1] + sensor_loc[sid][1]]
+            verbose('sensor location', loc, tag='Handler', pre='  ')
+            
+            # sensor return value
+            # see the criteria on sensor.py
+            dis = sensor_data[i]
+            if (dis < 0):
+                dis *= -1
+                obs = False
+            else:
+                obs = True
+            # set the free boxes
+            yy = dis_y[ (idx+idx_dire[i]) % 4 ]
+            xx = dis_x[ (idx+idx_dire[i]) % 4 ]
+            for i in range(dis):
+                loc[0] += yy
+                loc[1] += xx
+                self.map.set_map(loc[0], loc[1], 'free')
+            # set if obstacle
+            if (obs):
+                self.map.set_map(loc[0], loc[1], 'obstacle')
 
 
     # ----------------------------------------------------------------------

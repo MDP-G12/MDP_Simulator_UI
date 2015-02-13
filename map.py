@@ -162,7 +162,7 @@ class Map:
         return self.__map[y][x] == 2
 
     def isFree(self, y, x):
-        verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='debug' )
+        verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
         if (self.__map[y][x] == 0):
             return self.__map_real[y][x] == 0;
         return self.__map[y][x] == 1

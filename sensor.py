@@ -157,11 +157,11 @@ class SensorSimulator():
     #         right
     # ----------------------------------------------------------------------
     def get_all_sensor_data(self):
-        return [self.get_front_middle()]
-                # self.get_front_left(),
-                # self.get_front_right(),
-                # self.get_left(),
-                # self.get_right()]
+        return [self.get_front_middle(),
+                self.get_front_left(),
+                self.get_front_right(),
+                self.get_left(),
+                self.get_right()]
     # ----------------------------------------------------------------------
 
 
