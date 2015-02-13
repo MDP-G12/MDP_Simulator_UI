@@ -47,16 +47,23 @@ class SimulatorUI:
         self.robot_e = []
         self.robot_w = []
         for i in range(9):
-            self.robot_n += [PhotoImage(file=config.icon_path['north'][i])]
-            self.robot_s += [PhotoImage(file=config.icon_path['south'][i])]
-            self.robot_w += [PhotoImage(file=config.icon_path['west'][i])]
-            self.robot_e += [PhotoImage(file=config.icon_path['east'][i])]
-        self.map_free               = PhotoImage(file=config.icon_path['free'])
-        self.map_free_explored      = PhotoImage(file=config.icon_path['explored_free'])
-        self.map_obstacle           = PhotoImage(file=config.icon_path['obstacle'])
-        self.map_obstacle_explored  = PhotoImage(file=config.icon_path['explored_obstacle'])
-        self.map_start              = PhotoImage(file=config.icon_path['start'])
-        self.map_end                = PhotoImage(file=config.icon_path['end'])
+            self.robot_n += [PhotoImage(file=config.icon_path['north'][i]).subsample(config.icon_path['size'])]
+            self.robot_s += [PhotoImage(file=config.icon_path['south'][i]).subsample(config.icon_path['size'])]
+            self.robot_w += [PhotoImage(file=config.icon_path['west'][i]).subsample(config.icon_path['size'])]
+            self.robot_e += [PhotoImage(file=config.icon_path['east'][i]).subsample(config.icon_path['size'])]
+        self.map_free1               = PhotoImage(file=config.icon_path['free'])
+        self.map_free_explored1      = PhotoImage(file=config.icon_path['explored_free'])
+        self.map_obstacle1           = PhotoImage(file=config.icon_path['obstacle'])
+        self.map_obstacle_explored1  = PhotoImage(file=config.icon_path['explored_obstacle'])
+        self.map_start1              = PhotoImage(file=config.icon_path['start'])
+        self.map_end1                = PhotoImage(file=config.icon_path['end'])
+
+        self.map_free               = self.map_free1.subsample(config.icon_path['size'])
+        self.map_free_explored      = self.map_free_explored1.subsample(config.icon_path['size'])
+        self.map_obstacle           = self.map_obstacle1.subsample(config.icon_path['size'])
+        self.map_obstacle_explored  = self.map_obstacle_explored1.subsample(config.icon_path['size'])
+        self.map_start              = self.map_start1.subsample(config.icon_path['size'])
+        self.map_end                = self.map_end1.subsample(config.icon_path['size'])
 
 
         # map initialization.
