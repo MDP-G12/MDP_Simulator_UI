@@ -10,7 +10,7 @@ class Handler:
         self.simulator  = simulator
         self.map        = map.Map()
         self.algo       = algo.algoFactory(self, algoName='LHR')
-        if (config.sensorSimulation):
+        if config.sensorSimulation:
             self.sensor = sensor.SensorSimulator(self)
             self.__do_read()
 

@@ -36,10 +36,10 @@ icon_path = dict(
              'images/robot/Robot_W_08.gif',
              'images/robot/Robot_W_09.gif'],
     
-    free  				= 'images/d_blue.gif',
-    obstacle 			= 'images/d_red.gif',
-    explored_free		= 'images/l_blue.gif',
-    explored_obstacle	= 'images/l_red.gif',
+    free  				= 'images/gray.gif',
+    obstacle 			= 'images/gray.gif',
+    explored_free		= 'images/d_blue.gif',
+    explored_obstacle	= 'images/d_red.gif',
     start               = 'images/yellow.gif',
     end                 = 'images/l_green.gif',
     size                = 1
