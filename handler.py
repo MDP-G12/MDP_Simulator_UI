@@ -3,16 +3,19 @@ from logger import *
 import config
 import algo
 import map
-import sensor
+import robot_simulator
+import robot_connector
 
 class Handler:
     def __init__(self, simulator):
         self.simulator  = simulator
         self.map        = map.Map()
         self.algo       = algo.algoFactory(self, algoName='LHR')
-        if (config.sensorSimulation):
-            self.sensor = sensor.SensorSimulator(self)
+        if config.robot_simulation:
+            self.robot = robot_simulator.RobotSimulator(self)
             self.__do_read()
+        else:
+            self.robot = robot_connector.Connector()
 
     def get_robot_location(self):
         return self.map.get_robot_location()
@@ -48,6 +51,8 @@ class Handler:
         # ===== ========= =====
         verbose("Action: turn left", tag='Handler')
         self.map.set_robot_direction( self.map.get_robot_direction_left() )
+        # Send command to robot
+        self.robot.send('R')
         self.__do_read()
         self.simulator.update_map()
         # ===== Threading =====
@@ -63,6 +68,8 @@ class Handler:
         # ===== ========= =====
         verbose("Action: turn right", tag='Handler')
         self.map.set_robot_direction( self.map.get_robot_direction_right() )
+        # Send command to robot
+        self.robot.send('R')
         self.__do_read()
         self.simulator.update_map()
         # ===== Threading =====
@@ -102,6 +109,8 @@ class Handler:
         if self.map.valid_pos(robot_next[0], robot_next[1]):
             # Updating robot position value
             self.map.set_robot_location( robot_next )
+            # Send command to robot
+            self.robot.send('F')
         else:
             verbose("WARNING: Not moving due to obstacle or out of bound",
                 tag='Handler', pre='    ', lv='debug')
@@ -110,7 +119,9 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
 
     def __do_read(self):
-        sensor_data     = self.sensor.get_all_sensor_data()
+        sensor_data = None
+        while not sensor_data:
+            sensor_data = self.robot.receive()
         robot_direction = self.map.get_robot_direction()
         robot_location  = self.map.get_robot_location()
 

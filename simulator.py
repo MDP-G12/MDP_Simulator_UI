@@ -1,22 +1,18 @@
-try:
-    from tkinter import *
-    from tkinter import ttk
-except ImportError:
-    from Tkinter import *
-    import ttk
+from tkinter import *
+from tkinter import ttk
 
 # from sensor_simulator import SensorSimulator
-import threading
-import queue
-import time
+# import threading
+# import queue
+# import time
 
-import config
+# import config
 import handler
 from logger import *
 from copy import deepcopy
 
 
-class SimulatorUI:
+class Simulator:
     def __init__(self, title="Map Simulator"):
 
         self.master  = Tk()
@@ -65,13 +61,11 @@ class SimulatorUI:
         self.map_start              = self.map_start1.subsample(config.icon_path['size'])
         self.map_end                = self.map_end1.subsample(config.icon_path['size'])
 
-
         # map initialization.
         self.currentMap      = deepcopy(self.map.get_map())
         self.robot_location  = self.map.get_robot_location()
         self.robot_direction = self.map.get_robot_direction()
         self.update_map(init=True)
-
 
         control_pane_window = ttk.Panedwindow(self.control_pane, orient=VERTICAL)
         control_pane_window.grid(column=0, row=0, sticky=(N, S, E, W))
@@ -235,7 +229,7 @@ class SimulatorUI:
             tag='Simulator', lv='debug')
 
         # if robot position changed, change the left out part to map
-        if (self.robot_location != next_robot_location):
+        if self.robot_location != next_robot_location:
             for i in range(self.robot_location[0]-1, self.robot_location[0]+2):
                 for j in range(self.robot_location[1]-1, self.robot_location[1]+2):
                     if not (next_robot_location[0]-1 <= i <= next_robot_location[0]+1 and
@@ -265,7 +259,7 @@ class SimulatorUI:
 
 
 
-x = SimulatorUI()
+x = Simulator()
 
 
 ##### Ignore beyond this line #####
