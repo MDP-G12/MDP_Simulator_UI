@@ -42,7 +42,7 @@ icon_path = dict(
     explored_obstacle	= 'images/l_red.gif',
     start               = 'images/yellow.gif',
     end                 = 'images/l_green.gif',
-    size                = 2
+    size                = 1
 )
 
 map_detail 	= dict(

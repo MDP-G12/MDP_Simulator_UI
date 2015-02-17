@@ -118,47 +118,45 @@ class LeftHandRule(algoAbstract):
 
     def check_left(self):
         robot_location = self.handler.map.get_robot_location()
+        print(robot_location)
         left_direction = self.handler.map.get_robot_direction_left()
         map_explored = self.map.get_map()
         if left_direction == 'N':
-            try:
-                if map_explored[robot_location[0]-2][robot_location[1]] == 1 and map_explored[robot_location[0]-2][robot_location[1]-1] == 1 and map_explored[robot_location[0]-2][robot_location[1]+1] == 1:
-                    return True
-                else:
-                    return False
-            except IndexError:
+            if robot_location[0] < 2:
+                return False
+            if map_explored[robot_location[0]-2][robot_location[1]] == 1 and map_explored[robot_location[0]-2][robot_location[1]-1] == 1 and map_explored[robot_location[0]-2][robot_location[1]+1] == 1:
+                return True
+            else:
                 return False
         elif left_direction == 'S':
-            try:
-                if map_explored[robot_location[0]+2][robot_location[1]] == 1 and map_explored[robot_location[0]+2][robot_location[1]-1] == 1 and map_explored[robot_location[0]+2][robot_location[1]+1] == 1:
-                    return True
-                else:
-                    return False
-            except IndexError:
+            if robot_location[0] > 12:
+                return False
+            if map_explored[robot_location[0]+2][robot_location[1]] == 1 and map_explored[robot_location[0]+2][robot_location[1]-1] == 1 and map_explored[robot_location[0]+2][robot_location[1]+1] == 1:
+                return True
+            else:
                 return False
         elif left_direction == 'E':
-            try:
-                if map_explored[robot_location[0]][robot_location[1]+2] == 1 and map_explored[robot_location[0]+1][robot_location[1]+2] == 1 and map_explored[robot_location[0]-1][robot_location[1]+2] == 1:
-                    return True
-                else:
-                    return False
-            except IndexError:
+            if robot_location[1] > 17:
+                return False
+            if map_explored[robot_location[0]][robot_location[1]+2] == 1 and map_explored[robot_location[0]+1][robot_location[1]+2] == 1 and map_explored[robot_location[0]-1][robot_location[1]+2] == 1:
+                return True
+            else:
                 return False
         elif left_direction == 'W':
-            try:
-                if map_explored[robot_location[0]][robot_location[1]-2] == 1 and map_explored[robot_location[0]+1][robot_location[1]-2] == 1 and map_explored[robot_location[0]-1][robot_location[1]-2] == 1:
-                    return True
-                else:
-                    return False
-            except IndexError:
+            if robot_location[1] < 2:
                 return False
+            if map_explored[robot_location[0]][robot_location[1]-2] == 1 and map_explored[robot_location[0]+1][robot_location[1]-2] == 1 and map_explored[robot_location[0]-1][robot_location[1]-2] == 1:
+                return True
+            else:
+                return False
+
         else:
             print("[Error] Invalid direction.")
 
     def check_front(self):
         sensor_data = self.handler.sensor.get_all_sensor_data()
         print('Sensor data: ', sensor_data)
-        if sensor_data[0] > 1 and sensor_data[1] > 1 and sensor_data[2] > 1:
+        if (sensor_data[0] > 1 or sensor_data[0] < 0) and (sensor_data[1] > 1 or sensor_data[1] < 0) and (sensor_data[2] > 1 or sensor_data[2] < 0):
             return True
         else:
             return False
