@@ -1,6 +1,6 @@
 import socket
-import time
-import sys
+# import time
+# import sys
 
 # class WFConnector:
 
@@ -102,8 +102,8 @@ class Connector:
         #     print("[Error] Unable to receive message. Connection loss.")
 
 
-connector = Connector()
-while True:
-    dataToBeSent = input("Input string: ")
-    connector.send(dataToBeSent)
-    connector.receive()
+# connector = Connector()
+# while True:
+#     dataToBeSent = input("Input string: ")
+#     connector.send(dataToBeSent)
+#     connector.receive()
