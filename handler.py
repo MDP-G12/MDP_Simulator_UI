@@ -10,7 +10,8 @@ class Handler:
     def __init__(self, simulator):
         self.simulator  = simulator
         self.map        = map.Map()
-        self.algo       = algo.algoFactory(self, algoName='LHR')
+        self.algo       = algo.algoFactory(self, algoName=config.algoName)
+        # if robot is simulated
         if config.robot_simulation:
             self.robot = robot_simulator.RobotSimulator(self)
             self.__do_read()
@@ -32,16 +33,17 @@ class Handler:
         verbose("Action: move forward", tag='Handler')
         self.__do_move()
         self.__do_read()
-        self.simulator.update_map()
+        self.__update_map()
 
+    # Change direction backwards, move 1 block, revert directions
     def back(self):
         verbose("Action: move backward", tag='Handler')
         cur_dir = self.map.get_robot_direction()
         self.map.set_robot_direction( self.map.get_robot_direction_back() )
-        self.__do_move()
+        self.__do_move(forward=False)
         self.map.set_robot_direction( cur_dir )
         self.__do_read()
-        self.simulator.update_map()
+        self.__update_map()
 
     def left(self):
         # ===== Threading =====
@@ -52,9 +54,9 @@ class Handler:
         verbose("Action: turn left", tag='Handler')
         self.map.set_robot_direction( self.map.get_robot_direction_left() )
         # Send command to robot
-        self.robot.send('R')
+        self.robot.send('L')
         self.__do_read()
-        self.simulator.update_map()
+        self.__update_map()
         # ===== Threading =====
         # map_info.map_lock.release()
         # print("[Map Lock] Released by ", threading.current_thread())
@@ -82,9 +84,14 @@ class Handler:
     # ----------------------------------------------------------------------
     #   Real Actions
     # ----------------------------------------------------------------------
-    # Sending signal to robot, get the sensors data and process it to map
+    # Updating simulator map if exist
+    # Sending signal to robot, get the sensors data and process it to map;
     # ----------------------------------------------------------------------
-    def __do_move(self):
+    def __update_map(self):
+        if self.simulator != None:
+            self.simulator.update_map()
+
+    def __do_move(self, forward=True):
         # Threading
         # map_info.map_lock.acquire()
         # verbose("Locked by "+threading.current_thread(),
@@ -110,7 +117,10 @@ class Handler:
             # Updating robot position value
             self.map.set_robot_location( robot_next )
             # Send command to robot
-            self.robot.send('F')
+            if forward:
+                self.robot.send('F')
+            else:
+                self.robot.send('B')
         else:
             verbose("WARNING: Not moving due to obstacle or out of bound",
                 tag='Handler', pre='    ', lv='debug')
@@ -152,7 +162,7 @@ class Handler:
             verbose('sensor location', loc, tag='Handler', pre='  ')
             
             # sensor return value
-            # see the criteria on sensor.py
+            # see the criteria on robot_simulator.py
             dis = sensor_data[i]
             if dis < 0:
                 dis *= -1

@@ -23,7 +23,7 @@ class RobotSimulator(Robot):
             sensor_location = [robot_location[0]-1, robot_location[1]]
             ret = self.get_sensor_data(sensor_location, 'N', detect_range)
         else:
-            print("    [ERROR] Invalid direction!", self.map_info.get_robot_direction(), sep='; ')
+            verbose("    [ERROR] Invalid direction!", self.map_info.get_robot_direction(), sep='; ')
             return
         # return [sensor_location, ret]
         return ret
@@ -45,7 +45,7 @@ class RobotSimulator(Robot):
             sensor_location = [robot_location[0]-1, robot_location[1]-1]
             ret = self.get_sensor_data(sensor_location, 'N', detect_range)
         else:
-            print("    [ERROR] Invalid direction!")
+            verbose("    [ERROR] Invalid direction!")
             return
         # return [sensor_location, ret]
         return ret
@@ -67,7 +67,7 @@ class RobotSimulator(Robot):
             sensor_location = [robot_location[0]-1, robot_location[1]+1]
             return self.get_sensor_data(sensor_location, 'N', detect_range)
         else:
-            print("    [ERROR] Invalid direction!")
+            verbose("    [ERROR] Invalid direction!")
 
     def get_left(self):
         detect_range = config.sensor_range['left']
@@ -86,7 +86,7 @@ class RobotSimulator(Robot):
             sensor_location = [robot_location[0], robot_location[1]-1]
             return self.get_sensor_data(sensor_location, 'W', detect_range)
         else:
-            print("    [ERROR] Invalid direction!")
+            verbose("    [ERROR] Invalid direction!")
 
     def get_right(self):
         detect_range = config.sensor_range['right']
@@ -105,7 +105,7 @@ class RobotSimulator(Robot):
             sensor_location = [robot_location[0], robot_location[1]+1]
             return self.get_sensor_data(sensor_location, 'E', detect_range)
         else:
-            print("    [ERROR] Invalid direction!")
+            verbose("    [ERROR] Invalid direction!")
 
     # ----------------------------------------------------------------------
     #   Function get_sensor_data
@@ -120,7 +120,7 @@ class RobotSimulator(Robot):
     #   detect_range    -  max dist. the sensor can detect in a straight line
     # ----------------------------------------------------------------------
     def get_sensor_data(self, location, direction, detect_range):
-        # print('detect_range:', detect_range)
+        # verbose('detect_range:', detect_range)
         dis = 1
         if direction == 'E':
             # while (within boundary) and (block is free) and (not exceeding sensor range)
@@ -164,6 +164,9 @@ class RobotSimulator(Robot):
 
 
 
+    ############### Scratch Workspace ###############
+    #     Please ignore starting from this line     #
+    #################################################
     # # ----------------------------------------------------------------------
     # # a thread-safe queue implementation from Phyton
     # # a testing function
@@ -175,7 +178,7 @@ class RobotSimulator(Robot):
     #     while not command_queue.empty():
     #         next_command = command_queue.get()
     #         self.event_buffer.put(next_command)
-    #         print("Command: " + next_command)
+    #         verbose("Command: " + next_command)
     # # ----------------------------------------------------------------------
 
 
@@ -184,11 +187,11 @@ class RobotSimulator(Robot):
     #     last_robot_direction = ''
     #     while True:
     #         self.map_info.map_lock.acquire()
-    #         print("[Map Lock] Locked by ", threading.current_thread())
-    #         print("[Map Info] Location: ", self.map_info.robot_location)
-    #         print("[Map Info] Direction: ", self.map_info.robot_direction)
-    #         print("[Map Info] Last location: ", last_robot_location)
-    #         print("[Map Info] Last direction: ", last_robot_direction)
+    #         verbose("[Map Lock] Locked by ", threading.current_thread())
+    #         verbose("[Map Info] Location: ", self.map_info.robot_location)
+    #         verbose("[Map Info] Direction: ", self.map_info.robot_direction)
+    #         verbose("[Map Info] Last location: ", last_robot_location)
+    #         verbose("[Map Info] Last direction: ", last_robot_direction)
     #         if not (self.map_info.robot_location == last_robot_location and self.map_info.robot_direction == last_robot_direction):
     #             data_to_send = SensorData(self.map_info.get_robot_location(), self.map_info.get_robot_direction(),
     #                                       {'front_middle': self.get_front_middle(),
@@ -198,15 +201,15 @@ class RobotSimulator(Robot):
     #                                        'right': self.get_right()})
     #             last_robot_direction = self.map_info.get_robot_direction()
     #             last_robot_location = []+self.map_info.get_robot_location()
-    #             print("Robot position updated!")
+    #             verbose("Robot position updated!")
     #             # self.event_buffer_lock.acquire()
-    #             print("[Sensor] Sending data to buffer")
+    #             verbose("[Sensor] Sending data to buffer")
     #             self.event_buffer.put(data_to_send)
-    #             print("[Buffer] size = ", self.event_buffer.qsize())
+    #             verbose("[Buffer] size = ", self.event_buffer.qsize())
     #             # self.event_buffer_lock.release()
     #         else:
-    #             print("[Sensor] Robot is not moving")
+    #             verbose("[Sensor] Robot is not moving")
     #         self.map_info.map_lock.release()
-    #         print("[Map Lock] Released by ", threading.current_thread())
-    #         print('[Thread] ', threading.current_thread(), 'Giving up control')
+    #         verbose("[Map Lock] Released by ", threading.current_thread())
+    #         verbose('[Thread] ', threading.current_thread(), 'Giving up control')
     #         time.sleep(1)

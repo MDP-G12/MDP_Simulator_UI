@@ -51,8 +51,7 @@ map_detail 	= dict(
 )
 
 robot_detail = dict (
-    size	= 3,
-    delay   = 500
+    size	= 3
 )
 
 sensor_range = dict (
@@ -72,4 +71,7 @@ verbose = dict (
 )
 verboseLv = verbose['normal']
 
-robot_simulation = True
+robot_simulation        = True
+simulator_mapfrequency  = 100       # simulator map update frequency in ms
+
+algoName = 'LHR'

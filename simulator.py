@@ -23,7 +23,7 @@ class Simulator:
 
         t = Toplevel(self.master)
         t.title("Control Panel")
-        t.geometry('180x360+1050+28')
+        t.geometry('180x380+1050+28')
 
         # left side map panel
         self.map_pane = ttk.Frame(self.master, borderwidth=0, relief="solid")
@@ -84,6 +84,8 @@ class Simulator:
         left_button.grid(column=0, row=3, sticky=(W, E))
         right_button = ttk.Button(action_pane, text='Right', command=self.right)
         right_button.grid(column=0, row=4, sticky=(W, E))
+        explore_button = ttk.Button(action_pane, text='Stop', command=self.algo.stop)       # See note on algo.py
+        explore_button.grid(column=0, row=5, sticky=(W, E))
 
         step_per_second = StringVar()
         step_per_second_label = ttk.Label(parameter_pane, text="Step Per Second:")

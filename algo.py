@@ -1,3 +1,6 @@
+import config
+from logger import *
+
 # ----------------------------------------------------------------------
 # class definition of algoAbstract.
 # 
@@ -23,6 +26,11 @@ class algoAbstract:
 
     def run(self):
         raise NotImplementedError
+
+    # Uh? is it okay to put it here?
+    def stop(self):
+        pass
+
 
 
 # ----------------------------------------------------------------------
@@ -68,6 +76,10 @@ class algoFactory:
     def run(self):
         self.algo.run()
 
+    # Uh? is it okay to put it here?
+    def stop(self):
+        self.algo.stop()
+
 
 # ----------------------------------------------------------------------
 # class definition of algoBF1.
@@ -84,7 +96,7 @@ class algoBF1(algoAbstract):
 
     def periodic_check(self):
         self.handler.move()
-        self.handler.simulator.master.after(500, self.periodic_check)
+        self.handler.simulator.master.after(config.simulator_mapfrequency, self.periodic_check)
 
     def findSP(self):
         pass
@@ -97,8 +109,10 @@ class LeftHandRule(algoAbstract):
     def __init__(self, handler):
         self.handler    = handler
         self.map        = handler.map
+        self.stopFlag   = True
 
     def explore(self):
+        self.stopFlag = False
         self.periodic_check()
 
     def periodic_check(self):
@@ -108,13 +122,18 @@ class LeftHandRule(algoAbstract):
             self.handler.move()
         else:
             self.handler.right()
-        self.handler.simulator.master.after(500, self.periodic_check)
+        if not self.stopFlag:
+            self.handler.simulator.master.after(config.simulator_mapfrequency, self.periodic_check)
 
     def findSP(self):
         pass
 
     def run(self):
         pass
+
+    def stop(self):
+        self.stopFlag = True;
+        verbose('Robot is asked to stop', tag='algo')
 
     def check_left(self):
         robot_location = self.handler.map.get_robot_location()
