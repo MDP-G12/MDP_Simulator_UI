@@ -119,6 +119,7 @@ class SensorSimulator():
     #   detect_range    -  max dist. the sensor can detect in a straight line
     # ----------------------------------------------------------------------
     def get_sensor_data(self, location, direction, detect_range):
+        # print('detect_range:', detect_range)
         dis = 1
         if direction == 'E':
             # while (within boundary) and (block is free) and (not exceeding sensor range)
@@ -133,7 +134,7 @@ class SensorSimulator():
         elif direction == 'N':
             while location[0]-dis >= 0   and self.map_info.isFree(location[0]-dis,location[1])  and dis <= detect_range:
                 dis += 1
-        if (dis > detect_range):
+        if dis > detect_range:
             dis = -detect_range
 
         # verbose("    >> get_sensor_data; loc="+location + "; dir="+direction + "; ran="+detect_range + "; ret="+dis, tag='sensor')
@@ -153,6 +154,7 @@ class SensorSimulator():
     #         right
     # ----------------------------------------------------------------------
     def get_all_sensor_data(self):
+        # print(self.get_front_middle())
         return [self.get_front_middle(),
                 self.get_front_left(),
                 self.get_front_right(),

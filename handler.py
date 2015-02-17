@@ -9,7 +9,7 @@ class Handler:
     def __init__(self, simulator):
         self.simulator  = simulator
         self.map        = map.Map()
-        self.algo       = algo.algoFactory(self, algoName='BF1')
+        self.algo       = algo.algoFactory(self, algoName='LHR')
         if (config.sensorSimulation):
             self.sensor = sensor.SensorSimulator(self)
             self.__do_read()
@@ -38,6 +38,7 @@ class Handler:
         self.__do_move()
         self.map.set_robot_direction( cur_dir )
         self.__do_read()
+        self.simulator.update_map()
 
     def left(self):
         # ===== Threading =====
@@ -48,6 +49,7 @@ class Handler:
         verbose("Action: turn left", tag='Handler')
         self.map.set_robot_direction( self.map.get_robot_direction_left() )
         self.__do_read()
+        self.simulator.update_map()
         # ===== Threading =====
         # map_info.map_lock.release()
         # print("[Map Lock] Released by ", threading.current_thread())
@@ -62,6 +64,7 @@ class Handler:
         verbose("Action: turn right", tag='Handler')
         self.map.set_robot_direction( self.map.get_robot_direction_right() )
         self.__do_read()
+        self.simulator.update_map()
         # ===== Threading =====
         # map_info.map_lock.release()
         # print("[Map Lock] Released by ", threading.current_thread())
