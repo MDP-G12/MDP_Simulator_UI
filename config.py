@@ -1,3 +1,5 @@
+# Currently changes on this file need to restart the app before changes take place.
+
 icon_path = dict(
     north = ['images/robot/Robot_N_01.gif',
              'images/robot/Robot_N_02.gif',

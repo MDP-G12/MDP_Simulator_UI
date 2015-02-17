@@ -78,6 +78,12 @@ class Handler:
         # map_info.map_lock.release()
         # print("[Map Lock] Released by ", threading.current_thread())
         # ===== ========= =====
+
+    def explore(self):
+        self.algo.explore()
+
+    def stop(self):
+        self.algo.stop()
     # ----------------------------------------------------------------------
 
 
@@ -90,6 +96,9 @@ class Handler:
     def __update_map(self):
         if self.simulator != None:
             self.simulator.update_map()
+        if (verbose("Current Map:", tag='Handler', lv='debug', pre='  ')):
+            for y in range(self.map.height):
+                print('\t', curmap[y])
 
     def __do_move(self, forward=True):
         # Threading
@@ -159,7 +168,7 @@ class Handler:
                 sid =  (idx + idx_disp[i]) % 4
                 loc =  [robot_location[0] + sensor_loc[sid][0],
                         robot_location[1] + sensor_loc[sid][1]]
-            verbose('sensor location', loc, tag='Handler', pre='  ')
+            verbose('sensor location', loc, tag='Handler', pre='  ', lv='debug')
             
             # sensor return value
             # see the criteria on robot_simulator.py
@@ -183,3 +192,16 @@ class Handler:
 
     # ----------------------------------------------------------------------
 
+
+    # ----------------------------------------------------------------------
+    #   Additional functions
+    # ----------------------------------------------------------------------
+    def showCurMap(self):
+        curmap = self.map.get_map()
+        for y in range(self.map.height):
+            print('\t', curmap[y])
+    # ----------------------------------------------------------------------
+    
+
+# x = Handler(None)
+# x.showCurMap()
