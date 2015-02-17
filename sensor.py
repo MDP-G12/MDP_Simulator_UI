@@ -1,8 +1,5 @@
-import queue
-import time
-import threading
-import config
 from logger import *
+
 
 class SensorSimulator():
     def __init__(self, handler):

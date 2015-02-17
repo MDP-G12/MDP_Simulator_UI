@@ -20,7 +20,6 @@ class Handler:
     def get_robot_direction(self):
         return self.map.get_robot_direction()
 
-
     # ----------------------------------------------------------------------
     #   Actions
     # ----------------------------------------------------------------------
@@ -30,6 +29,7 @@ class Handler:
         verbose("Action: move forward", tag='Handler')
         self.__do_move()
         self.__do_read()
+        self.simulator.update_map()
 
     def back(self):
         verbose("Action: move backward", tag='Handler')
@@ -72,7 +72,7 @@ class Handler:
     # ----------------------------------------------------------------------
     #   Real Actions
     # ----------------------------------------------------------------------
-    # Sending signal to robot, get the sensors datas and process it to map
+    # Sending signal to robot, get the sensors data and process it to map
     # ----------------------------------------------------------------------
     def __do_move(self):
         # Threading
@@ -125,7 +125,7 @@ class Handler:
         # front sensor
         idx = map.Map.DIRECTIONS.index(robot_direction)
         for i in range(sensor_nbr):
-            if (idx_disp[i] < 0):
+            if idx_disp[i] < 0:
                 # diagonal sensor. front_right, front_left. using sensor_locd
                 sid =  (idx - idx_disp[i]) % 4
                 loc =  [robot_location[0] + sensor_locd[sid][0],
@@ -140,7 +140,7 @@ class Handler:
             # sensor return value
             # see the criteria on sensor.py
             dis = sensor_data[i]
-            if (dis < 0):
+            if dis < 0:
                 dis *= -1
                 obs = False
             else:

@@ -1,8 +1,3 @@
-import time
-import threading
-from sensor import *
-
-
 # ----------------------------------------------------------------------
 # class definition of algoAbstract.
 # 
@@ -15,6 +10,8 @@ from sensor import *
 #   - run()
 #		robot starts running according shortest path algorithm
 # ----------------------------------------------------------------------
+
+
 class algoAbstract:
     # def __init__(self):
 
@@ -78,23 +75,14 @@ class algoBF1(algoAbstract):
     def __init__(self, handler):
         self.handler    = handler
         self.map        = handler.map
-        self.counter = 0
 
     def explore(self):
-        robot_location  = self.map.get_robot_location()
+        # robot_location  = self.map.get_robot_location()
+        self.periodic_check()
 
-    # def periodic_check(self):
-    #     if self.client.sensor_buffer.qsize():
-    #         self.client.sensor_data_handler.update_map(self.client.sensor_buffer.get())
-    #         if self.counter < 30:
-    #             self.counter += 1
-    #             if self.counter % 18 == 0:
-    #                 self.client.simulator.right()
-    #             else:
-    #                 self.client.simulator.move()
-    #         else:
-    #             return
-    #     self.client.master.after(100, self.periodic_check)
+    def periodic_check(self):
+        self.handler.move()
+        self.handler.simulator.master.after(500, self.periodic_check)
 
     def findSP(self):
         pass
@@ -102,15 +90,26 @@ class algoBF1(algoAbstract):
     def run(self):
         pass
 
-    # def issue_command(self, command):
-    #     # time.sleep(1)
-    #     print("[Thread] ", threading.current_thread())
-    #     self.simulator.event_queue.put(command)
-    #     print("Command: " + command)
-        # print('[Thread] ', threading.current_thread(), 'Giving up control')
-        # time.sleep(1)
 
-    # def periodic_call(self):
-    #     while True:
-    #         if ()
-    #     return
+# class LeftHandRule(algoAbstract):
+#     def __init__(self, handler):
+#         self.handler    = handler
+#         self.map        = handler.map
+#
+#     def explore(self):
+#         self.periodic_check()
+#
+#     def periodic_check(self):
+#         if self.handler.sensor[3] == 1:
+#             if self.handler.sensor[0] > 1 and self.handler.sensor[1] > 1 and self.handler.sensor[2] > 1:
+#                 self.handler.move()
+#             else:
+#         else:
+#
+#         self.handler.simulator.master.after(500, self.periodic_check)
+#
+#     def findSP(self):
+#         pass
+#
+#     def run(self):
+#         pass
