@@ -1,5 +1,3 @@
-import time
-
 # ----------------------------------------------------------------------
 # class definition of algoAbstract.
 # 
@@ -12,6 +10,8 @@ import time
 #   - run()
 #		robot starts running according shortest path algorithm
 # ----------------------------------------------------------------------
+
+
 class algoAbstract:
     # def __init__(self):
 
@@ -23,6 +23,17 @@ class algoAbstract:
 
     def run(self):
         raise NotImplementedError
+
+
+# ----------------------------------------------------------------------
+class algoDum(algoAbstract):
+    def explore(self):
+        pass
+    def findSP(self):
+        pass
+    def run(self):
+        pass
+# ----------------------------------------------------------------------
 
 
 # ----------------------------------------------------------------------
@@ -38,9 +49,13 @@ class algoAbstract:
 #		robot starts running according shortest path algorithm
 # ----------------------------------------------------------------------
 class algoFactory:
-    def __init__(self, simulator, algoName="BF1"):
+    def __init__(self, handler, algoName="BF1"):
         if (algoName == "BF1"):
-            self.algo = algoBF1(simulator)
+            self.algo = algoBF1(handler)
+        elif (algoName == "dum"):
+            self.algo = algoDum()
+        elif (algoName == 'LHR'):
+            self.algo = LeftHandRule(handler)
         else:
             raise NameError('algoName not found')
 
@@ -59,22 +74,89 @@ class algoFactory:
 # Implementation class of algoAbstract using algorithm Brute Force #1
 # ----------------------------------------------------------------------
 class algoBF1(algoAbstract):
-    def __init__(self, simulator):
-        self.sim = simulator
+    def __init__(self, handler):
+        self.handler    = handler
+        self.map        = handler.map
 
     def explore(self):
-        i = 1
-        while (True):
-            if ((i%20) > 0):
-                self.sim.move_delay(i)
-            else:
-                self.sim.right_delay(i)
-            i = i + 1
-            if (i > 200):
-                break
+        # robot_location  = self.map.get_robot_location()
+        self.periodic_check()
+
+    def periodic_check(self):
+        self.handler.move()
+        self.handler.simulator.master.after(500, self.periodic_check)
 
     def findSP(self):
         pass
 
     def run(self):
         pass
+
+
+class LeftHandRule(algoAbstract):
+    def __init__(self, handler):
+        self.handler    = handler
+        self.map        = handler.map
+
+    def explore(self):
+        self.periodic_check()
+
+    def periodic_check(self):
+        if self.check_left():
+            self.handler.left()
+        elif self.check_front():
+            self.handler.move()
+        else:
+            self.handler.right()
+        self.handler.simulator.master.after(500, self.periodic_check)
+
+    def findSP(self):
+        pass
+
+    def run(self):
+        pass
+
+    def check_left(self):
+        robot_location = self.handler.map.get_robot_location()
+        print(robot_location)
+        left_direction = self.handler.map.get_robot_direction_left()
+        map_explored = self.map.get_map()
+        if left_direction == 'N':
+            if robot_location[0] < 2:
+                return False
+            if map_explored[robot_location[0]-2][robot_location[1]] == 1 and map_explored[robot_location[0]-2][robot_location[1]-1] == 1 and map_explored[robot_location[0]-2][robot_location[1]+1] == 1:
+                return True
+            else:
+                return False
+        elif left_direction == 'S':
+            if robot_location[0] > 12:
+                return False
+            if map_explored[robot_location[0]+2][robot_location[1]] == 1 and map_explored[robot_location[0]+2][robot_location[1]-1] == 1 and map_explored[robot_location[0]+2][robot_location[1]+1] == 1:
+                return True
+            else:
+                return False
+        elif left_direction == 'E':
+            if robot_location[1] > 17:
+                return False
+            if map_explored[robot_location[0]][robot_location[1]+2] == 1 and map_explored[robot_location[0]+1][robot_location[1]+2] == 1 and map_explored[robot_location[0]-1][robot_location[1]+2] == 1:
+                return True
+            else:
+                return False
+        elif left_direction == 'W':
+            if robot_location[1] < 2:
+                return False
+            if map_explored[robot_location[0]][robot_location[1]-2] == 1 and map_explored[robot_location[0]+1][robot_location[1]-2] == 1 and map_explored[robot_location[0]-1][robot_location[1]-2] == 1:
+                return True
+            else:
+                return False
+
+        else:
+            print("[Error] Invalid direction.")
+
+    def check_front(self):
+        sensor_data = self.handler.sensor.get_all_sensor_data()
+        print('Sensor data: ', sensor_data)
+        if (sensor_data[0] > 1 or sensor_data[0] < 0) and (sensor_data[1] > 1 or sensor_data[1] < 0) and (sensor_data[2] > 1 or sensor_data[2] < 0):
+            return True
+        else:
+            return False

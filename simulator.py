@@ -5,33 +5,29 @@ except ImportError:
     from Tkinter import *
     import ttk
 
-from map import *
-from sensor_simulator import SensorSimulator
-from algo import *
-import config
+# from sensor_simulator import SensorSimulator
 import threading
 import queue
 import time
 
+import config
+import handler
+from logger import *
+from copy import deepcopy
+
 
 class SimulatorUI:
-    def __init__(self, master, event_queue):
+    def __init__(self, title="Map Simulator"):
 
-        # ----------------------------------------------------------------------
-        #   Algo initialization.
-        # ----------------------------------------------------------------------
+        self.master  = Tk()
+        self.master.title(title)
+        self.handler = handler.Handler(self)
+        self.map     = self.handler.map
+        self.algo    = self.handler.algo
 
-        self.algoObject = algoFactory(self)
-
-        self.master = master
-        self.event_queue = event_queue
-
-        t = Toplevel(master)
+        t = Toplevel(self.master)
         t.title("Control Panel")
         t.geometry('180x360+1050+28')
-
-        # s = ttk.Style()
-        # s.theme_use('aqua')
 
         # left side map panel
         self.map_pane = ttk.Frame(self.master, borderwidth=0, relief="solid")
@@ -40,13 +36,10 @@ class SimulatorUI:
         self.control_pane = ttk.Frame(t, padding=(12, 10))
         self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
 
-        # map size
-        self.map_height     = config.map_detail['height']
-        self.map_width      = config.map_detail['width']
         # robot size
         self.robot_size     = config.robot_detail['size']
         # stores instances of widgets on the map
-        self.map_widget     = [[None]*self.map_width]*self.map_height
+        self.map_widget     = [[None]*self.map.width]*self.map.height
 
         # photo instances
         self.robot_n = []
@@ -54,45 +47,31 @@ class SimulatorUI:
         self.robot_e = []
         self.robot_w = []
         for i in range(9):
-            self.robot_n += [PhotoImage(file=config.icon_path['north'][i])]
-            self.robot_s += [PhotoImage(file=config.icon_path['south'][i])]
-            self.robot_w += [PhotoImage(file=config.icon_path['west'][i])]
-            self.robot_e += [PhotoImage(file=config.icon_path['east'][i])]
-        # self.robot_n                = PhotoImage(file=config.icon_path['north'])
-        # self.robot_s                = PhotoImage(file=config.icon_path['south'])
-        # self.robot_e                = PhotoImage(file=config.icon_path['east'])
-        # self.robot_w                = PhotoImage(file=config.icon_path['west'])
-        self.map_free               = PhotoImage(file=config.icon_path['free'])
-        self.map_free_explored      = PhotoImage(file=config.icon_path['explored_free'])
-        self.map_obstacle           = PhotoImage(file=config.icon_path['obstacle'])
-        self.map_obstacle_explored  = PhotoImage(file=config.icon_path['explored_obstacle'])
-        self.map_start              = PhotoImage(file=config.icon_path['start'])
-        self.map_end                = PhotoImage(file=config.icon_path['end'])
+            self.robot_n += [PhotoImage(file=config.icon_path['north'][i]).subsample(config.icon_path['size'])]
+            self.robot_s += [PhotoImage(file=config.icon_path['south'][i]).subsample(config.icon_path['size'])]
+            self.robot_w += [PhotoImage(file=config.icon_path['west'][i]).subsample(config.icon_path['size'])]
+            self.robot_e += [PhotoImage(file=config.icon_path['east'][i]).subsample(config.icon_path['size'])]
+        self.map_free1               = PhotoImage(file=config.icon_path['free'])
+        self.map_free_explored1      = PhotoImage(file=config.icon_path['explored_free'])
+        self.map_obstacle1           = PhotoImage(file=config.icon_path['obstacle'])
+        self.map_obstacle_explored1  = PhotoImage(file=config.icon_path['explored_obstacle'])
+        self.map_start1              = PhotoImage(file=config.icon_path['start'])
+        self.map_end1                = PhotoImage(file=config.icon_path['end'])
 
-        # cell_N = ttk.Label(map_pane, image=image_N, borderwidth=1, relief="solid")
-        # cell_S = ttk.Label(map_pane, image=image_S, borderwidth=1, relief="solid")
-        # cell_E = ttk.Label(map_pane, image=image_E, borderwidth=1, relief="solid")
-        # cell_W = ttk.Label(map_pane, image=image_W, borderwidth=1, relief="solid")
+        self.map_free               = self.map_free1.subsample(config.icon_path['size'])
+        self.map_free_explored      = self.map_free_explored1.subsample(config.icon_path['size'])
+        self.map_obstacle           = self.map_obstacle1.subsample(config.icon_path['size'])
+        self.map_obstacle_explored  = self.map_obstacle_explored1.subsample(config.icon_path['size'])
+        self.map_start              = self.map_start1.subsample(config.icon_path['size'])
+        self.map_end                = self.map_end1.subsample(config.icon_path['size'])
 
-        # ----------------------------------------------------------------------
+
         # map initialization.
-        # map_info = Map()      =>  see Map.py
-        # ----------------------------------------------------------------------
-        for i in range(self.map_height):
-            for j in range(self.map_width):
-                if (map_info.robot_location[0]-1 <= i <= map_info.robot_location[0]+1 and
-                    map_info.robot_location[1]-1 <= j <= map_info.robot_location[1]+1):
-                    if i == map_info.robot_location[0] and j == map_info.robot_location[1]:
-                        if map_info.robot_direction == 'N':
-                            self.put_robot(i, j, 'N')
-                        elif map_info.robot_direction == 'S':
-                            self.put_robot(i, j, 'S')
-                        elif map_info.robot_direction == 'W':
-                            self.put_robot(i, j, 'W')
-                        else:
-                            self.put_robot(i, j, 'E')
-                else:
-                    self.put_map(i, j)
+        self.currentMap      = deepcopy(self.map.get_map())
+        self.robot_location  = self.map.get_robot_location()
+        self.robot_direction = self.map.get_robot_direction()
+        self.update_map(init=True)
+
 
         control_pane_window = ttk.Panedwindow(self.control_pane, orient=VERTICAL)
         control_pane_window.grid(column=0, row=0, sticky=(N, S, E, W))
@@ -101,9 +80,9 @@ class SimulatorUI:
         control_pane_window.add(parameter_pane, weight=4)
         control_pane_window.add(action_pane, weight=1)
 
-        explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algoObject.explore)
+        explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algo.explore)
         explore_button.grid(column=0, row=0, sticky=(W, E))
-        fastest_path_button = ttk.Button(action_pane, text='Fastest Path', command=self.algoObject.run)
+        fastest_path_button = ttk.Button(action_pane, text='Fastest Path', command=self.algo.run)
         fastest_path_button.grid(column=0, row=1, sticky=(W, E))
         move_button = ttk.Button(action_pane, text='Move', command=self.move)
         move_button.grid(column=0, row=2, sticky=(W, E))
@@ -143,7 +122,37 @@ class SimulatorUI:
         self.master.bind("<Left>", lambda e: self.left())
         self.master.bind("<Right>", lambda e: self.right())
         self.master.bind("<Up>", lambda e: self.move())
+        self.master.bind("<Down>", lambda e: self.back())
 
+        self.master.mainloop()
+
+    # ----------------------------------------------------------------------
+    #   Actions
+    # ----------------------------------------------------------------------
+    # List of actions that robot can receive
+    # ----------------------------------------------------------------------
+    def move(self):
+        self.handler.move()
+        self.update_map()
+
+    def back(self):
+        self.handler.back()
+        self.update_map()
+
+    def left(self):
+        self.handler.left()
+        self.update_map()
+
+    def right(self):
+        self.handler.right()
+        self.update_map()
+    # ----------------------------------------------------------------------
+
+
+    # ----------------------------------------------------------------------
+    # Function put_map
+    # Destroy the 3x3 grid then put the robot on the 3x3 grid
+    # ----------------------------------------------------------------------
     def put_robot(self, x, y, direction):
         if direction == 'N':
             robot_image = self.robot_n
@@ -153,7 +162,7 @@ class SimulatorUI:
             robot_image = self.robot_w
         else:
             robot_image = self.robot_e
-        # cell = ttk.Label(self.map_pane, image=robot_image, borderwidth=1, relief="solid")
+
         for i in range(3):
             for j in range(3):
                 cell = ttk.Label(self.map_pane, image=robot_image[i*3+j], borderwidth=1)
@@ -163,26 +172,37 @@ class SimulatorUI:
                     pass
                 cell.grid(column=y+j-1, row=x+i-1)
                 self.map_widget[x+i-1][y+j-1] = cell
+    # ----------------------------------------------------------------------
 
+
+    # ----------------------------------------------------------------------
+    # Function put_map
+    # Destroy the grid then put the grid according to map
+    # ----------------------------------------------------------------------
     def put_map(self, x, y):
-        if map_info.map_real[x][y]:
-            if map_info.map_explored[x][y]:
-                map_image = self.map_obstacle_explored
-            else:
-                map_image = self.map_obstacle
-        elif ((0 <= y < 3) and
+        # Start & End box
+        if   ((0 <= y < 3) and
               (0 <= x < 3)):
-            map_image = self.map_start
-        elif ((self.map_width -3 <= y < self.map_width) and
-              (self.map_height-3 <= x < self.map_height)):
-            map_image = self.map_end
-        else:
-            if map_info.map_explored[x][y]:
-                map_image = self.map_free_explored
+                map_image = self.map_start
+        elif ((self.map.width -3 <= y < self.map.width) and
+              (self.map.height-3 <= x < self.map.height)):
+                map_image = self.map_end
+
+        # Map Unexplored
+        elif not self.map.isExplored(x,y):
+            if self.map.isObstacle(x,y):
+                map_image = self.map_obstacle
             else:
                 map_image = self.map_free
-        # map_image = self.map_obstacle if map_info.map_real[x][y] else self.map_free
-        # cell = ttk.Label(self.map_pane, image=map_image, borderwidth=1, relief="solid")
+        
+        # Map Explored
+        else:
+            if self.map.isObstacle(x,y):
+                map_image = self.map_obstacle_explored
+            else:
+                map_image = self.map_free_explored
+
+        # Change map
         cell = ttk.Label(self.map_pane, image=map_image, borderwidth=1)
         try:
             self.map_pane[x][y].destroy()
@@ -190,152 +210,122 @@ class SimulatorUI:
             pass
         cell.grid(column=y, row=x)
         self.map_widget[x][y] = cell
-
-
-    # ----------------------------------------------------------------------
-    #   Function valid_pos
-    # ----------------------------------------------------------------------
-    # parameter:
-    #   y   -   row position to be validated of robot
-    #   x   -   coloumn position to be validated of robot
-    # ----------------------------------------------------------------------
-    def valid_pos(self, y, x):
-        if not (0 < y < 14 and 0 < x < 19):
-            return False
-        for i in range(y-1, y+2):
-            for j in range(x-1, x+2):
-                if map_info.map_real[i][j] == 1:
-                    return False
-        return True
     # ----------------------------------------------------------------------
 
 
     # ----------------------------------------------------------------------
-    #   Function delay
+    # Function put_map
     # ----------------------------------------------------------------------
-    # Delay for moving the robot. (Hardware delay)
+    # Call this function whenever there are changes on the UI map.
+    # The function wont do anything to the grid which has same values as
+    # before updating.
+    # 
+    # Parameter:
+    #     init    - initializaion. re-placing all grids.
     # ----------------------------------------------------------------------
-    def move_delay(self, mult):
-        self.master.after(config.robot_detail['delay']*mult, self.move)
-
-    def left_delay(self, mult):
-        self.master.after(config.robot_detail['delay']*mult, self.left)
-
-    def right_delay(self, mult):
-        self.master.after(config.robot_detail['delay']*mult, self.right)
-    # ----------------------------------------------------------------------
-
-    def move(self):
-        print("Action: move forward")
-
-        # Getting the next position
-        if map_info.robot_direction == 'N':
-            robot_next = [map_info.robot_location[0]-1, map_info.robot_location[1]]
-        elif map_info.robot_direction == 'S':
-            robot_next = [map_info.robot_location[0]+1, map_info.robot_location[1]]
-        elif map_info.robot_direction == 'W':
-            robot_next = [map_info.robot_location[0], map_info.robot_location[1]-1]
-        elif map_info.robot_direction == 'E':
-            robot_next = [map_info.robot_location[0], map_info.robot_location[1]+1]
+    def update_map(self, init=False):
+        if init:
+            next_map         = self.currentMap
         else:
-            print("    [ERROR] Direction undefined!")
-            return
+            next_map         = self.map.get_map()
+        next_robot_location  = self.map.get_robot_location()
+        next_robot_direction = self.map.get_robot_direction()
 
-        # Validating the next position
-        if not self.valid_pos(robot_next[0], robot_next[1]):
-            print("    [WARNING] Not moving due to obstacle or out of bound")
-            return
+        verbose('Update map robo loc:', next_robot_location, self.robot_location,
+            tag='Simulator', lv='debug')
 
-        # Updating robot position value
-        [map_info.robot_location[0], map_info.robot_location[1]] = robot_next
+        # if robot position changed, change the left out part to map
+        if (self.robot_location != next_robot_location):
+            for i in range(self.robot_location[0]-1, self.robot_location[0]+2):
+                for j in range(self.robot_location[1]-1, self.robot_location[1]+2):
+                    if not (next_robot_location[0]-1 <= i <= next_robot_location[0]+1 and
+                            next_robot_location[1]-1 <= j <= next_robot_location[1]+1):
+                        self.put_map(i,j)
+                        self.currentMap[i][j] = next_map[i][j]
 
-        # Updating the map
-        if map_info.robot_direction == 'N':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'N')
-            for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
-                self.put_map(map_info.robot_location[0]+2, z)
+        # put map to all changed grid and non-robot area
+        for i in range(self.map.height):
+            for j in range(self.map.width):
+                if (not (next_robot_location[0]-1 <= i <= next_robot_location[0]+1 and
+                         next_robot_location[1]-1 <= j <= next_robot_location[1]+1) and
+                        (init or self.currentMap[i][j] != next_map[i][j])):
+                    self.put_map(i, j)
+                    self.currentMap[i][j] = next_map[i][j]
 
-        elif map_info.robot_direction == 'S':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'S')
-            for z in range(map_info.robot_location[1]-1, map_info.robot_location[1]+2):
-                self.put_map(map_info.robot_location[0]-2, z)
-
-        elif map_info.robot_direction == 'W':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'W')
-            for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
-                self.put_map(z, map_info.robot_location[1]+2)
-
-        elif map_info.robot_direction == 'E':
-            self.put_robot(map_info.robot_location[0], map_info.robot_location[1], 'E')
-            for z in range(map_info.robot_location[0]-1, map_info.robot_location[0]+2):
-                self.put_map(z, map_info.robot_location[1]-2)
-
-    def left(self):
-        print("Action: turn left")
-        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+3) % 4]
-
-        self.put_robot(map_info.robot_location[0], map_info.robot_location[1], map_info.robot_direction)
-
-    def right(self):
-        print("Action: turn right")
-        map_info.robot_direction = DIRECTIONS[(DIRECTIONS.index(map_info.robot_direction)+1) % 4]
-        self.put_robot(map_info.robot_location[0], map_info.robot_location[1], map_info.robot_direction)
-
-    def action(self):
-        while self.event_queue.qsize():
-            try:
-                command = self.event_queue.get()
-                if command == 'move':
-                    self.move()
-                elif command == 'left':
-                    self.left()
-                elif command == 'right':
-                    self.right()
-                else:
-                    print("Invalid command.")
-            except queue.Empty:
-                pass
-            time.sleep(0)
-
-
-class ThreadedClient():
-    def __init__(self, master):
-        self.master = master
-
-        self.event_queue = queue.Queue()
-
-        self.simulator_UI = SimulatorUI(self.master, self.event_queue)
-
-        self.sensor_simulator = SensorSimulator(map_info, self.event_queue)
-
-        # self.sensor_thread = threading.Thread(name="sensor thread", target=self.sensor_simulator.issue_command)
-
-        # self.sensor_thread.start()
-
-        self.periodic_call()
-
-    def periodic_call(self):
-        self.simulator_UI.action()
-        self.master.after(50, self.periodic_call)
-
-
-DIRECTIONS = ['N', 'E', 'S', 'W']
-
-map_info = Map()
-
-root = Tk()
-root.title("Map Simulator")
-client = ThreadedClient(root)
-
-# map_simulator = Simulator(root)
-
-# map_simulator.algoObject.explore()
-
-root.mainloop()
+        # put the robot
+        if (init or
+            self.robot_location  != next_robot_location or
+            self.robot_direction != next_robot_direction):
+            self.put_robot(next_robot_location[0], next_robot_location[1], next_robot_direction)
+        
+        # update the change
+        self.robot_location  = next_robot_location
+        self.robot_direction = next_robot_direction
+    # ----------------------------------------------------------------------
 
 
 
-# while True:
-#     command = input("Please issue a command:")
-#     if command == "move":
-#         map_simulator.move()
+x = SimulatorUI()
+
+
+##### Ignore beyond this line #####
+
+# # ----------------------------------------------------------------------
+# # class SimulatorThread
+# # ----------------------------------------------------------------------
+# #     Return:
+# #         thread for simulator UI
+# #
+# #     Thread class with a stop() method. The thread itself has to check
+# #     regularly for the stopped() condition.
+# # ----------------------------------------------------------------------
+# class SimulatorThread(threading.Thread):
+#     def __init__(self, handler):
+#         super().__init__()
+#         self._stop  = threading.Event()
+#         self.the_UI = SimulatorUI(handler)
+
+#     def run(self):
+#         print("simulator_UI starts")
+#         self.the_UI.master.mainloop()
+#         print("simulator_UI exits")
+
+#     def stop(self):
+#         self._stop.set()
+
+#     def stopped(self):
+#         return self._stop.isSet()
+# # ----------------------------------------------------------------------
+
+# class wut:
+#     def __init__(self, master):
+#         self.master = master
+
+#         self.event_queue = queue.Queue()
+#         print("[Current Thread] ", threading.current_thread())
+#         # self.simulator = SimulatorUI(self.master, self)
+#         self.sensor_buffer = queue.Queue()
+#         self.sensor_simulator = SensorSimulator(self.map, self.sensor_buffer)
+#         self.sensor_thread = threading.Thread(name="SensorThread", target=self.sensor_simulator.send_sendsor_data)
+#         self.sensor_thread.start()
+#         self.sensor_data_handler = SensorDataHandler(self.map, self.simulator)
+
+#         print("[Current Thread] ", threading.current_thread())
+#         # sensor_data_test = SensorData([1, 1], 'E',
+#         #                                   {'front_middle': 10,
+#         #                                    'front_left': 10,
+#         #                                    'front_right': 10})
+#         # self.sensor_data_handler.update_map(sensor_data_test)
+
+#         self.simulator_UI = SimulatorUI(self.master, self.event_queue, sensor=self.sensor_simulator)
+
+#         # self.sensor_thread = threading.Thread(name="sensor thread", target=self.sensor_simulator.issue_command)
+
+#         # self.sensor_thread.start()
+
+#     #     self.periodic_call()
+#     #
+#     # def periodic_call(self):
+#     #     print("[Periodic Run]")
+#     #     self.simulator_UI.action()
+#     #     self.master.after(50, self.periodic_call)

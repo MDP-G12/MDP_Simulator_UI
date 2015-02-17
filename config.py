@@ -41,23 +41,35 @@ icon_path = dict(
     explored_free		= 'images/l_blue.gif',
     explored_obstacle	= 'images/l_red.gif',
     start               = 'images/yellow.gif',
-    end                 = 'images/l_green.gif'
+    end                 = 'images/l_green.gif',
+    size                = 1
 )
 
 map_detail 	= dict(
     height	= 15,
-    width	= 20,
+    width	= 20
 )
 
 robot_detail = dict (
     size	= 3,
-    delay   = 500,
+    delay   = 500
 )
 
 sensor_range = dict (
-    front_middle    = 20,
+    front_middle    = 10,
     front_left      = 4,
     front_right     = 4,
     left            = 6,
     right           = 6
 )
+
+verbose = dict (
+    silent      = 0,
+    quiet       = 1,
+    normal      = 2,
+    debug       = 3,
+    deepdebug   = 4
+)
+verboseLv = verbose['normal']
+
+sensorSimulation = True
