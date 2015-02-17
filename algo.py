@@ -154,7 +154,7 @@ class LeftHandRule(algoAbstract):
             print("[Error] Invalid direction.")
 
     def check_front(self):
-        sensor_data = self.handler.sensor.get_all_sensor_data()
+        sensor_data = self.handler.robot.receive()
         print('Sensor data: ', sensor_data)
         if (sensor_data[0] > 1 or sensor_data[0] < 0) and (sensor_data[1] > 1 or sensor_data[1] < 0) and (sensor_data[2] > 1 or sensor_data[2] < 0):
             return True

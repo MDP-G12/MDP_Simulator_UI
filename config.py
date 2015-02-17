@@ -72,4 +72,4 @@ verbose = dict (
 )
 verboseLv = verbose['normal']
 
-sensorSimulation = True
+robot_simulation = True

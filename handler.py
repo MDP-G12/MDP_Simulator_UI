@@ -3,19 +3,19 @@ from logger import *
 import config
 import algo
 import map
-import sensor_simulator
-import connector
+import robot_simulator
+import robot_connector
 
 class Handler:
     def __init__(self, simulator):
         self.simulator  = simulator
         self.map        = map.Map()
         self.algo       = algo.algoFactory(self, algoName='LHR')
-        if config.sensorSimulation:
-            self.sensor = sensor_simulator.SensorSimulator(self)
+        if config.robot_simulation:
+            self.robot = robot_simulator.RobotSimulator(self)
             self.__do_read()
         else:
-            self.sensor = connector.Connector()
+            self.robot = robot_connector.Connector()
 
     def get_robot_location(self):
         return self.map.get_robot_location()
@@ -113,8 +113,8 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
 
     def __do_read(self):
-        if config.sensorSimulation:
-            sensor_data = self.sensor.get_all_sensor_data()
+        if config.robot_simulation:
+            sensor_data = self.robot.receive()
         else:
             sensor_data = self
         robot_direction = self.map.get_robot_direction()

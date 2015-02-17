@@ -1,7 +1,8 @@
 from logger import *
+from robot import *
 
 
-class SensorSimulator():
+class RobotSimulator(Robot):
     def __init__(self, handler):
         self.map_info       = handler.map
 
@@ -153,8 +154,7 @@ class SensorSimulator():
     #         left,
     #         right
     # ----------------------------------------------------------------------
-    def get_all_sensor_data(self):
-        # print(self.get_front_middle())
+    def receive(self):
         return [self.get_front_middle(),
                 self.get_front_left(),
                 self.get_front_right(),

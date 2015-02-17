@@ -1,4 +1,5 @@
 import socket
+from robot import *
 # import time
 # import sys
 
@@ -35,7 +36,7 @@ import socket
 # s.close()
 
 
-class Connector:
+class Connector(Robot):
     def __init__(self):
 
         family = socket.AF_INET
@@ -95,6 +96,7 @@ class Connector:
                 msg = self.socket.recv(1024)
                 if msg:
                     print("[Info] Received: ", msg.decode())
+                    return msg.decode()
                 return msg
             except socket.timeout:
                 print("No message is received.")
