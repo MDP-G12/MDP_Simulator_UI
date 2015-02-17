@@ -15,6 +15,6 @@ class Robot:
     def receive(self):
         raise NotImplementedError
 
-    def send(self):
+    def send(self, msg):
         pass
 

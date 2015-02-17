@@ -1,39 +1,5 @@
 import socket
 from robot import *
-# import time
-# import sys
-
-# class WFConnector:
-
-# host = '192.168.12.12'
-# port = 8008
-#
-# s = None
-# for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM):
-#     family, socket_type, proto, canonname, socket_address = res
-#     try:
-#         s = socket.socket(family, socket_type, proto)
-#     except socket.error:
-#         s = None
-#         continue
-#     try:
-#         s.connect(socket_address)
-#     except socket.error:
-#         s.close()
-#         s = None
-#         continue
-#     break
-# if s is None:
-#     print('could not open socket')
-#
-# while 1:
-#
-#     dataToBeSent = str.encode(input("Input string: "))
-#     s.sendall(dataToBeSent)
-#
-#     data = s.recv(1024)
-#     print('Received', repr(data))
-# s.close()
 
 
 class Connector(Robot):
@@ -47,26 +13,6 @@ class Connector(Robot):
         self.connect()
 
     def connect(self):
-
-        # for res in socket.getaddrinfo(host, port, socket.AF_UNSPEC, socket.SOCK_STREAM):
-        #     family, socket_type, proto, canonname, socket_address = res
-        #     try:
-        #         s = socket.socket(family, socket_type, proto)
-        #     except socket.error:
-        #         continue
-        #     try:
-        #         s.connect(socket_address)
-        #     except socket.error:
-        #         s.close()
-        #         continue
-        #     s.settimeout(0.5)
-        #     # s.setblocking(False)
-        #     self.socket = s
-        #     print("[Info] Connection established.")
-        #     print("         family: ", family)
-        #     print("         socket_type: ", socket_type)
-        #     print("         proto: ", proto)
-        #     break
         host = '192.168.12.12'
         port = 8008
         try:
@@ -95,17 +41,15 @@ class Connector(Robot):
             try:
                 msg = self.socket.recv(1024)
                 if msg:
-                    print("[Info] Received: ", msg.decode())
-                    return msg.decode()
-                return msg
+                    msg_decoded = msg.decode()
+                    print("[Info] Received: ", msg_decoded)
+                    sensor_data_in_str = msg.split(',')
+                    sensor_data = []
+                    for data in sensor_data_in_str:
+                        sensor_data.append(int(data))
+                    return sensor_data
             except socket.timeout:
-                print("No message is received.")
+                print("[Info] No message received.")
         # else:
         #     print("[Error] Unable to receive message. Connection loss.")
 
-
-# connector = Connector()
-# while True:
-#     dataToBeSent = input("Input string: ")
-#     connector.send(dataToBeSent)
-#     connector.receive()
