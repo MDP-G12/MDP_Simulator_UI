@@ -145,7 +145,9 @@ class Map:
 
     # ----------------------------------------------------------------------
     # map checking functions
-    #     isExplored, isFree, isObstacle, valid_range
+    #   - isExplored, isFree, isObstacle, valid_range;
+    #   - isFree and isObstacle return False on out of range/index,
+    #     isExplored will give an error msg and throw IndexError
     # ----------------------------------------------------------------------
     # parameter:
     #     y, x    - row index and coloumn index respectively
@@ -154,15 +156,20 @@ class Map:
         try:
             return (self.__map[y][x] != 0)
         except IndexError:
-            print(y,x,sep="; ")
+            verbose('ERROR: isExplored Index Error!', y, x, tag='Map', pre='<E> ')
+            raise IndexError
 
     def isObstacle(self, y, x):
+        if not self.valid_range(y,x):
+            return False;
         if (self.__map[y][x] == 0):
             return self.__map_real[y][x] == 1;
         return self.__map[y][x] == 2
 
     def isFree(self, y, x):
         verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
+        if not self.valid_range(y,x):
+            return False;
         if (self.__map[y][x] == 0):
             return self.__map_real[y][x] == 0;
         return self.__map[y][x] == 1

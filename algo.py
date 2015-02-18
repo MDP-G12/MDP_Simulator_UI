@@ -12,11 +12,17 @@ from logger import *
 # 
 #   - run()
 #		robot starts running according shortest path algorithm
+#
+#   > handler   Handler class
+#   > map       Map class
+#   > stopFlag  Flag to tell robot to stop doing anything
 # ----------------------------------------------------------------------
-
-
 class algoAbstract:
-    # def __init__(self):
+    def __init__(self, handler=None):
+        self.handler    = handler
+        if handler != None:
+            self.map    = handler.map
+        self.stopFlag   = True
 
     def explore(self):
         raise NotImplementedError
@@ -29,11 +35,13 @@ class algoAbstract:
 
     # Uh? is it okay to put it here?
     def stop(self):
-        pass
+        self.stopFlag = True;
+        verbose('Robot is asked to stop', tag='algo')
 
 
 
 # ----------------------------------------------------------------------
+# Dumb boy. This boy does nothing. I SWEAR!!
 class algoDum(algoAbstract):
     def explore(self):
         pass
@@ -67,28 +75,26 @@ class algoFactory:
         else:
             raise NameError('algoName not found')
 
-    def explore(self):
-        self.algo.explore()
+    # def explore(self):
+    #     self.algo.explore()
 
-    def findSP(self):
-        self.algo.findSP()
+    # def findSP(self):
+    #     self.algo.findSP()
 
-    def run(self):
-        self.algo.run()
+    # def run(self):
+    #     self.algo.run()
 
-    # Uh? is it okay to put it here?
-    def stop(self):
-        self.algo.stop()
+    # def stop(self):
+    #     self.algo.stop()
 
 
 # ----------------------------------------------------------------------
-# class definition of algoBF1.
+# algoName = 'BF1'
 # Implementation class of algoAbstract using algorithm Brute Force #1
 # ----------------------------------------------------------------------
 class algoBF1(algoAbstract):
     def __init__(self, handler):
-        self.handler    = handler
-        self.map        = handler.map
+        super().__init__(handler)
 
     def explore(self):
         # robot_location  = self.map.get_robot_location()
@@ -103,13 +109,17 @@ class algoBF1(algoAbstract):
 
     def run(self):
         pass
+# ----------------------------------------------------------------------
 
 
+# ----------------------------------------------------------------------
+# algoName = 'LHR'
+# Left Hand Rule Exploration Algorithm:
+#     Walking by the wall; Wall is on the left side; Turn right on corner 
+# ----------------------------------------------------------------------
 class LeftHandRule(algoAbstract):
     def __init__(self, handler):
-        self.handler    = handler
-        self.map        = handler.map
-        self.stopFlag   = True
+        super().__init__(handler)
 
     def explore(self):
         self.stopFlag = False
@@ -130,10 +140,6 @@ class LeftHandRule(algoAbstract):
 
     def run(self):
         pass
-
-    def stop(self):
-        self.stopFlag = True;
-        verbose('Robot is asked to stop', tag='algo')
 
     def check_left(self):
         robot_location = self.handler.map.get_robot_location()

@@ -7,10 +7,10 @@ import robot_simulator
 import robot_connector
 
 class Handler:
-    def __init__(self, simulator):
+    def __init__(self, simulator=None):
         self.simulator  = simulator
         self.map        = map.Map()
-        self.algo       = algo.algoFactory(self, algoName=config.algoName)
+        self.algo       = algo.algoFactory(self, algoName=config.algoName).algo
         # if robot is simulated
         if config.robot_simulation:
             self.robot = robot_simulator.RobotSimulator(self)
@@ -203,5 +203,6 @@ class Handler:
     # ----------------------------------------------------------------------
     
 
-# x = Handler(None)
+x = Handler()
+
 # x.showCurMap()
