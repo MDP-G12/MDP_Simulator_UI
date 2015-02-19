@@ -21,6 +21,8 @@ class Simulator:
         self.map     = self.handler.map
         self.algo    = self.handler.algo
 
+        self.master.lift()
+
         t = Toplevel(self.master)
         t.title("Control Panel")
         t.geometry('180x380+1050+28')
@@ -35,7 +37,14 @@ class Simulator:
         # robot size
         self.robot_size     = config.robot_detail['size']
         # stores instances of widgets on the map
-        self.map_widget     = [[None]*self.map.width]*self.map.height
+        self.map_widget     = [[None]*self.map.width]*self.map.height       #!@#!%!#$!#!%#!#@! but it works
+        # WARNING: Are you sure this one is what you intend to do?
+        #     >>> x = [[None]*2]*3
+        #     >>> x
+        #     [[None, None], [None, None], [None, None]]
+        #     >>> x[1][1] = 2
+        #     >>> x
+        #     [[None, 2], [None, 2], [None, 2]]
 
         # photo instances
         self.robot_n = []

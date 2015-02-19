@@ -115,9 +115,9 @@ verbose = dict (
     debug       = 3,
     deepdebug   = 4
 )
-verboseLv = verbose['normal']
+verboseLv = verbose['debug']
 
 robot_simulation        = True
 simulator_mapfrequency  = 100       # simulator map update frequency in ms
 
-algoName = 'LHR'
+algoName = 'DFS'

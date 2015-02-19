@@ -79,6 +79,16 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
         # ===== ========= =====
 
+    def command(self, cmd):
+        if   cmd == 'M':
+            self.move()
+        elif cmd == 'L':
+            self.left()
+        elif cmd == 'R':
+            self.right()
+        else:
+            verbose("Command: unknown command", cmd, tag='Handler')
+
     def explore(self):
         self.algo.explore()
 
@@ -96,7 +106,8 @@ class Handler:
     def __update_map(self):
         if self.simulator != None:
             self.simulator.update_map()
-        if (verbose("Current Map:", tag='Handler', lv='debug', pre='  ')):
+        if (verbose("Current Map:", tag='Handler', lv='deepdebug', pre='  ')):
+            curmap = self.map.get_map()
             for y in range(self.map.height):
                 print('\t', curmap[y])
 

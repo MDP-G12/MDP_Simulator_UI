@@ -1,6 +1,8 @@
 import config
 from logger import *
 
+import queue
+
 # ----------------------------------------------------------------------
 # class definition of algoAbstract.
 # 
@@ -72,6 +74,8 @@ class algoFactory:
             self.algo = algoDum()
         elif (algoName == 'LHR'):
             self.algo = LeftHandRule(handler)
+        elif (algoName == 'DFS'):
+            self.algo = algoDFS(handler)
         else:
             raise NameError('algoName not found')
 
@@ -185,3 +189,150 @@ class LeftHandRule(algoAbstract):
             return True
         else:
             return False
+# ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
+# algoName = 'DFS'
+# Depth First Search exploration algorithm.
+# Assumption made on this algorithm:
+#   - turning left, turning right, and move forward are considered 1 move
+# ----------------------------------------------------------------------
+class algoDFS(algoAbstract):
+    def __init__(self, handler):
+        super().__init__(handler)
+        self.gotoList = [   (1,1,None),     (7,3,'N'),      (9,11,None),
+                            (5,11,'S'),     (5,11,'N'),
+                            (1,1,None),     (13,1,None),    (13,18,None) ]       # a STACK, executed from tail / last element
+
+    def explore(self, useSimulator=True):
+        if not self.gotoList:
+            return
+        loc = self.gotoList.pop()
+        self.act = self.gotoYX( loc[0], loc[1], loc[2] )
+        self.stopFlag = False
+        if (useSimulator):
+            self.periodic_check()
+
+    def periodic_check(self):
+        if self.act:
+            tmp = self.act.pop()
+            self.handler.command(tmp)
+        if not self.stopFlag:
+            if (self.act):
+                self.handler.simulator.master.after(config.simulator_mapfrequency, self.periodic_check)
+            else:
+                self.handler.simulator.master.after(config.simulator_mapfrequency, self.explore)
+
+    # ------------------------------------------------------------------
+    # map related own function
+    # ------------------------------------------------------------------
+    DIRECTIONS  = ('N', 'E', 'S', 'W')
+    # dispY       = (( 1, 0),  ( 0, 1),  (-1, 0),  ( 0,-1))
+    # dispX       = (( 0, 1),  (-1, 0),  ( 0,-1),  ( 1, 0))
+    # dispMtx     = ((-2,-1), (-2, 0), (-2, 1))      # displacement Matrix
+    locDisp     = ((-1, 0),  ( 0, 1),  ( 1, 0),  ( 0,-1))
+
+    Displacement= ( ((-2,-1), (-2, 0), (-2, 1)),   # North
+                    ((-1, 2), ( 0, 2), ( 1, 2)),   # East
+                    (( 2, 1), ( 2, 0), ( 2,-1)),   # South
+                    (( 1,-2), ( 0,-2), (-1,-2))    # West
+                )
+
+    # return True if the 3x1 boxes adjacent to robot are free given robot location (y,x)
+    # idx in parameter is an integer value equivalent to DIRECTIONS.index(direction)
+    def __areFree(self, y, x, idx):
+        # Matrix computation to get the boxes given the direction
+        verbose('__areFree', y, x, idx, tag='Algo DFS', lv='deepdebug')
+        for i in self.Displacement[idx]:
+            if not self.map.isFree(i[0]+y, i[1]+x):
+                return False
+        return True
+
+    # ------------------------------------------------------------------
+
+
+    # return A STACK (list, last element as top) of command,
+    #     the shortest known path to coordinate (y,x) using BFS algorithm
+    # 
+    def gotoYX(self, y, x, faceto=None):
+        map = self.map
+        loc = map.get_robot_location()                                          # original location
+        drcO= self.DIRECTIONS.index(map.get_robot_direction())                  # original direction
+        drc = drcO
+        mvt = [[[-1]*4 for i in range(map.width)] for j in range(map.height)]   # flag and step; -1 unvisited; -2 source; otherwise index of DIRECTIONS
+        step= 0
+        ret = None
+
+        q = queue.Queue()
+        q.put((loc[0],loc[1],drc,-2))                       # push source node into queue
+        while (not q.empty()) and (ret == None):
+            sz = q.qsize()
+            verbose('gotoYX ({},{}): step {}; size {};'.format(y, x, step, sz), tag='Algo DFS', lv='debug')
+            while sz > 0:
+                sz  = sz-1
+                fr  = q.get()
+                locY= fr[0]
+                locX= fr[1]
+                drc = fr[2]
+
+                # skip if visited before
+                if mvt[locY][locX][drc] != -1:
+                    continue
+                mvt[locY][locX][drc] = fr[3]
+
+                verbose('> Pop queue item and execute: ', fr, tag=None, lv='deepdebug', pre='\t')
+                # print('>>>', locY, locX, drc, ':', mvt[locY][locX], mvt[1][2], sep=' ')
+
+                # Terminate condition
+                if (locY == y) and (locX == x) and ((faceto == None) or (faceto == self.DIRECTIONS[drc])):
+                    ret = drc
+                    break
+
+                # move forward
+                nextY   = locY + self.locDisp[drc][0]
+                nextX   = locX + self.locDisp[drc][1]
+                # print('>>>', nextY, nextX, drc, ':', mvt[nextY][nextX][drc], sep=' ')
+                if (mvt[nextY][nextX][drc]==-1) and (self.__areFree( locY, locX, drc )):
+                    q.put( ( nextY, nextX, drc, drc ) )
+
+                # turn right
+                nextDrc = (drc+1) % 4
+                if (mvt[locY][locX][nextDrc] == -1):
+                    q.put(( locY, locX, nextDrc, drc ))
+
+                # turn left
+                nextDrc = (drc+3) % 4
+                if (mvt[locY][locX][nextDrc] == -1):
+                    q.put(( locY, locX, nextDrc, drc ))
+
+            # counting steps; currently it is unused
+            step = step + 1
+
+        # Trace back the steps
+        if (ret != None):
+            locY= y
+            locX= x
+            drc = ret
+            ret = []
+            while (locY != loc[0]) or (locX != loc[1]) or (drc != drcO):
+                tmp = mvt[locY][locX][drc]
+                if   (tmp == drc):
+                    ret.append('M')
+                    locY = locY - self.locDisp[drc][0]
+                    locX = locX - self.locDisp[drc][1]
+                elif ((tmp+1)%4 == drc):
+                    ret.append('R')
+                    drc = tmp
+                elif ((tmp+3)%4 == drc):
+                    ret.append('L')
+                    drc = tmp
+                else:
+                    verbose('ERROR: gotoYX trace back failed.', tag='Algo DFS', pre='  ')
+                    return None
+
+        # ret.reverse()     # see return format on the top of this function
+        return ret
+
+
+# ----------------------------------------------------------------------

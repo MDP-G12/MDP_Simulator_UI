@@ -58,7 +58,6 @@ class Map:
 
     def get_robot_direction(self):
         return self.__robot_direction
-
     def get_robot_direction_right(self):
         return Map.DIRECTIONS[ (Map.DIRECTIONS.index(self.__robot_direction)+1) % 4 ]
     def get_robot_direction_left(self):
@@ -92,6 +91,7 @@ class Map:
     def get_map(self):
         return self.__map
 
+    # Comparing the values of 2D arrays, cmpmap with own map. True if values are same
     def isSameMap(self, cmpmap):
         return cmpmap == self.__map
     # ----------------------------------------------------------------------
@@ -140,9 +140,9 @@ class Map:
         return self.__map[y][x] == 2
 
     def isFree(self, y, x):
-        verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
         if not self.valid_range(y,x):
             return False;
+        verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
         if (self.__map[y][x] == 0):
             return self.__map_real[y][x] == 0;
         return self.__map[y][x] == 1
