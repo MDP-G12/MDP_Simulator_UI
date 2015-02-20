@@ -100,17 +100,19 @@ class Handler:
     # ----------------------------------------------------------------------
     #   Real Actions
     # ----------------------------------------------------------------------
-    # Updating simulator map if exist
     # Sending signal to robot, get the sensors data and process it to map;
     # ----------------------------------------------------------------------
+
+    # Updating simulator map if exist
     def __update_map(self):
-        if self.simulator != None:
+        if self.simulator:
             self.simulator.update_map()
         if (verbose("Current Map:", tag='Handler', lv='deepdebug', pre='  ')):
             curmap = self.map.get_map()
             for y in range(self.map.height):
                 print('\t', curmap[y])
 
+    # sending signal to robot and set the new location to map class
     def __do_move(self, forward=True):
         # Threading
         # map_info.map_lock.acquire()
@@ -148,6 +150,7 @@ class Handler:
         # map_info.map_lock.release()
         # print("[Map Lock] Released by ", threading.current_thread())
 
+    # getting data from sensor then set the value to map class
     def __do_read(self):
         sensor_data = None
         while not sensor_data:
@@ -179,7 +182,7 @@ class Handler:
                 sid =  (idx + idx_disp[i]) % 4
                 loc =  [robot_location[0] + sensor_loc[sid][0],
                         robot_location[1] + sensor_loc[sid][1]]
-            verbose('sensor location', loc, tag='Handler', pre='  ', lv='debug')
+            verbose('sensor location', loc, tag='Handler', pre='  ', lv='deepdebug')
             
             # sensor return value
             # see the criteria on robot_simulator.py

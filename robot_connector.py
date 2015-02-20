@@ -1,5 +1,6 @@
 import socket
 from robot import *
+from logger import *
 
 
 class Connector(Robot):
@@ -18,20 +19,20 @@ class Connector(Robot):
         try:
             self.socket.connect((host, port))
         except Exception:
-            print("[Error] Unable to establish connection.")
+            verbose("ERROR: Unable to establish connection.", tag='RoboConn', pre='ERR>')
         else:
             self.connected = True
-            print("[Info] Connection established.")
+            verbose("Connection established.", tag='RoboConn')
 
     def send(self, msg):
         if not self.connected:
             self.connect()
         if self.connected:
-            print("[Info] Sending message: ", msg)
+            verbose("Sending message: \'{}\'".format(msg), tag='RoboConn')
             try:
                 self.socket.sendall(str.encode(msg))
             except Exception:
-                print("[Error] Unable to send message. Connection loss.")
+                verbose("[Error] Unable to send message. Connection loss.", tag='RoboConn', pre='ERR>')
                 # self.connected = False
 
     def receive(self):
@@ -42,14 +43,14 @@ class Connector(Robot):
                 msg = self.socket.recv(1024)
                 if msg:
                     msg_decoded = msg.decode()
-                    print("[Info] Received: ", msg_decoded)
+                    verbose("Received message", msg_decoded, tag='RoboConn')
                     sensor_data_in_str = msg.split(',')
                     sensor_data = []
                     for data in sensor_data_in_str:
                         sensor_data.append(int(data))
                     return sensor_data
             except socket.timeout:
-                print("[Info] No message received.")
+                verbose("No message received.", tag='RoboConn')
         # else:
-        #     print("[Error] Unable to receive message. Connection loss.")
+        #     verbose("[Error] Unable to receive message. Connection loss.")
 
