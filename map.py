@@ -20,7 +20,7 @@ from map import *
 from copy import deepcopy
 
 class Map:
-    DIRECTIONS = ['N', 'E', 'S', 'W']
+    DIRECTIONS = ('N', 'E', 'S', 'W')
 
     def __init__(self):
         self.map_lock = threading.Lock()
@@ -46,8 +46,9 @@ class Map:
         # ----------------------------------------------------------------------
         #   Robot
         # ----------------------------------------------------------------------
-        self.__robot_location = [1, 1]
-        self.__robot_direction = 'E'
+        self.__robot_location   = [1, 1]
+        self.__robot_direction  = 'E'
+        self.__rsize            = config.robot_detail['size']
 
 
     # ----------------------------------------------------------------------
@@ -66,8 +67,7 @@ class Map:
         return Map.DIRECTIONS[ (Map.DIRECTIONS.index(self.__robot_direction)+2) % 4 ]
 
     def set_robot_location(self, loc):
-        if ((0 <= loc[0] < self.height) and
-            (0 <= loc[1] < self.width )):
+        if self.valid_robot_loc(loc[0], loc[1]):
             self.__robot_location = loc
         else:
             verbose( "Error: Location update out of range", tag="Map", lv='quiet' )
@@ -80,7 +80,7 @@ class Map:
 
     def set_map(self, y, x, stat):
         if not self.valid_range(y, x):
-            verbose( "Warning: map to be set is out of bound!", tag="Map", lv='debug' )
+            verbose( "Warning: map to be set is out of bound!", y, x, tag="Map", lv='debug' )
             return
 
         if (stat in self.mapStat):
@@ -132,24 +132,28 @@ class Map:
             verbose('ERROR: isExplored Index Error!', y, x, tag='Map', pre='<E> ')
             raise IndexError
 
-    def isObstacle(self, y, x):
+    def isObstacle(self, y, x, isMapKnown=True):
         if not self.valid_range(y,x):
             return False;
         if (self.__map[y][x] == 0):
-            return self.__map_real[y][x] == 1;
+            return (not isMapKnown) or (self.__map_real[y][x] == 1);
         return self.__map[y][x] == 2
 
-    def isFree(self, y, x):
+    def isFree(self, y, x, isMapKnown=True):
         if not self.valid_range(y,x):
             return False;
         verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
         if (self.__map[y][x] == 0):
-            return self.__map_real[y][x] == 0;
+            return (isMapKnown) and (self.__map_real[y][x] == 0);
         return self.__map[y][x] == 1
 
     # to check whether the location is within range
     def valid_range(self, y, x):
         return (0 <= y < self.height) and (0 <= x < self.width)
+
+    def valid_robot_loc(self, y, x):
+        return ((0 + (self.__rsize>>1)   <= y <   self.height - (self.__rsize>>1)) and
+                (0 + (self.__rsize>>1)   <= x <   self.width  - (self.__rsize>>1)))
     # ----------------------------------------------------------------------
 
 
