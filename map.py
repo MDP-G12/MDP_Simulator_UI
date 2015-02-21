@@ -161,33 +161,51 @@ class Map:
     # Grading criteria functions
     #   map to be descripted need to be rotated 90 degrees clockwise
     # ----------------------------------------------------------------------
+    def print_descripted_map(self):
+        print( self.descripted_map() )
+
     def descripted_map(self, printThis=False, form='x'):
-        part1 = 3           # the first '11'
-        part2 = 3           # the second '11' - Part 1
-        cnt   = 0           # part 2 bit counter for padding bit
+        part1 = '11'            # the first '11'
+        part2 = ''              # the second '11' - Part 1
+        cnt   = 0               # part 2 bit counter for padding bit
 
         for x in range(self.width):
             for y in range(self.height):
-                part1 <<= 1
                 if (self.__map[y][x] != 0) :
-                    part1  |= 1
-                    part2 <<= 1
-                    cnt += 1
-                    if (self.__map[y][x] == 2):
-                        part2 |= 1
-        
-        
+                    cnt     += 1
+                    part1   += '1'
+                    part2   += '1' if (self.__map[y][x] == 2) else '0'
+                else:
+                    part1   += '0'
+        part1 += '11'
+
         # Padding bits
-        cnt      %= 8
-        part2   <<= 8-cnt
+        while (cnt%8):
+            cnt     += 1
+            part2   += '0'
+        
+        # Returning according format
+        part1x = ''
+        for i in range(len(part1)>>2):
+            if (form == 'x' or form == 'X'):
+                part1x += '%X' % int(part1[i*4:(i+1)*4], 2)
+            elif (form == 'b' or form == 'B'):
+                part1x = part1
+                break
 
-        # Returning accoring format
-        part1 = format(part1,form)
-        part2 = format(part2,form)
+        part2x = ''
+        for i in range(len(part2)>>2):
+            if (form == 'x' or form == 'X'):
+                part2x += '%X' % int(part2[i*4:(i+1)*4], 2)
+            elif (form == 'b' or form == 'B'):
+                part2x += part2
+                break
+
+        # print?
         if printThis:
-            print(part1, part2, sep=';\n')
+            print(part1x, part2x, sep=';\n')
 
-        return [part1, part2]
+        return [part1x, part2x]
 
     # ----------------------------------------------------------------------
 
