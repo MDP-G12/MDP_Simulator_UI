@@ -97,11 +97,14 @@ class Simulator:
         explore_button.grid(column=0, row=5, sticky=(W, E))
         explore_button = ttk.Button(action_pane, text='Print Descripted Map', command=self.map.print_descripted_map)
         explore_button.grid(column=0, row=6, sticky=(W, E))
+        explore_button = ttk.Button(action_pane, text='Apply Setting', command=self.__applySetting)
+        explore_button.grid(column=0, row=7, sticky=(W, E))
 
-        step_per_second = StringVar()
+        self.step_per_second = StringVar()
+        self.step_per_second.set("%d" % (1000/config.simulator_mapfrequency))
         step_per_second_label = ttk.Label(parameter_pane, text="Step Per Second:")
         step_per_second_label.grid(column=0, row=0, sticky=W)
-        step_per_second_entry = ttk.Entry(parameter_pane, textvariable=step_per_second)
+        step_per_second_entry = ttk.Entry(parameter_pane, textvariable=self.step_per_second)
         step_per_second_entry.grid(column=0, row=1, pady=(0, 10))
 
         coverage_figure = StringVar()
@@ -132,6 +135,10 @@ class Simulator:
         self.master.bind("<Down>", lambda e: self.back())
 
         self.master.mainloop()
+
+    def __applySetting(self):
+        config.simulator_mapfrequency = int( 1000 / int(self.step_per_second.get(),10) )
+        print('New map rate: %d' % config.simulator_mapfrequency)
 
     # ----------------------------------------------------------------------
     #   Actions
