@@ -197,8 +197,12 @@ class LeftHandRule(algoAbstract):
 # ----------------------------------------------------------------------
 # algoName = 'DFS'
 # Depth First Search exploration algorithm.
+#   - DFS + heuristic (incomplete exploration due to heuristic)
+#   - BFS for the rest of the unexplored boxes
+#   - Go to finish area then go back to start area 
 # Assumption made on this algorithm:
 #   - turning left, turning right, and move forward are considered 1 move
+# Shortest Path using BFS
 # ----------------------------------------------------------------------
 class algoDFS(algoAbstract):
     def __init__(self, handler):
@@ -622,6 +626,7 @@ class algoDFS(algoAbstract):
 #   - Find minimum step to get the sensor read unexplored block then
 #     then command the robot to go and read. (Using BFS)
 #   - [Move], [turn right], [turn left] are considered as 1 step
+#   - Once done go to finish area then go back to start area
 # Shortest Path:
 #   - BFS lo
 # ----------------------------------------------------------------------
