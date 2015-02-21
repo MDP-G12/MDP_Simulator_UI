@@ -151,6 +151,7 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
 
     # getting data from sensor then set the value to map class
+    # please read robot_simulator.py :: receive() for the order of return value from sensors
     def __do_read(self):
         sensor_data = None
         while not sensor_data:
@@ -158,7 +159,7 @@ class Handler:
         robot_direction = self.map.get_robot_direction()
         robot_location  = self.map.get_robot_location()
 
-        verbose('__do_read from sensor', sensor_data, tag='Handler', lv='debug')
+        verbose('__do_read from sensor', robot_location+[robot_direction], sensor_data, tag='Handler', lv='debug')
 
         dis_y = [-1, 0, 1, 0]
         dis_x = [ 0, 1, 0,-1]
@@ -189,19 +190,23 @@ class Handler:
             dis = sensor_data[i]
             if dis < 0:
                 dis *= -1
-                obs = False
+                obs  = False
             else:
-                obs = True
+                obs  = True
             # set the free boxes
             yy = dis_y[ (idx+idx_dire[i]) % 4 ]
             xx = dis_x[ (idx+idx_dire[i]) % 4 ]
-            for i in range(dis):
+            loc[0] += yy
+            loc[1] += xx
+            for i in range(dis-1):
+                self.map.set_map(loc[0], loc[1], 'free')
                 loc[0] += yy
                 loc[1] += xx
-                self.map.set_map(loc[0], loc[1], 'free')
             # set if obstacle
-            if (obs):
+            if obs:
                 self.map.set_map(loc[0], loc[1], 'obstacle')
+            else:
+                self.map.set_map(loc[0], loc[1], 'free')
 
 
     # ----------------------------------------------------------------------
@@ -217,6 +222,6 @@ class Handler:
     # ----------------------------------------------------------------------
     
 
-x = Handler()
+# x = Handler()
 
 # x.showCurMap()

@@ -120,17 +120,16 @@ class Map:
     # map checking functions
     #   - isExplored, isFree, isObstacle, valid_range;
     #   - isFree and isObstacle return False on out of range/index,
-    #     isExplored will give an error msg and throw IndexError
+    #     isExplored will give an warning msg and return True
     # ----------------------------------------------------------------------
     # parameter:
     #     y, x    - row index and coloumn index respectively
     # ----------------------------------------------------------------------
     def isExplored(self, y, x):
-        try:
-            return (self.__map[y][x] != 0)
-        except IndexError:
-            verbose('ERROR: isExplored Index Error!', y, x, tag='Map', pre='<E> ')
-            raise IndexError
+        if not self.valid_range(y,x):
+            verbose('WARNING: isExplored Out of Index!', y, x, tag='Map', pre='  ', lv='debug')
+            return True;
+        return (self.__map[y][x] != 0)
 
     def isObstacle(self, y, x, isMapKnown=True):
         if not self.valid_range(y,x):

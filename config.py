@@ -1,10 +1,10 @@
 # Currently changes on this file need to restart the app before changes take place.
 
 robot_simulation        = True
-simulator_mapfrequency  = 100       # simulator map update frequency in ms
+simulator_mapfrequency  = 200       # simulator map update frequency in ms
 
 algoMapKnown            = True
-algoName                = 'DFS'
+algoName                = 'BFS'
 
 verbose = dict (
     silent      = 0,
@@ -13,7 +13,7 @@ verbose = dict (
     debug       = 3,
     deepdebug   = 4
 )
-verboseLv = verbose['debug']
+verboseLv = verbose['normal']
 
 
 robot_detail = dict (
@@ -86,6 +86,7 @@ map_detail 	= dict(
     #       1 - obstacle
     #   Recommended to set all to 1 for real robot
     # ----------------------------------------------------------------------
+    # Map 12
     # map_real = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     #             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     #             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -101,6 +102,7 @@ map_detail 	= dict(
     #             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     #             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     #             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]],
+    # Map from map descriptor example
     map_real = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
