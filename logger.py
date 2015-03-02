@@ -8,9 +8,11 @@ def verbose( msg, *args, tag='General', lv='normal', pre='' ):
 			tag = '['+tag+']\t'
 		else:
 			tag = '\t'
-		print(pre, tag, msg, args )
+		print(pre, tag, msg, *args)
+		# log(pre, tag, msg, *args)
 		return True
 	return False
 
 # TODO: logger
-# def log(msg):
+def log(*args):
+	print(*args)

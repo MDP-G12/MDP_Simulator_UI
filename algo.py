@@ -1,4 +1,5 @@
 import config
+import time
 from logger import *
 
 import queue
@@ -26,6 +27,7 @@ class algoAbstract:
             self.map    = handler.map
         self.stopFlag   = True
 
+    # remember to update the time it start by calling self.startMove = time.clock()
     def explore(self):
         raise NotImplementedError
 
@@ -34,6 +36,18 @@ class algoAbstract:
 
     def run(self):
         raise NotImplementedError
+
+    def updateStopFlagStatus(self):
+        # map coverage limit
+        if (0 <= config.exploration_covLimit < 100) and self.map:
+            if (self.map.countExplored()*100/(self.map.width*self.map.height)) >= config.exploration_covLimit:
+                self.stop()
+                return
+        # time limit
+        if (config.exploration_timeLimit > 0) and ((time.clock()-self.startMove) > config.exploration_timeLimit):
+            self.stop()
+            return
+
 
     # Uh? is it okay to put it here?
     def stop(self):
@@ -217,7 +231,8 @@ class LeftHandRule(algoAbstract):
 class algoDFS(algoAbstract):
     def __init__(self, handler):
         super().__init__(handler)
-        self.gotoList = None
+        self.gotoList       = None
+        self.goalVisited    = False
 
     # ------------------------------------------------------------------
     # map related own function
@@ -231,12 +246,14 @@ class algoDFS(algoAbstract):
                     (( 1,-2), ( 0,-2), (-1,-2))    # West
                 )
 
+    goalLocation= [13,18]
+
     # return True if the 3x1 boxes adjacent to robot are free given robot location (y,x)
     # idx in parameter is an integer value equivalent to DIRECTIONS.index(direction)
     #
     def _areFree(self, y, x, idx):
         # Matrix computation to get the boxes given the direction
-        verbose('_areFree', y, x, idx, tag='Algo DFS', lv='deepdebug')
+        verbose('_areFree', (y, x, idx), tag='Algo DFS', lv='deepdebug')
         for i in self.Displacement[idx]:
             if not self.map.isFree(i[0]+y, i[1]+x, config.algoMapKnown):
                 return False
@@ -244,7 +261,12 @@ class algoDFS(algoAbstract):
 
     # pasted and adjusted from Handler.__do_read()
     # return True if there is unexplored box on sight; False otherwise
-    def _anyNewBlock( self, locY, locX, drc ):
+    def _anyNewBlock( self, locY, locX, drc, goalVisitedFlag = False ):
+        
+        # as grading criteria, must visit goal on exploration
+        if goalVisitedFlag and ([locY, locX] == self.goalLocation) and not self.goalVisited:
+            return True
+
         robot_direction = self.DIRECTIONS[drc]
         robot_location  = [locY, locX]
         sensor_data     = [ config.sensor_range['front_middle'],
@@ -326,10 +348,20 @@ class algoDFS(algoAbstract):
     # Execute list of actions inside self.act
     # Calling back caller on finish if simulator exist
     def actExec(self, caller=None, *args):
+        roboLoc = None
+        if self.map:
+            roboLoc = self.map.get_robot_location()
         if caller:
-            verbose('actExec', caller.__name__, tag='Algo DFS', lv='deepdebug', pre='  ')
+            verbose('actExec', roboLoc, caller.__name__, tag='Algo DFS', lv='deepdebug', pre='  ')
         else:
-            verbose('actExec', tag='Algo DFS', lv='deepdebug', pre='  ')
+            verbose('actExec', roboLoc, tag='Algo DFS', lv='deepdebug', pre='  ')
+
+        # if currently at Goal points then set the flag
+        if self.map and (self.map.get_robot_location() == self.goalLocation):
+            self.goalVisited = True
+
+        # update the stopFlag status
+        self.updateStopFlagStatus()
 
         # if simulator exists
         if self.handler.simulator:
@@ -390,7 +422,7 @@ class algoDFS(algoAbstract):
                     continue
                 mvt[locY][locX][drc] = fr[3]
 
-                verbose('> Pop queue item and execute (fr, y, x, d, faceto) ', fr, locY, locX, drc, faceto, tag=None, lv='deepdebug', pre='\t')
+                verbose('> Pop queue item and execute (fr, y, x, d, faceto) ', (fr, locY, locX, drc, faceto), tag=None, lv='deepdebug', pre='\t')
                 # print('>>>', locY, locX, drc, ':', mvt[locY][locX], mvt[1][2], sep=' ')
 
                 # Terminate condition
@@ -549,7 +581,7 @@ class algoDFS(algoAbstract):
                 # print('>>>', locY, locX, drc, ':', mvt[locY][locX], mvt[1][2], sep=' ')
 
                 # Terminate condition
-                if self._anyNewBlock( locY, locX, drc ):
+                if self._anyNewBlock( locY, locX, drc, True ):
                     ret = drc
                     break
 
@@ -605,6 +637,7 @@ class algoDFS(algoAbstract):
         visited         = [[[0]*4 for i in range(map.width)] for j in range(map.height)]
         s               = [(robY, robX, robD, None)]
         self.stopFlag   = False
+        self.startMove  = time.clock()
         self._do_DFS(s, visited)
 
 
@@ -647,6 +680,7 @@ class algoBFS(algoDFS):
     def explore(self):
         verbose('exploring...', tag='Algo-BFS')
         self.stopFlag   = False
+        self.startMove  = time.clock()
         self._do_BFS()
 
     def _do_BFS(self):
@@ -669,4 +703,7 @@ class algoBFS(algoDFS):
         self.actExec(None)
 
     def __exploreGrading(self):
-        return self._gotoYX(1,1, loc=(13,18), drcO='S') + self._gotoYX(13,18,'S')
+        if (self.goalVisited):
+            return self._gotoYX(1,1)
+        else:
+            return self._gotoYX(1,1, loc=(13,18), drcO='S') + self._gotoYX(13,18,'S')

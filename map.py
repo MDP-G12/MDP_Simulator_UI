@@ -24,20 +24,23 @@ class Map:
 
     def __init__(self):
         self.map_lock = threading.Lock()
-        # ----------------------------------------------------------------------
-        #   Map_real Legend:
-        #       0 - free
-        #       1 - obstacle
-        # ----------------------------------------------------------------------
-        self.__map_real =  deepcopy(config.map_detail['map_real'])
-        
-        # ----------------------------------------------------------------------
-        #   Map Legend:
-        #       0 - unexplored
-        #       1 - explored; free
-        #       2 - explored; obstacle
-        # ----------------------------------------------------------------------
-        self.__map      =  deepcopy(config.map_detail['map'])
+        if not config.mapFileLocation:
+            # ----------------------------------------------------------------------
+            #   Map_real Legend:
+            #       0 - free
+            #       1 - obstacle
+            # ----------------------------------------------------------------------
+            self.__map_real =  deepcopy(config.map_detail['map_real'])
+            
+            # ----------------------------------------------------------------------
+            #   Map Legend:
+            #       0 - unexplored
+            #       1 - explored; free
+            #       2 - explored; obstacle
+            # ----------------------------------------------------------------------
+            self.__map      =  deepcopy(config.map_detail['map'])
+        else:
+            raise Exception
 
         self.height     = config.map_detail['height']
         self.width      = config.map_detail['width']
@@ -78,13 +81,17 @@ class Map:
         else:
             verbose( "Error: Direction update invalid!", tag="Map", lv='quiet' )
 
+    # set map special case: once set to free, wont be changed!
     def set_map(self, y, x, stat):
         if not self.valid_range(y, x):
-            verbose( "Warning: map to be set is out of bound!", y, x, tag="Map", lv='debug' )
+            verbose( "Warning: map to be set is out of bound!", (y, x), tag="Map", lv='debug' )
             return
 
         if (stat in self.mapStat):
-            self.__map[y][x] = self.mapStat.index(stat)
+            if self.__map[y][x] != self.mapStat.index('free'):          # if the block to be changed is a free block
+                self.__map[y][x] = self.mapStat.index(stat)
+            elif self.mapStat.index(stat) != 'free':
+                verbose( "Warning: intended box to be set is found to be free previously!", (y,x), tag="Map", lv='deepdebug' )
         else:
             verbose( "Error: set map wrong status!", tag="Map", lv='quiet' )
 
@@ -127,7 +134,7 @@ class Map:
     # ----------------------------------------------------------------------
     def isExplored(self, y, x):
         if not self.valid_range(y,x):
-            verbose('WARNING: isExplored Out of Index!', y, x, tag='Map', pre='  ', lv='debug')
+            verbose('WARNING: isExplored Out of Index!', (y, x), tag='Map', pre='  ', lv='debug')
             return True;
         return (self.__map[y][x] != 0)
 
@@ -153,6 +160,14 @@ class Map:
     def valid_robot_loc(self, y, x):
         return ((0 + (self.__rsize>>1)   <= y <   self.height - (self.__rsize>>1)) and
                 (0 + (self.__rsize>>1)   <= x <   self.width  - (self.__rsize>>1)))
+
+    def countExplored(self):
+        explored = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                if self.__map[y][x] != 0:
+                    explored += 1
+        return explored
     # ----------------------------------------------------------------------
 
 

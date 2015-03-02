@@ -121,6 +121,8 @@ class RobotSimulator(Robot):
     # ----------------------------------------------------------------------
     def get_sensor_data(self, location, direction, detect_range):
         # verbose('detect_range:', detect_range)
+        if detect_range <= 0:
+            return 0
         dis = 1
         if direction == 'E':
             # while (within boundary) and (block is free) and (not exceeding sensor range)

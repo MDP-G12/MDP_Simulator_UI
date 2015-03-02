@@ -100,23 +100,25 @@ class Simulator:
         explore_button = ttk.Button(action_pane, text='Apply Setting', command=self.__applySetting)
         explore_button.grid(column=0, row=7, sticky=(W, E))
 
-        self.step_per_second = StringVar()
+        self.step_per_second  = StringVar()
         self.step_per_second.set("%d" % (1000/config.simulator_mapfrequency))
         step_per_second_label = ttk.Label(parameter_pane, text="Step Per Second:")
         step_per_second_label.grid(column=0, row=0, sticky=W)
         step_per_second_entry = ttk.Entry(parameter_pane, textvariable=self.step_per_second)
         step_per_second_entry.grid(column=0, row=1, pady=(0, 10))
 
-        coverage_figure = StringVar()
-        coverage_figure_label = ttk.Label(parameter_pane, text="Coverage Figure(%):")
+        self.coverage_figure = StringVar()
+        self.coverage_figure.set("%d" % config.exploration_covLimit)
+        coverage_figure_label = ttk.Label(parameter_pane, text="Coverage Figure (%):")
         coverage_figure_label.grid(column=0, row=2, sticky=W)
-        coverage_figure_entry = ttk.Entry(parameter_pane, textvariable=coverage_figure)
+        coverage_figure_entry = ttk.Entry(parameter_pane, textvariable=self.coverage_figure)
         coverage_figure_entry.grid(column=0, row=3, pady=(0, 10))
 
-        time_limit = StringVar()
-        time_limit_label = ttk.Label(parameter_pane, text="Time Limit(s):")
+        self.time_limit  = StringVar()
+        self.time_limit.set("%.1f" % config.exploration_timeLimit)
+        time_limit_label = ttk.Label(parameter_pane, text="Time Limit (second):")
         time_limit_label.grid(column=0, row=4, sticky=W)
-        time_limit_entry = ttk.Entry(parameter_pane, textvariable=time_limit)
+        time_limit_entry = ttk.Entry(parameter_pane, textvariable=self.time_limit)
         time_limit_entry.grid(column=0, row=5, pady=(0, 10))
 
         # self.root.columnconfigure(0, weight=1)
@@ -137,8 +139,12 @@ class Simulator:
         self.master.mainloop()
 
     def __applySetting(self):
-        config.simulator_mapfrequency = int( 1000 / int(self.step_per_second.get(),10) )
-        print('New map rate: %d' % config.simulator_mapfrequency)
+        config.simulator_mapfrequency   = int( 1000 / int(self.step_per_second.get(),10) )
+        config.exploration_covLimit     = int( self.coverage_figure.get(), 10 )
+        config.exploration_timeLimit    = float( self.time_limit.get() )
+        print('Step rate\t: %d / s' % config.simulator_mapfrequency)
+        print('Cov. limit\t: %d %%' % config.exploration_covLimit)
+        print('Time limit\t: %.3f s' % config.exploration_timeLimit)
 
     # ----------------------------------------------------------------------
     #   Actions
@@ -245,7 +251,7 @@ class Simulator:
         next_robot_location  = self.map.get_robot_location()
         next_robot_direction = self.map.get_robot_direction()
 
-        verbose('Update map robo loc:', next_robot_location, self.robot_location,
+        verbose('Update map robo loc:', self.robot_location, '=>', next_robot_location,
             tag='Simulator', lv='debug')
 
         # if robot position changed, change the left out part to map

@@ -5,6 +5,7 @@ import algo
 import map
 import robot_simulator
 import robot_connector
+import time
 
 class Handler:
     def __init__(self, simulator=None):
@@ -17,6 +18,7 @@ class Handler:
             self.__do_read()
         else:
             self.robot = robot_connector.Connector()
+        time.clock()
 
     def get_robot_location(self):
         return self.map.get_robot_location()
@@ -170,7 +172,7 @@ class Handler:
         idx_dire        = [0,  0,  0, 3, 1]                     # direction displacement index
         sensor_nbr      = 5
 
-        # front sensor
+        # sensor
         idx = map.Map.DIRECTIONS.index(robot_direction)
         for i in range(sensor_nbr):
             if idx_disp[i] < 0:
@@ -188,25 +190,30 @@ class Handler:
             # sensor return value
             # see the criteria on robot_simulator.py
             dis = sensor_data[i]
-            if dis < 0:
+            if dis < 1:
                 dis *= -1
                 obs  = False
             else:
                 obs  = True
+            
             # set the free boxes
             yy = dis_y[ (idx+idx_dire[i]) % 4 ]
             xx = dis_x[ (idx+idx_dire[i]) % 4 ]
-            loc[0] += yy
-            loc[1] += xx
-            for i in range(dis-1):
+            while dis > 1:
+                loc[0]  += yy
+                loc[1]  += xx
+                dis     -= 1
                 self.map.set_map(loc[0], loc[1], 'free')
-                loc[0] += yy
-                loc[1] += xx
-            # set if obstacle
-            if obs:
-                self.map.set_map(loc[0], loc[1], 'obstacle')
-            else:
-                self.map.set_map(loc[0], loc[1], 'free')
+
+            # set last block if obstacle
+            if (dis == 1):  # special case for 0, since dis will be 0
+                loc[0]  += yy
+                loc[1]  += xx
+                dis     -= 1
+                if obs:
+                    self.map.set_map(loc[0], loc[1], 'obstacle')
+                else:
+                    self.map.set_map(loc[0], loc[1], 'free')
 
 
     # ----------------------------------------------------------------------
