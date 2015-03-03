@@ -184,7 +184,7 @@ class Map:
         part2 = ''              # the second '11' - Part 1
         cnt   = 0               # part 2 bit counter for padding bit
 
-        for x in range(self.width):
+        for x in reversed(range(self.width)):
             for y in range(self.height):
                 if (self.__map[y][x] != 0) :
                     cnt     += 1

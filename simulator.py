@@ -99,6 +99,8 @@ class Simulator:
         explore_button.grid(column=0, row=6, sticky=(W, E))
         explore_button = ttk.Button(action_pane, text='Apply Setting', command=self.__applySetting)
         explore_button.grid(column=0, row=7, sticky=(W, E))
+        explore_button = ttk.Button(action_pane, text='Print Descripted Map', command=self.__printMapDescriptor)
+        explore_button.grid(column=0, row=8, sticky=(W, E))
 
         self.step_per_second  = StringVar()
         self.step_per_second.set("%d" % (1000/config.simulator_mapfrequency))
@@ -145,6 +147,9 @@ class Simulator:
         print('Step rate\t: %d / s' % config.simulator_mapfrequency)
         print('Cov. limit\t: %d %%' % config.exploration_covLimit)
         print('Time limit\t: %.3f s' % config.exploration_timeLimit)
+
+    def __printMapDescriptor(self):
+        self.map.print_descripted_map()
 
     # ----------------------------------------------------------------------
     #   Actions

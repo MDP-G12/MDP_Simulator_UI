@@ -230,5 +230,6 @@ class Handler:
     
 
 # x = Handler()
-
+#
 # x.showCurMap()
+# x.map.print_descripted_map()
