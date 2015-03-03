@@ -44,7 +44,7 @@ class Connector(Robot):
                 if msg:
                     msg_decoded = msg.decode()
                     verbose("Received message", msg_decoded, tag='RoboConn')
-                    sensor_data_in_str = msg.split(',')
+                    sensor_data_in_str = msg_decoded.split(',')
                     sensor_data = []
                     for data in sensor_data_in_str:
                         sensor_data.append(int(data))
