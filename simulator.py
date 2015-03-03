@@ -17,6 +17,7 @@ class Simulator:
 
         self.master  = Tk()
         self.master.title(title)
+        self.master.resizable(0, 0)
         self.handler = handler.Handler(self)
         self.map     = self.handler.map
         self.algo    = self.handler.algo
@@ -25,14 +26,17 @@ class Simulator:
 
         t = Toplevel(self.master)
         t.title("Control Panel")
-        t.geometry('180x380+1050+28')
+        t.geometry('195x390+1050+28')
+        t.resizable(0, 0)
 
         # left side map panel
         self.map_pane = ttk.Frame(self.master, borderwidth=0, relief="solid")
         self.map_pane.grid(column=0, row=0, sticky=(N, S, E, W))
         # right side control panel
-        self.control_pane = ttk.Frame(t, padding=(12, 10))
+        self.control_pane = ttk.Frame(t, padding=(10, 10))
         self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
+        # self.control_pane.columnconfigure(0, weight=1)
+        # self.control_pane.rowconfigure(0, weight=1)
 
         # robot size
         self.robot_size     = config.robot_detail['size']
@@ -84,21 +88,21 @@ class Simulator:
         control_pane_window.add(action_pane, weight=1)
 
         explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algo.explore)
-        explore_button.grid(column=0, row=0, sticky=(W, E))
+        explore_button.grid(column=0, row=0, sticky=(W, E), pady='3')
         fastest_path_button = ttk.Button(action_pane, text='Fastest Path', command=self.algo.run)
-        fastest_path_button.grid(column=0, row=1, sticky=(W, E))
+        fastest_path_button.grid(column=0, row=1, sticky=(W, E), pady='3')
         # move_button = ttk.Button(action_pane, text='Move', command=self.move)
-        # move_button.grid(column=0, row=2, sticky=(W, E))
+        # move_button.grid(column=0, row=2, sticky=(W, E), pady='3')
         # left_button = ttk.Button(action_pane, text='Left', command=self.left)
-        # left_button.grid(column=0, row=3, sticky=(W, E))
+        # left_button.grid(column=0, row=3, sticky=(W, E), pady='3')
         # right_button = ttk.Button(action_pane, text='Right', command=self.right)
-        # right_button.grid(column=0, row=4, sticky=(W, E))
+        # right_button.grid(column=0, row=4, sticky=(W, E), pady='3')
         explore_button = ttk.Button(action_pane, text='Stop', command=self.algo.stop)       # See note on algo.py
-        explore_button.grid(column=0, row=5, sticky=(W, E))
+        explore_button.grid(column=0, row=5, sticky=(W, E), pady='3')
         explore_button = ttk.Button(action_pane, text='Print Descripted Map', command=self.map.print_descripted_map)
-        explore_button.grid(column=0, row=6, sticky=(W, E))
+        explore_button.grid(column=0, row=6, sticky=(W, E), pady='3')
         explore_button = ttk.Button(action_pane, text='Apply Setting', command=self.__applySetting)
-        explore_button.grid(column=0, row=7, sticky=(W, E))
+        explore_button.grid(column=0, row=7, sticky=(W, E), pady='3')
 
         self.step_per_second  = StringVar()
         self.step_per_second.set("%d" % (1000/config.simulator_mapfrequency))
@@ -123,8 +127,6 @@ class Simulator:
 
         # self.root.columnconfigure(0, weight=1)
         # self.root.rowconfigure(0, weight=1)
-        self.control_pane.columnconfigure(0, weight=1)
-        self.control_pane.rowconfigure(0, weight=1)
 
         # for i in range(10):
         #     map_pane.rowconfigure(i, weight=1)
