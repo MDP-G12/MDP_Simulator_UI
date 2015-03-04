@@ -9,11 +9,7 @@ mapFullyExploredStart   = False
 mapFileLocation         = None
 
 algoMapKnown            = True
-<<<<<<< Updated upstream
 algoName                = 'DFS'
-=======
-algoName                = 'LHR'
->>>>>>> Stashed changes
 
 verbose = dict (
     silent      = 0,
