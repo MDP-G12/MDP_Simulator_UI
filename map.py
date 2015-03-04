@@ -126,8 +126,8 @@ class Map:
     # ----------------------------------------------------------------------
     # map checking functions
     #   - isExplored, isFree, isObstacle, valid_range;
-    #   - isFree and isObstacle return False on out of range/index,
-    #     isExplored will give an warning msg and return True
+    #   - isFree eturn False on out of range/index,
+    #     isExplored and isObstacle will give an warning msg and return True
     # ----------------------------------------------------------------------
     # parameter:
     #     y, x    - row index and coloumn index respectively
@@ -140,7 +140,7 @@ class Map:
 
     def isObstacle(self, y, x, isMapKnown=True):
         if not self.valid_range(y,x):
-            return False;
+            return True;
         if (self.__map[y][x] == 0):
             return (not isMapKnown) or (self.__map_real[y][x] == 1);
         return self.__map[y][x] == 2

@@ -81,6 +81,10 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
         # ===== ========= =====
 
+    def calibrate(self):
+        verbose("Action: calibrate", tag='Handler')
+        self.robot.send('C')
+
     def command(self, cmd):
         if   cmd == 'M':
             self.move()
@@ -88,6 +92,8 @@ class Handler:
             self.left()
         elif cmd == 'R':
             self.right()
+        elif cmd == 'C':
+            self.calibrate()
         else:
             verbose("Command: unknown command", cmd, tag='Handler')
 

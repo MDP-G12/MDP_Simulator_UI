@@ -1,15 +1,18 @@
 # Currently changes on this file need to restart the app before changes take place.
 
 robot_simulation        = True
-simulator_mapfrequency  = 50        # simulator map update frequency in ms
+simulator_mapfrequency  = 1000      # simulator map update frequency in ms
 exploration_timeLimit   = 0
 exploration_covLimit    = 100       # in %
+
+maxCalibrationMove      = 5
+noCalibrationLimit      = 10
 
 mapFullyExploredStart   = False
 mapFileLocation         = None
 
 algoMapKnown            = True
-algoName                = 'DFS'
+algoName                = 'BFS'
 
 verbose = dict (
     silent      = 0,
@@ -18,7 +21,7 @@ verbose = dict (
     debug       = 3,
     deepdebug   = 4
 )
-verboseLv = verbose['debug']
+verboseLv = verbose['normal']
 
 
 robot_detail = dict (

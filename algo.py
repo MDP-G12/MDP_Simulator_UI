@@ -22,10 +22,11 @@ import queue
 # ----------------------------------------------------------------------
 class algoAbstract:
     def __init__(self, handler=None):
-        self.handler    = handler
+        self.handler            = handler
         if handler != None:
-            self.map    = handler.map
-        self.stopFlag   = True
+            self.map            = handler.map
+        self.stopFlag           = True
+        self.lastCalibration    = 0
 
     # remember to update the time it start by calling self.startMove = time.clock()
     def explore(self):
@@ -326,25 +327,9 @@ class algoDFS(algoAbstract):
     # ------------------------------------------------------------------
     
 
-
     # ------------------------------------------------------------------
     # Robot related own function
     # ------------------------------------------------------------------
-    # Execute goto list
-    def gotoListExec(self):
-        if not self.gotoList:
-            return
-        if self.handler.simulator:
-            if self.gotoList:
-                loc = self.gotoList.pop()
-                self.act = self._gotoYX( loc[0], loc[1], loc[2] )
-                self.actExec(self.gotoListExec)
-        else:
-            while self.gotoList:
-                loc = self.gotoList.pop()
-                self.act = self._gotoYX( loc[0], loc[1], loc[2] )
-                self.actExec(self.gotoListExec)
-
     # Execute list of actions inside self.act
     # Calling back caller on finish if simulator exist
     def actExec(self, caller=None, *args):
@@ -367,7 +352,14 @@ class algoDFS(algoAbstract):
         if self.handler.simulator:
             # Unfinished condition
             if not self.stopFlag and self.act:
+                # Move
                 self.handler.command( self.act.pop() )
+                # if calibratable then do calibration
+                if self.__calibrateable():
+                    self.lastCalibration = 0
+                    self.handler.calibrate()
+                else:
+                    self.lastCalibration += 1
                 self.handler.simulator.master.after(config.simulator_mapfrequency, self.actExec, caller, *args)
                 return
 
@@ -378,6 +370,26 @@ class algoDFS(algoAbstract):
         else:
             while not self.stopFlag and self.act:
                 self.handler.command( self.act.pop() )
+                if self.__calibrateable():
+                    self.lastCalibration = 0
+                    self.handler.calibrate()
+                else:
+                    self.lastCalibration += 1
+
+    def __calibrateable(self, y=None, x=None, roboDir=None):
+        if (y==None) or (x==None) or (roboDir==None):
+            [y,x] = self.map.get_robot_location()
+            roboDir = self.map.get_robot_direction()
+        idx     = self.DIRECTIONS.index( roboDir )
+        i = self.Displacement[idx][0]
+        j = self.Displacement[idx][2]
+        mv= self.locDisp[idx]
+        if ((self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and
+             self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown)) or
+            (self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and
+             self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown))):
+            return True
+        return False
 
     # ------------------------------------------------------------------
 
@@ -626,7 +638,86 @@ class algoDFS(algoAbstract):
 
         return ret
 
+
+    # BFS based on _do_findUnexplored to find nearest calibratable position within limit
+    def _do_findCalibration(self):
+        map = self.map
+        loc = map.get_robot_location()                                          # original location
+        drcO= self.DIRECTIONS.index(map.get_robot_direction())                  # original direction
+        drc = drcO
+        step= 0
+        ret = None
+
+        # flag and step; -1 unvisited; -2 source; otherwise index of DIRECTIONS
+        mvt = [[[-1]*4 for i in range(map.width)] for j in range(map.height)]
+
+        # --------------------
+        # the BFS
+        q = queue.Queue()
+        q.put((loc[0],loc[1],drc,-2))                       # push source node into queue
+        while (step <= config.maxCalibrationMove) and (not q.empty()) and (ret == None):
+            sz = q.qsize()
+            # verbose('_gotoYX ({},{}): step {}; size {};'.format(y, x, step, sz), tag='Algo DFS', lv='debug')
+            while sz > 0:
+                sz  = sz-1
+                fr  = q.get()
+                [locY, locX, drc] = fr[:3]
+
+                # skip if visited before
+                if mvt[locY][locX][drc] != -1:
+                    continue
+                mvt[locY][locX][drc] = fr[3]
+
+                # Terminate condition
+                if self.__calibrateable( locY, locX, self.DIRECTIONS[drc] ):
+                    ret = drc
+                    break
+
+                # move forward
+                nextY   = locY + self.locDisp[drc][0]
+                nextX   = locX + self.locDisp[drc][1]
+                if (mvt[nextY][nextX][drc]==-1) and (self._areFree( locY, locX, drc )):
+                    q.put( ( nextY, nextX, drc, drc ) )
+
+                # turn right
+                nextDrc = (drc+1) % 4
+                if (mvt[locY][locX][nextDrc] == -1):
+                    q.put(( locY, locX, nextDrc, drc ))
+
+                # turn left
+                nextDrc = (drc+3) % 4
+                if (mvt[locY][locX][nextDrc] == -1):
+                    q.put(( locY, locX, nextDrc, drc ))
+
+            # counting steps;
+            step = step + 1
+
+        # --------------------
+        # Trace back the steps
+        if (ret != None):
+            ret = ['C']
+            while (locY != loc[0]) or (locX != loc[1]) or (drc != drcO):
+                tmp = mvt[locY][locX][drc]
+                if   (tmp == drc):
+                    ret.append('M')
+                    locY = locY - self.locDisp[drc][0]
+                    locX = locX - self.locDisp[drc][1]
+                elif ((tmp+1)%4 == drc):
+                    ret.append('R')
+                    drc = tmp
+                elif ((tmp+3)%4 == drc):
+                    ret.append('L')
+                    drc = tmp
+                else:
+                    verbose('ERROR: _gotoYX trace back failed.', tag='Algo DFS', pre='  ')
+                    return None
+
+        print(ret)
+
+        return ret
+
     # ------------------------------------------------------------------
+
 
     def explore(self):
         verbose('exploring...', tag='Algo DFS')
@@ -688,6 +779,15 @@ class algoBFS(algoDFS):
             return
 
         if self.handler.simulator:
+            # if too long never calibrate
+            if (self.lastCalibration > config.noCalibrationLimit):
+                print('lastCalibration:', self.lastCalibration);
+                self.act = self._do_findCalibration()
+                # if got place to calibrate within limit then go. Otherwise continue the algo
+                if self.act:
+                    self.actExec( self._do_BFS )
+                    return
+
             self.act = self._do_findUnexplored()
             if self.act:
                 self.actExec( self._do_BFS )
