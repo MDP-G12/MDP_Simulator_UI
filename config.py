@@ -3,7 +3,7 @@
 robot_simulation        = True
 simulator_mapfrequency  = 50        # simulator map update frequency in ms
 exploration_timeLimit   = 0
-exploration_covLimit    = 5       # in %
+exploration_covLimit    = 100       # in %
 
 mapFullyExploredStart   = False
 mapFileLocation         = None
@@ -78,7 +78,7 @@ icon_path = dict(
     explored_obstacle	= 'images/red.gif',
     start               = 'images/s_yellow.gif',
     end                 = 'images/g_yellow.gif',
-    size                = 1
+    size                = 2
 )
 
 map_detail 	= dict(
