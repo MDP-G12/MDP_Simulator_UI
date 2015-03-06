@@ -283,7 +283,7 @@ class algoDFS(algoAbstract):
         sensor_locd     = [[-1,-1], [-1, 1], [ 1, 1], [ 1,-1]]  # displacement of diagonal sensor relative to robot location
         idx_disp        = [0, -4, -1, 3, 1]                     # index displacement
         idx_dire        = [0,  0,  0, 3, 1]                     # direction displacement index
-        sensor_nbr      = 5
+        sensor_nbr      = config.sensor_nbr
 
         # print('_anyNewBlock', locY, locX, drc, sep='; ')
 

@@ -1,6 +1,6 @@
 # Currently changes on this file need to restart the app before changes take place.
 
-robot_simulation        = True
+robot_simulation        = False
 simulator_mapfrequency  = 1000      # simulator map update frequency in ms
 exploration_timeLimit   = 0
 exploration_covLimit    = 100       # in %
@@ -14,6 +14,20 @@ mapFileLocation         = None
 algoMapKnown            = True
 algoName                = 'BFS'
 
+
+
+lfCon = 8605.422262
+lfPow = -1.109343067
+rgCon = 8177.575259
+rgPow = -1.093434639
+    
+lflfCon =   16547.64293
+lflfPow =   -1.214602924
+rgrgCon =   5414.857844
+rgrgPow =   -1.029863514
+
+
+
 verbose = dict (
     silent      = 0,
     quiet       = 1,
@@ -21,19 +35,22 @@ verbose = dict (
     debug       = 3,
     deepdebug   = 4
 )
-verboseLv = verbose['normal']
+verboseLv = verbose['debug']
 
 
 robot_detail = dict (
-    size    = 3
+    size    = 3,
+    loc     = [1,1],
+    drc     = 'N'
 )
 
+sensor_nbr   = 5
 sensor_range = dict (
     front_middle    = 4,
     front_left      = 4,
     front_right     = 4,
-    left            = 0,
-    right           = 0
+    left            = 3,
+    right           = 3
 )
 
 
