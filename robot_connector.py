@@ -6,6 +6,9 @@ from logger import *
 
 class Connector(Robot):
     def __init__(self):
+        self.androMsgNbr    = 0
+        self.androMsgNbrUpd = 0
+        self.androMsgNbrMod = 100
 
         family = socket.AF_INET
         socket_type = socket.SOCK_STREAM
@@ -17,6 +20,7 @@ class Connector(Robot):
 
     def connect(self):
         host = '192.168.12.12'
+        # host = 'localhost'
         port = 8008
         try:
             self.socket.connect((host, port))
@@ -28,24 +32,29 @@ class Connector(Robot):
             verbose("Connection established.", tag='RoboConn')
         return True
 
-    def send(self, msg):
+    def send(self, msg, isByte=False):
         if not self.connected:
             self.connect()
         if self.connected:
             verbose("Sending message: \'{}\'".format(msg), tag='RoboConn')
+            if not isByte:
+                msg = str.encode(msg)
             try:
-                self.socket.sendall(str.encode(msg))
+                self.socket.sendall(msg)
             except Exception:
                 verbose("[Error] Unable to send message. Connection loss.", tag='RoboConn', pre='ERR>')
                 # self.connected = False
 
-    def receive(self, convert=True):
+    def receive(self, convert=True, retByte=False):
         if not self.connected:
             self.connect()
         if self.connected:
             try:
                 msg = self.socket.recv(1024)
                 if msg:
+                    if retByte:
+                        verbose("Received message", msg, tag='RoboConn')
+                        return msg
                     ret = msg.decode()                                      # msg decoded
                     verbose("Received message", ret[:len(ret)-2], tag='RoboConn')
                     if convert:
@@ -57,6 +66,28 @@ class Connector(Robot):
                 verbose("No message received.", tag='RoboConn')
         # else:
         #     verbose("[Error] Unable to receive message. Connection loss.")
+
+    # this boy here doesn't wait... or so I think.
+    def androListen(self, simulator, exploreFunc, runFunc):
+        if (self.androMsgNbr == self.androMsgNbrUpd):
+            self.send('RN')
+            tmp = None
+            while not tmp:
+                tmp = self.receive(convert=False, retByte=True)
+            self.androMsgNbrUpd = int.from_bytes(tmp, 'big')
+
+        if self.androMsgNbrUpd > self.androMsgNbr:
+            self.androMsgNbr = (self.androMsgNbr + 1) % self.androMsgNbrMod
+            self.send( b''.join([str.encode('RT'), bytes([self.androMsgNbr])]), isByte=True )
+            txt = None
+            while txt == None:
+                txt = self.receive(convert=False)
+            if config.androCmd['Explore'] in txt:
+                exploreFunc()
+            elif config.androCmd['Run'] in txt:
+                runFunc()
+
+        simulator.master.after( config.androListenInterval, self.androListen, simulator, exploreFunc, runFunc )
 
 
 class sensorConverter:

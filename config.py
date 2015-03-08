@@ -1,7 +1,7 @@
 # Currently changes on this file need to restart the app before changes take place.
 log_path                = "log.txt"
 
-robot_simulation        = True
+robot_simulation        = False
 simulator_mapfrequency  = 100        # simulator map update frequency in ms
 exploration_timeLimit   = 0
 exploration_covLimit    = 100        # in %
@@ -15,6 +15,12 @@ mapFileLocation         = None
 algoMapKnown            = True
 algoName                = 'BFS'
 
+
+androListenInterval     = 100
+androCmd = dict(
+    Explore = 'Ex',
+    Run     = 'Ru'
+)
 
 # Calibration and calibration distance waiting time
 CWait = 0.1

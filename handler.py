@@ -19,13 +19,9 @@ class Handler:
         else:
             self.robot = robot_connector.Connector()
             time.sleep(0.1)
-            # time.sleep(3)
-            # self.robot.send('I')
-            # time.sleep(3)
-            # self.robot.send('F')
-            # time.sleep(3)
             self.robot.send('I')
             self.__do_read()
+            self.robot.androListen( simulator, self.algo.explore, self.algo.run )
         time.clock()
 
     def get_robot_location(self):
