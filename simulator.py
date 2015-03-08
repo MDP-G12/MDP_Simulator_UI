@@ -137,6 +137,8 @@ class Simulator:
         self.master.bind("<Right>", lambda e: self.right())
         self.master.bind("<Up>", lambda e: self.move())
         self.master.bind("<Down>", lambda e: self.back())
+        self.master.bind("C", lambda e: self.handler.calibrate())
+        self.master.bind("E", lambda e: self.handler.calibDist())
 
         self.master.mainloop()
 
