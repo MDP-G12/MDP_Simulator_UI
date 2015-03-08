@@ -16,7 +16,7 @@ algoMapKnown            = True
 algoName                = 'BFS'
 
 
-androListenInterval     = 100
+androListenInterval     = 1000
 androCmd = dict(
     Explore = 'Ex',
     Run     = 'Ru'

@@ -56,6 +56,12 @@ class Map:
         self.__robot_direction  = config.robot_detail['drc']
         self.__rsize            = config.robot_detail['size']
 
+        # First position is set as free spaces
+        y, x = self.__robot_location
+        for i in range(y-1, y+2):
+            for j in range(x-1, x+2):
+                self.set_map(i,j,'free')
+
 
     # ----------------------------------------------------------------------
     #   Encapsulation functions
@@ -88,8 +94,9 @@ class Map:
     def set_map(self, y, x, stat):
         if not self.valid_range(y, x):
             verbose( "Warning: map to be set is out of bound!", (y, x), tag="Map", lv='debug' )
-            return
+            return False
 
+        ret = False
         if (stat in self.mapStat):
             if self.__map[y][x] != self.mapStat.index('free'):          # if the block to be changed is a free block
                 # if stat == 'obstacle':
@@ -99,11 +106,13 @@ class Map:
                 #         self.__map[y][x] = self.mapStat.index(stat)
                 #     else:
                 #         self.__map[y][x] += 1
+                ret = True
                 self.__map[y][x] = self.mapStat.index(stat)
             elif self.mapStat.index(stat) != 'free':
                 verbose( "Warning: intended box to be set is found to be free previously!", (y,x), tag="Map", lv='deepdebug' )
         else:
             verbose( "Error: set map wrong status!", tag="Map", lv='quiet' )
+        return ret
 
     def get_map(self):
         return self.__map
@@ -196,7 +205,7 @@ class Map:
 
         for x in range(self.width):
             for y in range(self.height):
-                if (self.__map[y][x] != 0) :
+                if (1 <= self.__map[y][x] <= 2) :
                     cnt     += 1
                     part1   += '1'
                     part2   += '1' if (self.__map[y][x] == 2) else '0'

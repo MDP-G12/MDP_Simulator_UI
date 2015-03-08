@@ -3,6 +3,8 @@ import socket
 from robot import *
 from logger import *
 
+import sys
+
 
 class Connector(Robot):
     def __init__(self):
@@ -14,13 +16,17 @@ class Connector(Robot):
         socket_type = socket.SOCK_STREAM
         self.socket = socket.socket(family, socket_type)
         self.socket.settimeout(1)
+        self.host = '192.168.12.12'
+
+        if '-host' in sys.argv:
+            self.host = sys.argv[sys.argv.index('-host')+1]
+
         self.connected = False
         while not self.connect():
             time.sleep(3)
 
     def connect(self):
-        host = '192.168.12.12'
-        # host = 'localhost'
+        host = self.host
         port = 8008
         try:
             self.socket.connect((host, port))

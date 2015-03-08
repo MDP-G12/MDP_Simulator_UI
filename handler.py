@@ -249,6 +249,16 @@ class Handler:
                 else:
                     self.map.set_map(loc[0], loc[1], 'free')
 
+        # update map data in RPi
+        p1, p2 = self.map.descripted_map()
+        p3  = p1 + p2
+        msg = b''.join([ str.encode('Map'), bytes([int(p3[x*2:x*2+2],16) for x in range(len(p3)>>1)]),
+                        bytes(robot_location), str.encode(robot_direction) ])
+        self.robot.send( msg, isByte=True )
+        txt = None
+        while not txt or '[Cmd] Map' not in txt:
+            txt = self.robot.receive(convert=False)
+
 
     # ----------------------------------------------------------------------
 
