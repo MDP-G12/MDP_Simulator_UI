@@ -26,7 +26,7 @@ class Simulator:
 
         t = Toplevel(self.master)
         t.title("Control Panel")
-        t.geometry('195x390+1050+28')
+        t.geometry('+1050+0')
         t.resizable(0, 0)
 
         # left side map panel
@@ -35,8 +35,6 @@ class Simulator:
         # right side control panel
         self.control_pane = ttk.Frame(t, padding=(10, 10))
         self.control_pane.grid(column=1, row=0, sticky=(N, S, E, W))
-        # self.control_pane.columnconfigure(0, weight=1)
-        # self.control_pane.rowconfigure(0, weight=1)
 
         # robot size
         self.robot_size     = config.robot_detail['size']
@@ -84,7 +82,7 @@ class Simulator:
         control_pane_window.grid(column=0, row=0, sticky=(N, S, E, W))
         parameter_pane = ttk.Labelframe(control_pane_window, text='Parameters')
         action_pane = ttk.Labelframe(control_pane_window, text='Action')
-        control_pane_window.add(parameter_pane, weight=4)
+        control_pane_window.add(parameter_pane, weight=1)
         control_pane_window.add(action_pane, weight=1)
 
         explore_button = ttk.Button(action_pane, text='Explore', width=16, command=self.algo.explore)
