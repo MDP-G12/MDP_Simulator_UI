@@ -30,27 +30,30 @@ class Map:
             #       0 - free
             #       1 - obstacle
             # ----------------------------------------------------------------------
-            self.__map_real =  deepcopy(config.map_detail['map_real'])
+            self.__map_real     =  deepcopy(config.map_detail['map_real'])
             
             # ----------------------------------------------------------------------
             #   Map Legend:
-            #       0 - unexplored
-            #       1 - explored; free
-            #       2 - explored; obstacle
+            #       0    - unexplored
+            #       1    - explored; free
+            #       2    - explored; obstacle
+            #       3..3 - unexplored; pre-obstacle
             # ----------------------------------------------------------------------
-            self.__map      =  deepcopy(config.map_detail['map'])
+            self.__map          = deepcopy(config.map_detail['map'])
+            self.__preObsLimit  = 3
         else:
+            # Not implemented. Will not use.
             raise Exception
 
         self.height     = config.map_detail['height']
         self.width      = config.map_detail['width']
         self.mapStat    = ['unexplored', 'free', 'obstacle']
-        
+
         # ----------------------------------------------------------------------
         #   Robot
         # ----------------------------------------------------------------------
-        self.__robot_location   = [1, 1]
-        self.__robot_direction  = 'E'
+        self.__robot_location   = config.robot_detail['loc']
+        self.__robot_direction  = config.robot_detail['drc']
         self.__rsize            = config.robot_detail['size']
 
 
@@ -89,6 +92,13 @@ class Map:
 
         if (stat in self.mapStat):
             if self.__map[y][x] != self.mapStat.index('free'):          # if the block to be changed is a free block
+                # if stat == 'obstacle':
+                #     if (self.__map[y][x] == self.mapStat.index('unexplored')):
+                #         self.__map[y][x] = self.mapStat.index(stat)
+                #     elif self.__map[y][x] == self.__preObsLimit:
+                #         self.__map[y][x] = self.mapStat.index(stat)
+                #     else:
+                #         self.__map[y][x] += 1
                 self.__map[y][x] = self.mapStat.index(stat)
             elif self.mapStat.index(stat) != 'free':
                 verbose( "Warning: intended box to be set is found to be free previously!", (y,x), tag="Map", lv='deepdebug' )
@@ -136,7 +146,7 @@ class Map:
         if not self.valid_range(y,x):
             verbose('WARNING: isExplored Out of Index!', (y, x), tag='Map', pre='  ', lv='debug')
             return True;
-        return (self.__map[y][x] != 0)
+        return (self.__map[y][x] != 0) and (self.__map[y][x] != 3)
 
     def isObstacle(self, y, x, isMapKnown=True):
         if not self.valid_range(y,x):

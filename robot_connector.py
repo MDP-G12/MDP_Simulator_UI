@@ -13,7 +13,7 @@ class Connector(Robot):
         self.socket.settimeout(1)
         self.connected = False
         while not self.connect():
-            time.sleep(1)
+            time.sleep(3)
 
     def connect(self):
         host = '192.168.12.12'
@@ -47,7 +47,7 @@ class Connector(Robot):
                 msg = self.socket.recv(1024)
                 if msg:
                     ret = msg.decode()                                      # msg decoded
-                    verbose("Received message", ret, tag='RoboConn')
+                    verbose("Received message", ret[:len(ret)-2], tag='RoboConn')
                     if convert:
                         sensor_data_in_str = ret.split(',')         # 3 values: (cm, V, V)
                         s   = sensorConverter()
@@ -70,7 +70,6 @@ class sensorConverter:
     __rgrgCon = config.rgrgCon
     __rgrgPow = config.rgrgPow
 
-
     def setParam(self, lfCon=None, lfPow=None, rgCon=None, rgPow=None):
         if not lfCon:
             self.__lfCon = lfCon
@@ -82,20 +81,20 @@ class sensorConverter:
             self.__rgPow = rgPow
     
     def frLeft(self, x):
-        if not x:
-            return 0
+        if x < 1:
+            return config.sensor_range['front_left']*10
         return self.__lfCon*x**self.__lfPow
     def frRight(self, x):
-        if not x:
-            return 0
+        if x < 1:
+            return config.sensor_range['front_right']*10
         return self.__rgCon*x**self.__rgPow
     def lfMid(self, x):
-        if not x:
-            return 0
+        if x < 1:
+            return config.sensor_range['left']*10
         return self.__lflfCon*x**self.__lflfPow
     def rgMid(self, x):
-        if not x:
-            return 0
+        if x < 1:
+            return config.sensor_range['right']*10
         return self.__rgrgCon*x**self.__rgrgPow
 
     # create a list of 5 datas to be returned to handler
@@ -110,17 +109,24 @@ class sensorConverter:
         ret.append( self.distToBlock( self.rgMid( int(sensor_data_in_str[4]) ), config.sensor_range['right'] ) )
         return ret
 
+    # ASSUMING obstacle will never be too close
     def distToBlock(self, dist, maxRange):
-        errCompromise   = 1           # in cm
-        offset          = 10
-        # no block detected (5 blocks above)
-        if   dist+errCompromise > (maxRange*10):
-            return -maxRange
+        errCompromise   = 2           # in cm
+        distCm = dist // 1
         # block detected within range (1, 2, 3, 4)
-        # 1: <10 cm,
-        # 2: 10 - 19 cm,
-        # 3: 20 - 29 cm,
-        # 4: 30 - 39 cm, and so on
-        else:
-            return (dist + offset + errCompromise) // 10
-        # ASSUMING obstacle will never be too close
+        # 1: <12 cm,                    5
+        # 2: 12 - 22 cm,                15
+        # 3: 22 - 32 cm,                25
+        # 4: 32 - 42 cm, and so on      35
+        blockRangeLimit = [12, 22, 32, 42, 52, 62]
+        ret = 1
+        for i in blockRangeLimit:
+            if distCm < i:
+                break
+            ret += 1
+        if   ret > maxRange  or  ret > len(blockRangeLimit):
+            ret = -maxRange
+
+        verbose(dist, distCm, ret, maxRange, tag='distToBlock', pre='    ', lv='debug')
+        return ret
+
