@@ -1,12 +1,13 @@
 # Currently changes on this file need to restart the app before changes take place.
+log_path                = "log.txt"
 
-robot_simulation        = False
-simulator_mapfrequency  = 1000      # simulator map update frequency in ms
+robot_simulation        = True
+simulator_mapfrequency  = 100        # simulator map update frequency in ms
 exploration_timeLimit   = 0
-exploration_covLimit    = 100       # in %
+exploration_covLimit    = 100        # in %
 
-maxCalibrationMove      = 5
-noCalibrationLimit      = 10
+maxCalibrationMove      = 4
+noCalibrationLimit      = 8
 
 mapFullyExploredStart   = False
 mapFileLocation         = None
@@ -15,33 +16,27 @@ algoMapKnown            = True
 algoName                = 'BFS'
 
 
+# Calibration and calibration distance waiting time
+CWait = 0.1
+EWait = 0.05
 
+# Front sensor
 lfCon = 8605.422262
 lfPow = -1.109343067
 rgCon = 8177.575259
 rgPow = -1.093434639
-    
+
+# Side sensor 
 lflfCon =   16547.64293
 lflfPow =   -1.214602924
-rgrgCon =   5414.857844
-rgrgPow =   -1.029863514
-
-
-
-verbose = dict (
-    silent      = 0,
-    quiet       = 1,
-    normal      = 2,
-    debug       = 3,
-    deepdebug   = 4
-)
-verboseLv = verbose['debug']
+rgrgCon = 8177.575259
+rgrgPow = -1.093434639
 
 
 robot_detail = dict (
     size    = 3,
     loc     = [1,1],
-    drc     = 'N'
+    drc     = 'E'
 )
 
 sensor_nbr   = 5
@@ -52,6 +47,16 @@ sensor_range = dict (
     left            = 3,
     right           = 3
 )
+
+
+verbose = dict (
+    silent      = 0,
+    quiet       = 1,
+    normal      = 2,
+    debug       = 3,
+    deepdebug   = 4
+)
+verboseLv = verbose['debug']
 
 
 icon_path = dict(

@@ -18,6 +18,14 @@ class Handler:
             self.__do_read()
         else:
             self.robot = robot_connector.Connector()
+            time.sleep(0.1)
+            # time.sleep(3)
+            # self.robot.send('I')
+            # time.sleep(3)
+            # self.robot.send('F')
+            # time.sleep(3)
+            self.robot.send('I')
+            self.__do_read()
         time.clock()
 
     def get_robot_location(self):
@@ -33,8 +41,9 @@ class Handler:
     # ----------------------------------------------------------------------
     def move(self):
         verbose("Action: move forward", tag='Handler')
-        self.__do_move()
-        self.__do_read()
+        tmp = self.__do_move()
+        if tmp:
+            self.__do_read()
         self.__update_map()
 
     # Change direction backwards, move 1 block, revert directions
@@ -42,9 +51,10 @@ class Handler:
         verbose("Action: move backward", tag='Handler')
         cur_dir = self.map.get_robot_direction()
         self.map.set_robot_direction( self.map.get_robot_direction_back() )
-        self.__do_move(forward=False)
+        tmp = self.__do_move(forward=False)
         self.map.set_robot_direction( cur_dir )
-        self.__do_read()
+        if tmp:
+            self.__do_read()
         self.__update_map()
 
     def left(self):
@@ -81,9 +91,23 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
         # ===== ========= =====
 
-    def calibrate(self):
+    def calibrate(self, distCalibrate=False):
         verbose("Action: calibrate", tag='Handler')
         self.robot.send('C')
+        tmp = self.robot.receive(convert=False)
+        while '[Cmd] C' not in tmp:
+            tmp = self.robot.receive(convert=False)
+        time.sleep(config.CWait)
+        if (distCalibrate):
+            self.calibDist()
+
+    def calibDist(self):
+        verbose("Action: Calibrate Distance", tag='Handler')
+        self.robot.send('E')
+        tmp = self.robot.receive(convert=False)
+        while '[Cmd] E' not in tmp:
+            tmp = self.robot.receive(convert=False)
+        time.sleep(config.EWait)
 
     def command(self, cmd):
         if   cmd == 'M':
@@ -94,6 +118,8 @@ class Handler:
             self.right()
         elif cmd == 'C':
             self.calibrate()
+        elif cmd == 'E':
+            self.calibDist()
         else:
             verbose("Command: unknown command", cmd, tag='Handler')
 
@@ -151,9 +177,11 @@ class Handler:
                 self.robot.send('F')
             else:
                 self.robot.send('B')
+            return True
         else:
             verbose("WARNING: Not moving due to obstacle or out of bound",
                 tag='Handler', pre='    ', lv='debug')
+            return False
 
         # map_info.map_lock.release()
         # print("[Map Lock] Released by ", threading.current_thread())
@@ -164,10 +192,14 @@ class Handler:
         sensor_data = None
         while not sensor_data:
             sensor_data = self.robot.receive()
+            verbose('__do_read', sensor_data, tag='Handler', lv='debug', pre='  ')
         robot_direction = self.map.get_robot_direction()
         robot_location  = self.map.get_robot_location()
 
         verbose('__do_read from sensor', robot_location+[robot_direction], sensor_data, tag='Handler', lv='debug')
+
+        # return
+        # print(sensor_data)
 
         dis_y = [-1, 0, 1, 0]
         dis_x = [ 0, 1, 0,-1]

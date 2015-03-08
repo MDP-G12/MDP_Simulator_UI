@@ -355,9 +355,10 @@ class algoDFS(algoAbstract):
                 # Move
                 self.handler.command( self.act.pop() )
                 # if calibratable then do calibration
-                if self.__calibrateable():
+                calib = self.__calibrateable()
+                if calib[0]:
                     self.lastCalibration = 0
-                    self.handler.calibrate()
+                    self.handler.calibrate(calib[1])
                 else:
                     self.lastCalibration += 1
                 self.handler.simulator.master.after(config.simulator_mapfrequency, self.actExec, caller, *args)
@@ -370,9 +371,10 @@ class algoDFS(algoAbstract):
         else:
             while not self.stopFlag and self.act:
                 self.handler.command( self.act.pop() )
-                if self.__calibrateable():
+                calib = self.__calibrateable()
+                if calib[0]:
                     self.lastCalibration = 0
-                    self.handler.calibrate()
+                    self.handler.calibrate(calib[1])
                 else:
                     self.lastCalibration += 1
 
@@ -381,15 +383,25 @@ class algoDFS(algoAbstract):
             [y,x] = self.map.get_robot_location()
             roboDir = self.map.get_robot_direction()
         idx     = self.DIRECTIONS.index( roboDir )
-        i = self.Displacement[idx][0]
-        j = self.Displacement[idx][2]
-        mv= self.locDisp[idx]
+        
+        # Orientation Calibration
+        i   = self.Displacement[idx][0]
+        j   = self.Displacement[idx][2]
+        mv  = self.locDisp[idx]
+        ret = []
         if ((self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and
              self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown)) or
             (self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and
              self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown))):
-            return True
-        return False
+            ret.append(True)
+        else:
+            ret.append(False)
+
+        # Distance Calibration
+        i = self.Displacement[idx][1]
+        ret.append(self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown))
+
+        return ret
 
     # ------------------------------------------------------------------
 
@@ -669,7 +681,8 @@ class algoDFS(algoAbstract):
                 mvt[locY][locX][drc] = fr[3]
 
                 # Terminate condition
-                if self.__calibrateable( locY, locX, self.DIRECTIONS[drc] ):
+                calib = self.__calibrateable( locY, locX, self.DIRECTIONS[drc] )
+                if calib[0]:
                     ret = drc
                     break
 
