@@ -1,6 +1,6 @@
 # Currently changes on this file need to restart the app before changes take place.
-log_path                = "log.txt"
-log_path_full           = "log_full.txt"
+log_path                = "log/log.txt"
+log_path_full           = "log/log_full.txt"
 
 robot_simulation        = True
 simulator_mapfrequency  = 100        # simulator map update frequency in ms

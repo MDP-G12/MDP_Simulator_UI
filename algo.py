@@ -401,9 +401,9 @@ class algoDFS(algoAbstract):
         i = self.Displacement[idx][1]
         ret.append(self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown))
 
-        verbose("__calibrateable", ret, y, x, idx, i, j,
-                self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown), self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown),
-                lv='debug')
+        # verbose("__calibrateable", ret, y, x, idx, i, j,
+        #         self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown), self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown),
+        #         tag='algoDFS', lv='debug')
 
         return ret
 
@@ -433,13 +433,14 @@ class algoDFS(algoAbstract):
         mvt = [[[-1]*4 for i in range(map.width)] for j in range(map.height)]
 
 
+        verbose('_gotoYX ({},{}) starts..'.format(y, x), tag='Algo DFS', lv='debug')
         # --------------------
         # the BFS
         q = queue.Queue()
         q.put((loc[0],loc[1],drc,-2))                       # push source node into queue
         while (not q.empty()) and (ret == None):
             sz = q.qsize()
-            verbose('_gotoYX ({},{}): step {}; size {};'.format(y, x, step, sz), tag='Algo DFS', lv='debug')
+            # verbose('_gotoYX ({},{}): step {}; size {};'.format(y, x, step, sz), tag='Algo DFS', lv='debug')
             while sz > 0:
                 sz  = sz-1
                 fr  = q.get()
@@ -480,6 +481,7 @@ class algoDFS(algoAbstract):
             step = step + 1
 
 
+        verbose('_gotoYX ({},{}) trace back.'.format(y, x), tag='Algo DFS', lv='debug')
         # --------------------
         # Trace back the steps
         if (ret != None):

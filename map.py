@@ -62,6 +62,11 @@ class Map:
             for j in range(x-1, x+2):
                 self.set_map(i,j,'free')
 
+        if config.mapFullyExploredStart:
+            for i in range(self.height):
+                for j in range(self.width):
+                    self.set_map(i,j,self.mapStat[ self.__map_real[i][j]+1 ])
+
 
     # ----------------------------------------------------------------------
     #   Encapsulation functions
@@ -135,7 +140,7 @@ class Map:
             return False
         for i in range(y-1, y+2):
             for j in range(x-1, x+2):
-                if not self.valid_range(i,j) or self.isObstacle(i,j):
+                if not self.valid_range(i,j) or self.isObstacle(i,j) or not self.isExplored(i,j):
                     return False
         return True
     # ----------------------------------------------------------------------
@@ -161,7 +166,7 @@ class Map:
         if not self.valid_range(y,x):
             return True;
         if (self.__map[y][x] == 0):
-            return (not isMapKnown) or (self.__map_real[y][x] == 1);
+            return (isMapKnown) and (self.__map_real[y][x] == 1);
         return self.__map[y][x] == 2
 
     def isFree(self, y, x, isMapKnown=True):
