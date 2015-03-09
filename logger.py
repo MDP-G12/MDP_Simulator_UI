@@ -11,12 +11,13 @@ def verbose( msg, *args, tag='General', lv='normal', pre='' ):
 		tag = '\t'
 	if ret:
 		print(pre, tag, msg, *args)
-	log(pre, tag, msg, *args)
+		log(config.log_path, pre, tag, msg, *args)
+	log(config.log_path_full, pre, tag, msg, *args)
 	return ret
 
 # TODO: logger
-def log(*args):
-	f = open(config.log_path, 'w')
+def log(path, *args):
+	f = open(path, 'a')
 	f.write( time.ctime() + ';' )
 	for i in args:
 		f.write(' ' + str(i))

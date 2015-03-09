@@ -401,6 +401,10 @@ class algoDFS(algoAbstract):
         i = self.Displacement[idx][1]
         ret.append(self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown))
 
+        verbose("__calibrateable", ret, y, x, idx, i, j,
+                self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown), self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown),
+                lv='debug')
+
         return ret
 
     # ------------------------------------------------------------------
@@ -708,7 +712,8 @@ class algoDFS(algoAbstract):
         # --------------------
         # Trace back the steps
         if (ret != None):
-            ret = ['C']
+            # ret = ['C']
+            ret = []
             while (locY != loc[0]) or (locX != loc[1]) or (drc != drcO):
                 tmp = mvt[locY][locX][drc]
                 if   (tmp == drc):
@@ -746,9 +751,14 @@ class algoDFS(algoAbstract):
 
 
     def __exploreGrading(self):
-        return self._gotoYX(1,1, loc=(13,18), drcO='S') + self._gotoYX(13,18,'S')
+        verbose('Entering Explore Grading..', tag='algoDFS', lv='debug')
+        ret = self._gotoYX(1,1, loc=(13,18), drcO='S')
+        if ret:
+            ret = ret + self._gotoYX(13,18,'S')
+        return ret
 
     def findSP(self):
+        verbose('Entering find Shortest Path..', tag='algoDFS', lv='debug')
         return self._gotoYX(13,18, loc=(1,1), drcO='E') + self._gotoYX(1,1,'E')
 
     def run(self):
@@ -761,8 +771,6 @@ class algoDFS(algoAbstract):
                 self.handler.command( self.act.pop() )
 
 # ----------------------------------------------------------------------
-
-
 
 
 
@@ -812,11 +820,16 @@ class algoBFS(algoDFS):
                 self.act = self._do_findUnexplored()
 
         # Grading purpose part (go inside finish then inside start)
+        verbose('_do_BFS finished', tag='algoBFS', lv='debug')
         self.act = self.__exploreGrading()
         self.actExec(None)
 
     def __exploreGrading(self):
+        verbose('Entering Explore Grading..', tag='algoDFS', lv='debug')
         if (self.goalVisited):
             return self._gotoYX(1,1)
         else:
-            return self._gotoYX(1,1, loc=(13,18), drcO='S') + self._gotoYX(13,18,'S')
+            ret = self._gotoYX(1,1, loc=(13,18), drcO='S')
+            if ret:
+                ret = ret + self._gotoYX(13,18,'S')
+            return ret

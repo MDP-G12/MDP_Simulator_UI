@@ -89,21 +89,23 @@ class Handler:
 
     def calibrate(self, distCalibrate=False):
         verbose("Action: calibrate", tag='Handler')
-        self.robot.send('C')
-        tmp = self.robot.receive(convert=False)
-        while '[Cmd] C' not in tmp:
+        if not config.robot_simulation:
+            self.robot.send('C')
             tmp = self.robot.receive(convert=False)
-        time.sleep(config.CWait)
-        if (distCalibrate):
-            self.calibDist()
+            while not tmp or '[Cmd] C' not in tmp:
+                tmp = self.robot.receive(convert=False)
+            time.sleep(config.CWait)
+            if (distCalibrate):
+                self.calibDist()
 
     def calibDist(self):
         verbose("Action: Calibrate Distance", tag='Handler')
-        self.robot.send('E')
-        tmp = self.robot.receive(convert=False)
-        while '[Cmd] E' not in tmp:
+        if not config.robot_simulation:
+            self.robot.send('E')
             tmp = self.robot.receive(convert=False)
-        time.sleep(config.EWait)
+            while not tmp or '[Cmd] E' not in tmp:
+                tmp = self.robot.receive(convert=False)
+            time.sleep(config.EWait)
 
     def command(self, cmd):
         if   cmd == 'M':
@@ -250,14 +252,14 @@ class Handler:
                     self.map.set_map(loc[0], loc[1], 'free')
 
         # update map data in RPi
-        p1, p2 = self.map.descripted_map()
-        p3  = p1 + p2
-        msg = b''.join([ str.encode('Map'), bytes([int(p3[x*2:x*2+2],16) for x in range(len(p3)>>1)]),
-                        bytes(robot_location), str.encode(robot_direction) ])
-        self.robot.send( msg, isByte=True )
-        txt = None
-        while not txt or '[Cmd] Map' not in txt:
-            txt = self.robot.receive(convert=False)
+        # p1, p2 = self.map.descripted_map()
+        # p3  = p1 + p2
+        # msg = b''.join([ str.encode('Map'), bytes([int(p3[x*2:x*2+2],16) for x in range(len(p3)>>1)]),
+        #                 bytes(robot_location), str.encode(robot_direction) ])
+        # self.robot.send( msg, isByte=True )
+        # txt = None
+        # while not txt or '[Cmd] Map' not in txt:
+        #     txt = self.robot.receive(convert=False)
 
 
     # ----------------------------------------------------------------------

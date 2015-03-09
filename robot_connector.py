@@ -75,25 +75,26 @@ class Connector(Robot):
 
     # this boy here doesn't wait... or so I think.
     def androListen(self, simulator, exploreFunc, runFunc):
-        if (self.androMsgNbr == self.androMsgNbrUpd):
-            self.send('RN')
-            tmp = None
-            while not tmp:
-                tmp = self.receive(convert=False, retByte=True)
-            self.androMsgNbrUpd = int.from_bytes(tmp, 'big')
+        # if (self.androMsgNbr == self.androMsgNbrUpd):
+        #     self.send('RN')
+        #     tmp = None
+        #     while not tmp:
+        #         tmp = self.receive(convert=False, retByte=True)
+        #     self.androMsgNbrUpd = int.from_bytes(tmp, 'big')
 
-        if self.androMsgNbrUpd > self.androMsgNbr:
-            self.androMsgNbr = (self.androMsgNbr + 1) % self.androMsgNbrMod
-            self.send( b''.join([str.encode('RT'), bytes([self.androMsgNbr])]), isByte=True )
-            txt = None
-            while txt == None:
-                txt = self.receive(convert=False)
-            if config.androCmd['Explore'] in txt:
-                exploreFunc()
-            elif config.androCmd['Run'] in txt:
-                runFunc()
+        # if self.androMsgNbrUpd > self.androMsgNbr:
+        #     self.androMsgNbr = (self.androMsgNbr + 1) % self.androMsgNbrMod
+        #     self.send( b''.join([str.encode('RT'), bytes([self.androMsgNbr])]), isByte=True )
+        #     txt = None
+        #     while txt == None:
+        #         txt = self.receive(convert=False)
+        #     if config.androCmd['Explore'] in txt:
+        #         exploreFunc()
+        #     elif config.androCmd['Run'] in txt:
+        #         runFunc()
 
-        simulator.master.after( config.androListenInterval, self.androListen, simulator, exploreFunc, runFunc )
+        # simulator.master.after( config.androListenInterval, self.androListen, simulator, exploreFunc, runFunc )
+        pass
 
 
 class sensorConverter:

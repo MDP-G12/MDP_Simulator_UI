@@ -156,7 +156,7 @@ class RobotSimulator(Robot):
     #         left,
     #         right
     # ----------------------------------------------------------------------
-    def receive(self):
+    def receive(self, *args, **kwargs):
         return [self.get_front_middle(),
                 self.get_front_left(),
                 self.get_front_right(),
