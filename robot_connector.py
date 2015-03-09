@@ -42,9 +42,9 @@ class Connector(Robot):
         if not self.connected:
             self.connect()
         if self.connected:
-            verbose("Sending message: \'{}\'".format(msg), tag='RoboConn')
             if not isByte:
                 msg = str.encode(msg)
+            verbose("Sending message: \'{}\'".format(msg), tag='RoboConn')
             try:
                 self.socket.sendall(msg)
             except Exception:

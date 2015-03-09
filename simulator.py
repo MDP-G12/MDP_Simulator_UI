@@ -144,7 +144,7 @@ class Simulator:
         config.simulator_mapfrequency   = int( 1000 / int(self.step_per_second.get(),10) )
         config.exploration_covLimit     = int( self.coverage_figure.get(), 10 )
         config.exploration_timeLimit    = float( self.time_limit.get() )
-        print('Step rate\t: %d / s' % config.simulator_mapfrequency)
+        print('Update rate\t: %d / s' % config.simulator_mapfrequency)
         print('Cov. limit\t: %d %%' % config.exploration_covLimit)
         print('Time limit\t: %.3f s' % config.exploration_timeLimit)
 

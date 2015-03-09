@@ -5,6 +5,7 @@ from robot import *
 class RobotSimulator(Robot):
     def __init__(self, handler):
         self.map_info       = handler.map
+        self.buffer         = None
 
     def get_front_middle(self):
         detect_range    = config.sensor_range['front_middle']
@@ -157,11 +158,24 @@ class RobotSimulator(Robot):
     #         right
     # ----------------------------------------------------------------------
     def receive(self, *args, **kwargs):
-        return [self.get_front_middle(),
-                self.get_front_left(),
-                self.get_front_right(),
-                self.get_left(),
-                self.get_right()]
+        return self.buffer
+
+    def send(self, msg, isByte=False):
+        if not isByte:
+            msg = str.encode(msg)
+        verbose("Sending message: \'{}\'".format(msg), tag='RoboSim')
+        if msg==b'I'  or  msg==b'F'  or  msg==b'L'  or  msg==b'R':
+            self.buffer = [self.get_front_middle(),
+                            self.get_front_left(),
+                            self.get_front_right(),
+                            self.get_left(),
+                            self.get_right()]
+        elif msg==b'C':
+            self.buffer = '[Cmd] C'
+        elif msg==b'E':
+            self.buffer = '[Cmd] E'
+        else:
+            self.buffer = None
     # ----------------------------------------------------------------------
 
 

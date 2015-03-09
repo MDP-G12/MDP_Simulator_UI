@@ -8,7 +8,7 @@ exploration_timeLimit   = 0
 exploration_covLimit    = 100        # in %
 
 maxCalibrationMove      = 4
-noCalibrationLimit      = 6
+noCalibrationLimit      = 5
 
 mapFullyExploredStart   = False
 mapFileLocation         = None
@@ -63,7 +63,7 @@ verbose = dict (
     debug       = 3,
     deepdebug   = 4
 )
-verboseLv = verbose['normal']
+verboseLv = verbose['debug']
 
 
 icon_path = dict(

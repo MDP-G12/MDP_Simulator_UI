@@ -12,16 +12,17 @@ class Handler:
         self.simulator  = simulator
         self.map        = map.Map()
         self.algo       = algo.algoFactory(self, algoName=config.algoName).algo
+        
         # if robot is simulated
         if config.robot_simulation:
             self.robot = robot_simulator.RobotSimulator(self)
-            self.__do_read()
         else:
             self.robot = robot_connector.Connector()
-            time.sleep(0.1)
-            self.robot.send('I')
-            self.__do_read()
             self.robot.androListen( simulator, self.algo.explore, self.algo.run )
+
+        time.sleep(0.1)
+        self.robot.send('I')
+        self.__do_read()
         time.clock()
 
     def get_robot_location(self):
@@ -89,23 +90,21 @@ class Handler:
 
     def calibrate(self, distCalibrate=False):
         verbose("Action: calibrate", tag='Handler')
-        if not config.robot_simulation:
-            self.robot.send('C')
+        self.robot.send('C')
+        tmp = self.robot.receive(convert=False)
+        while not tmp or '[Cmd] C' not in tmp:
             tmp = self.robot.receive(convert=False)
-            while not tmp or '[Cmd] C' not in tmp:
-                tmp = self.robot.receive(convert=False)
-            time.sleep(config.CWait)
-            if (distCalibrate):
-                self.calibDist()
+        time.sleep(config.CWait)
+        if (distCalibrate):
+            self.calibDist()
 
     def calibDist(self):
         verbose("Action: Calibrate Distance", tag='Handler')
-        if not config.robot_simulation:
-            self.robot.send('E')
+        self.robot.send('E')
+        tmp = self.robot.receive(convert=False)
+        while not tmp or '[Cmd] E' not in tmp:
             tmp = self.robot.receive(convert=False)
-            while not tmp or '[Cmd] E' not in tmp:
-                tmp = self.robot.receive(convert=False)
-            time.sleep(config.EWait)
+        time.sleep(config.EWait)
 
     def command(self, cmd):
         if   cmd == 'M':
