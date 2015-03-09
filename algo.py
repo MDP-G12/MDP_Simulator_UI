@@ -89,6 +89,8 @@ class algoFactory:
             self.algo = algoDum()
         elif (algoName == 'LHR'):
             self.algo = LeftHandRule(handler)
+        elif (algoName == 'LHR2'):
+            self.algo = algoLHR2(handler)
         elif (algoName == 'DFS'):
             self.algo = algoDFS(handler)
         elif (algoName == 'BFS'):
@@ -247,16 +249,19 @@ class algoDFS(algoAbstract):
                     (( 1,-2), ( 0,-2), (-1,-2))    # West
                 )
 
-    goalLocation= [13,18]
+    startLocation   = [ 1, 1]
+    goalLocation    = [13,18]
 
-    # return True if the 3x1 boxes adjacent to robot are free given robot location (y,x)
+    # return True if the 3x1 boxes next adjacent (mvt=0) to robot are free given robot location (y,x)
     # idx in parameter is an integer value equivalent to DIRECTIONS.index(direction)
     #
-    def _areFree(self, y, x, idx):
+    def _areFree(self, y, x, idx, mvt=0):
         # Matrix computation to get the boxes given the direction
         verbose('_areFree', (y, x, idx), tag='Algo DFS', lv='deepdebug')
         for i in self.Displacement[idx]:
-            if not self.map.isFree(i[0]+y, i[1]+x, config.algoMapKnown):
+            if not self.map.isFree( i[0] + y + self.locDisp[idx][0]*mvt,
+                                    i[1] + x + self.locDisp[idx][1]*mvt,
+                                    config.algoMapKnown):
                 return False
         return True
 
@@ -332,6 +337,7 @@ class algoDFS(algoAbstract):
     # ------------------------------------------------------------------
     # Execute list of actions inside self.act
     # Calling back caller on finish if simulator exist
+    # Auto calibration defined here
     def actExec(self, caller=None, *args):
         roboLoc = None
         if self.map:
@@ -796,6 +802,119 @@ class algoBFS(algoDFS):
         self.stopFlag   = False
         self.startMove  = time.clock()
         self._do_BFS()
+
+    def _do_BFS(self):
+        if self.stopFlag:
+            return
+
+        if self.handler.simulator:
+            # if too long never calibrate
+            if (self.lastCalibration > config.noCalibrationLimit):
+                print('lastCalibration:', self.lastCalibration);
+                self.act = self._do_findCalibration()
+                # if got place to calibrate within limit then go. Otherwise continue the algo
+                if self.act:
+                    self.actExec( self._do_BFS )
+                    return
+
+            self.act = self._do_findUnexplored()
+            if self.act:
+                self.actExec( self._do_BFS )
+                return
+        else:
+            self.act = self._do_findUnexplored()
+            while not self.stopFlag and self.act:
+                self.actExec( self._do_BFS )
+                self.act = self._do_findUnexplored()
+
+        # Grading purpose part (go inside finish then inside start)
+        verbose('_do_BFS finished', tag='algoBFS', lv='debug')
+        self.act = self.__exploreGrading()
+        self.actExec(None)
+
+    def __exploreGrading(self):
+        verbose('Entering Explore Grading..', tag='algoDFS', lv='debug')
+        if (self.goalVisited):
+            return self._gotoYX(1,1)
+        else:
+            ret = self._gotoYX(1,1, loc=(13,18), drcO='S')
+            if ret:
+                ret = ret + self._gotoYX(13,18,'S')
+            return ret
+# ----------------------------------------------------------------------
+
+
+# ----------------------------------------------------------------------
+# algoName = 'LHR2'
+# Left Hand Rule algorithm #2. LHR + BFS
+# Exploration:
+#   - based on LHR above
+#   - Will auto calibrate and finding place to calibrate
+#     when too long nvr calibrate
+# Assumtion: will go through goal then able to go back to start.
+# ----------------------------------------------------------------------
+class algoLHR2(algoDFS):
+    def __init__(self, handler):
+        super().__init__(handler)
+        self.left_flag      = True
+        self.goalVisited    = False
+        self.startReVisited = False
+        if not self.handler.simulator:
+            raise Exception
+
+    def explore(self):
+        verbose('exploring...', tag='Algo-LHR-2')
+        self.stopFlag = False
+        self.goalVisited    = False
+        self.startReVisited = False
+        self.periodic_check()
+
+    # flag if ever visited
+    # return true when LHR algo completes
+    def check_pos(self):
+        if self.startReVisited:
+            return True
+        roboLoc = self.map.get_robot_location()
+        if self.goalVisited:
+            if roboLoc == self.startLocation:
+                verbose('start re-visited', tag='algoLHR2', lv='debug')
+                self.startReVisited = True
+        elif roboLoc == self.goalLocation:
+            verbose('goal visited', tag='algoLHR2', lv='debug')
+            self.goalVisited = True
+        return self.startReVisited
+
+    def periodic_check(self):
+        if self.check_pos():
+            self._do_BFS()
+            return
+
+        # TODO: Calibration after several continuous step without calibration
+
+        if self.left_flag and self.check_left():
+            self.act = ['L']
+            self.actExec(None)
+            self.left_flag = False
+        elif self.check_front():
+            self.act = ['M']
+            self.actExec(None)
+            self.left_flag = True
+        else:
+            self.act = ['R']
+            self.actExec(None)
+            self.left_flag = True
+        if not self.stopFlag:
+            self.handler.simulator.master.after(config.simulator_mapfrequency, self.periodic_check)
+
+    def check_left(self):
+        idx = self.DIRECTIONS.index( self.map.get_robot_direction_left() )
+        loc = self.map.get_robot_location()
+        return self._areFree( loc[0], loc[1], idx )
+
+    def check_front(self):
+        idx = self.DIRECTIONS.index( self.map.get_robot_direction() )
+        loc = self.map.get_robot_location()
+        return self._areFree( loc[0], loc[1], idx )
 
     def _do_BFS(self):
         if self.stopFlag:

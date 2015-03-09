@@ -158,7 +158,9 @@ class RobotSimulator(Robot):
     #         right
     # ----------------------------------------------------------------------
     def receive(self, *args, **kwargs):
-        return self.buffer
+        ret         = self.buffer
+        # self.buffer = None
+        return ret
 
     def send(self, msg, isByte=False):
         if not isByte:
