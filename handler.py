@@ -122,7 +122,9 @@ class Handler:
         elif cmd == 'R':
             self.right()
         elif cmd == 'C':
-            self.calibrate()
+            self.calibrateC()
+        elif cmd == 'Z':
+            self.calibrateZ()
         elif cmd == 'E':
             self.calibDist()
         else:

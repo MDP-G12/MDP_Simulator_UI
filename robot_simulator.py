@@ -174,6 +174,8 @@ class RobotSimulator(Robot):
                             self.get_right()]
         elif msg==b'C':
             self.buffer = '[Cmd] C'
+        elif msg==b'Z':
+            self.buffer = '[Cmd] Z'
         elif msg==b'E':
             self.buffer = '[Cmd] E'
         else:

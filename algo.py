@@ -88,11 +88,11 @@ class algoFactory:
         elif (algoName == "dum"):
             self.algo = algoDum()
         elif (algoName == 'LHR'):
-            self.algo = LeftHandRule(handler)
+            self.algo = LHR(handler)
         elif (algoName == 'RHR'):
             self.algo = algoRHR(handler)
-        elif (algoName == 'RHRRHR'):
-            self.algo = RHR(handler)
+        elif (algoName == 'RHR2'):
+            self.algo = RHR2(handler)
         elif (algoName == 'DFS'):
             self.algo = algoDFS(handler)
         elif (algoName == 'BFS'):
@@ -142,7 +142,7 @@ class algoBF1(algoAbstract):
 # Left Hand Rule Exploration Algorithm:
 #     Walking by the wall; Wall is on the left side; Turn right on corner 
 # ----------------------------------------------------------------------
-class LeftHandRule(algoAbstract):
+class LHR(algoAbstract):
     def __init__(self, handler):
         super().__init__(handler)
         self.left_flag = True
@@ -176,42 +176,6 @@ class LeftHandRule(algoAbstract):
         ret = self.check_front()
         self.handler.right()
         return ret
-
-        # robot_location = self.handler.map.get_robot_location()
-        # print(robot_location)
-        # left_direction = self.handler.map.get_robot_direction_left()
-        # map_explored = self.map.get_map()
-        # if left_direction == 'N':
-        #     if robot_location[0] < 2:
-        #         return False
-        #     if map_explored[robot_location[0]-2][robot_location[1]] == 1 and map_explored[robot_location[0]-2][robot_location[1]-1] == 1 and map_explored[robot_location[0]-2][robot_location[1]+1] == 1:
-        #         return True
-        #     else:
-        #         return False
-        # elif left_direction == 'S':
-        #     if robot_location[0] > 12:
-        #         return False
-        #     if map_explored[robot_location[0]+2][robot_location[1]] == 1 and map_explored[robot_location[0]+2][robot_location[1]-1] == 1 and map_explored[robot_location[0]+2][robot_location[1]+1] == 1:
-        #         return True
-        #     else:
-        #         return False
-        # elif left_direction == 'E':
-        #     if robot_location[1] > 17:
-        #         return False
-        #     if map_explored[robot_location[0]][robot_location[1]+2] == 1 and map_explored[robot_location[0]+1][robot_location[1]+2] == 1 and map_explored[robot_location[0]-1][robot_location[1]+2] == 1:
-        #         return True
-        #     else:
-        #         return False
-        # elif left_direction == 'W':
-        #     if robot_location[1] < 2:
-        #         return False
-        #     if map_explored[robot_location[0]][robot_location[1]-2] == 1 and map_explored[robot_location[0]+1][robot_location[1]-2] == 1 and map_explored[robot_location[0]-1][robot_location[1]-2] == 1:
-        #         return True
-        #     else:
-        #         return False
-        #
-        # else:
-        #     print("[Error] Invalid direction.")
 
     def check_front(self):
         sensor_data = self.handler.robot.receive()
@@ -982,13 +946,12 @@ class algoRHR(algoDFS):
 # ----------------------------------------------------------------------
 
 
-
 # ----------------------------------------------------------------------
-# algoName = 'RHRRHR'
-# Left Hand Rule Exploration Algorithm:
+# algoName = 'RHR2'
+# Right Hand Rule Exploration Algorithm:
 #     Walking by the wall; Wall is on the right side; Turn left on corner
 # ----------------------------------------------------------------------
-class RHR(algoDFS):
+class RHR2(algoDFS):
     def __init__(self, handler):
         super().__init__(handler)
         self.right_flag = True  # To avoid infinite right turn
@@ -1000,6 +963,8 @@ class RHR(algoDFS):
         self.DIRECTIONS  = ('N', 'E', 'S', 'W')
         self.locDisp     = ((-1, 0),  ( 0, 1),  ( 1, 0),  ( 0,-1))
         self.locDisp_right = ((0, 1), (1, 0), (0, -1), (-1, 0))
+
+        self.act = []
 
     def is_wall(self, x, y, d):
         # return (x == 1 or x == 13) and (y == 1 or y == 18)
@@ -1017,7 +982,7 @@ class RHR(algoDFS):
         self.exec()
 
     def exec(self):
-        self.lastCalibration += 1
+
         x, y = self.handler.get_robot_location()
         d = self.handler.get_robot_direction()
         if (x, y) == self.start_coordinate:
@@ -1025,15 +990,16 @@ class RHR(algoDFS):
         if self.start_visited > 2:
             self.stopFlag = True
 
-        if self.is_calibrateable(x, y):
-            self.handler.calibrate()
+        # if self.is_calibrateable(x, y):
+        #     self.handler.calibrate()
 
         if self.is_wall(x, y, d) and self.lastCalibration > config.maxCalibrationMove:
             # self.handler.command('R')
             self.act = ['L', 'R']
-            self.actExec()
-            self.lastCalibration = 0
-            print("[Calibration] Calibration Done.")
+            # Need to run this command twice
+            self.actExec(None)
+            self.actExec(None)
+            print("[Calibration] Wall calibration Done.")
 
         if not self.right():
             if not self.forward():
@@ -1057,7 +1023,7 @@ class RHR(algoDFS):
                 return False
             else:
                 self.act = ['R']
-                self.actExec()
+                self.actExec(None)
                 self.right_flag = False
                 return True
         else:
@@ -1071,14 +1037,14 @@ class RHR(algoDFS):
         nextY = y + self.locDisp[drc][1]
         if self.handler.map.possible_pos(nextX, nextY):
             self.act = ['M']
-            self.actExec()
+            self.actExec(None)
             return True
         else:
             return False
 
     def left(self):
         self.act = ['L']
-        self.actExec()
+        self.actExec(None)
 
     def get_front_map(self):
         x, y = self.handler.map.get_robot_location()
@@ -1088,20 +1054,5 @@ class RHR(algoDFS):
 
     def find_wall(self):
         pass
-
-    def check_left(self):
-        self.handler.left()
-        ret = self.check_front()
-        self.handler.right()
-        return ret
-
-    def check_front(self):
-        sensor_data = self.handler.robot.receive()
-        print('Sensor data: ', sensor_data)
-        if (sensor_data[0] > 1 or sensor_data[0] < 0) and (sensor_data[1] > 1 or sensor_data[1] < 0) and (sensor_data[2] > 1 or sensor_data[2] < 0):
-            return True
-        else:
-            return False
-
 
 # ----------------------------------------------------------------------
