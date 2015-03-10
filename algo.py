@@ -856,7 +856,7 @@ class algoBFS(algoDFS):
 class algoLHR2(algoDFS):
     def __init__(self, handler):
         super().__init__(handler)
-        self.left_flag      = True
+        self.side_flag      = True
         self.goalVisited    = False
         self.startReVisited = False
         if not self.handler.simulator:
@@ -877,37 +877,38 @@ class algoLHR2(algoDFS):
         roboLoc = self.map.get_robot_location()
         if self.goalVisited:
             if roboLoc == self.startLocation:
-                verbose('start re-visited', tag='algoLHR2', lv='debug')
+                verbose('start re-visited', tag='algoRHR2', lv='debug')
                 self.startReVisited = True
         elif roboLoc == self.goalLocation:
-            verbose('goal visited', tag='algoLHR2', lv='debug')
+            verbose('goal visited', tag='algoRHR2', lv='debug')
             self.goalVisited = True
         return self.startReVisited
 
     def periodic_check(self):
-        if self.check_pos():
-            self._do_BFS()
-            return
+        # finish the Hand Rule algorithm
+        # if self.check_pos():
+        #     self._do_BFS()
+        #     return
 
         # TODO: Calibration after several continuous step without calibration
 
-        if self.left_flag and self.check_left():
+        if self.side_flag and self.check_side():
             self.act = ['L']
             self.actExec(None)
-            self.left_flag = False
+            self.side_flag = False
         elif self.check_front():
             self.act = ['M']
             self.actExec(None)
-            self.left_flag = True
+            self.side_flag = True
         else:
             self.act = ['R']
             self.actExec(None)
-            self.left_flag = True
+            self.side_flag = True
         if not self.stopFlag:
             self.handler.simulator.master.after(config.simulator_mapfrequency, self.periodic_check)
 
-    def check_left(self):
-        idx = self.DIRECTIONS.index( self.map.get_robot_direction_left() )
+    def check_side(self):
+        idx = self.DIRECTIONS.index( self.map.get_robot_direction_right() )
         loc = self.map.get_robot_location()
         return self._areFree( loc[0], loc[1], idx )
 
