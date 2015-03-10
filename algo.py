@@ -89,8 +89,8 @@ class algoFactory:
             self.algo = algoDum()
         elif (algoName == 'LHR'):
             self.algo = LeftHandRule(handler)
-        elif (algoName == 'LHR2'):
-            self.algo = algoLHR2(handler)
+        elif (algoName == 'RHR'):
+            self.algo = algoRHR(handler)
         elif (algoName == 'DFS'):
             self.algo = algoDFS(handler)
         elif (algoName == 'BFS'):
@@ -845,15 +845,15 @@ class algoBFS(algoDFS):
 
 
 # ----------------------------------------------------------------------
-# algoName = 'LHR2'
-# Left Hand Rule algorithm #2. LHR + BFS
+# algoName = 'RHR'
+# Right Hand Rule algorithm. RHR + BFS
 # Exploration:
 #   - based on LHR above
 #   - Will auto calibrate and finding place to calibrate
 #     when too long nvr calibrate
 # Assumtion: will go through goal then able to go back to start.
 # ----------------------------------------------------------------------
-class algoLHR2(algoDFS):
+class algoRHR(algoDFS):
     def __init__(self, handler):
         super().__init__(handler)
         self.side_flag      = True
@@ -863,7 +863,7 @@ class algoLHR2(algoDFS):
             raise Exception
 
     def explore(self):
-        verbose('exploring...', tag='Algo-LHR-2')
+        verbose('exploring...', tag='algoRHR2')
         self.stopFlag = False
         self.goalVisited    = False
         self.startReVisited = False
@@ -886,22 +886,23 @@ class algoLHR2(algoDFS):
 
     def periodic_check(self):
         # finish the Hand Rule algorithm
-        # if self.check_pos():
-        #     self._do_BFS()
-        #     return
+        if self.check_pos():
+            self._do_BFS()
+            return
 
         # TODO: Calibration after several continuous step without calibration
+        act = ( ['R'], ['M'], ['L'] )
 
         if self.side_flag and self.check_side():
-            self.act = ['L']
+            self.act = act[0]
             self.actExec(None)
             self.side_flag = False
         elif self.check_front():
-            self.act = ['M']
+            self.act = act[1]
             self.actExec(None)
             self.side_flag = True
         else:
-            self.act = ['R']
+            self.act = act[2]
             self.actExec(None)
             self.side_flag = True
         if not self.stopFlag:

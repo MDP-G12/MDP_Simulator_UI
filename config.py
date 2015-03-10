@@ -14,7 +14,7 @@ mapFullyExploredStart   = False
 mapFileLocation         = None
 
 algoMapKnown            = True
-algoName                = 'LHR2'
+algoName                = 'RHR'
 
 
 androListenInterval     = 100
@@ -43,16 +43,16 @@ rgrgPow = -1.093434639
 robot_detail = dict (
     size    = 3,
     loc     = [1,1],
-    drc     = 'E'
+    drc     = 'S'
 )
 
 sensor_nbr   = 5
 sensor_range = dict (
-    front_middle    = 4,
-    front_left      = 4,
-    front_right     = 4,
-    left            = 3,
-    right           = 3
+    front_middle    = 3,
+    front_left      = 3,
+    front_right     = 3,
+    left            = 2,
+    right           = 0
 )
 
 
