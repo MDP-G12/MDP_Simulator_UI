@@ -2,12 +2,12 @@
 log_path                = "log/log.txt"
 log_path_full           = "log/log_full.txt"
 
-robot_simulation        = True
+robot_simulation        = False
 simulator_mapfrequency  = 100        # simulator map update frequency in ms
 exploration_timeLimit   = 0
 exploration_covLimit    = 100        # in %
 
-maxCalibrationMove      = 4
+maxCalibrationMove      = 3
 noCalibrationLimit      = 5
 
 mapFullyExploredStart   = False

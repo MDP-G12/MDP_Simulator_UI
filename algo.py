@@ -91,6 +91,8 @@ class algoFactory:
             self.algo = LeftHandRule(handler)
         elif (algoName == 'RHR'):
             self.algo = algoRHR(handler)
+        elif (algoName == 'RHRRHR'):
+            self.algo = RHR(handler)
         elif (algoName == 'DFS'):
             self.algo = algoDFS(handler)
         elif (algoName == 'BFS'):
@@ -956,3 +958,149 @@ class algoRHR(algoDFS):
             if ret:
                 ret = ret + self._gotoYX(13,18,'S')
             return ret
+
+# ----------------------------------------------------------------------
+
+
+
+# ----------------------------------------------------------------------
+# algoName = 'RHRRHR'
+# Left Hand Rule Exploration Algorithm:
+#     Walking by the wall; Wall is on the right side; Turn left on corner
+# ----------------------------------------------------------------------
+class RHR(algoDFS):
+    def __init__(self, handler):
+        super().__init__(handler)
+        self.right_flag = True  # To avoid infinite right turn
+        self.start_visited = 0
+        self.start_coordinate = (1, 1)
+        self.end_coordinate = (13, 18)
+        self.corner_coordinate = (self.start_coordinate, self.end_coordinate, (1, 18), (13, 1))
+
+        self.DIRECTIONS  = ('N', 'E', 'S', 'W')
+        self.locDisp     = ((-1, 0),  ( 0, 1),  ( 1, 0),  ( 0,-1))
+        self.locDisp_right = ((0, 1), (1, 0), (0, -1), (-1, 0))
+
+    def is_wall(self, x, y, d):
+        # return (x == 1 or x == 13) and (y == 1 or y == 18)
+        return (x == 1 and d == 'W') or (y == 1 and d == 'S') or (x == 13 and d == 'E') or (y == 18 and d == 'N')
+
+    def is_corner(self, x, y):
+        return (x, y) in self.corner_coordinate
+
+    def is_calibrateable(self, x, y):
+        return False
+
+
+    def explore(self):
+        self.stopFlag = False
+        self.exec()
+
+    def exec(self):
+        self.lastCalibration += 1
+        x, y = self.handler.get_robot_location()
+        d = self.handler.get_robot_direction()
+        if (x, y) == self.start_coordinate:
+            self.start_visited += 1
+        if self.start_visited > 2:
+            self.stopFlag = True
+
+        if self.is_calibrateable(x, y):
+            self.handler.calibrate()
+
+        if self.is_wall(x, y, d) and self.lastCalibration > config.maxCalibrationMove:
+            self.handler.command('R')
+            self.handler.calibrate()
+            self.handler.command('L')
+            self.lastCalibration = 0
+            print("[Calibration] Calibration Done.")
+
+        if not self.right():
+            if not self.forward():
+                self.left()
+        if not self.stopFlag:
+            self.handler.simulator.master.after(config.simulator_mapfrequency, self.exec)
+
+    def right(self):
+        if not self.right_flag:
+            self.right_flag = True  # Reset right flag
+            return False
+
+        x, y = self.handler.map.get_robot_location()
+        d = self.handler.map.get_robot_direction()
+
+        if not self.is_wall(x, y, d):
+            drc = self.DIRECTIONS.index(d)
+            nextX   = x + self.locDisp_right[drc][0]
+            nextY   = y + self.locDisp_right[drc][1]
+            if not self.handler.map.possible_pos(nextX, nextY):
+                return False
+            else:
+                self.handler.command('R')
+                self.right_flag = False
+                return True
+        else:
+            return False
+
+    def forward(self):
+        x, y = self.handler.map.get_robot_location()
+        d = self.handler.map.get_robot_direction()
+        drc = self.DIRECTIONS.index(d)
+        nextX = x + self.locDisp[drc][0]
+        nextY = y + self.locDisp[drc][1]
+        if self.handler.map.possible_pos(nextX, nextY):
+            self.handler.command('M')
+            return True
+        else:
+            return False
+
+    def left(self):
+        self.handler.command('L')
+
+    def get_front_map(self):
+        x, y = self.handler.map.get_robot_location()
+        d = self.handler.map.get_robot_direction()
+
+        return 0, 0, 0
+
+
+    # def exec(self):
+    #     if self.check_left() and self.left_flag:
+    #         self.handler.left()
+    #         print(" [Info] Stop turning left.")
+    #         self.left_flag = False
+    #     elif self.check_front():
+    #         self.handler.move()
+    #         self.left_flag = True
+    #     else:
+    #         self.handler.right()
+    #         self.left_flag = True
+    #     if not self.stopFlag:
+    #         self.handler.simulator.master.after(config.simulator_mapfrequency, self.exec)
+
+    # def findSP(self):
+    #     pass
+
+    # def run(self):
+    #     pass
+
+    def find_wall(self):
+        pass
+
+    def check_left(self):
+        self.handler.left()
+        ret = self.check_front()
+        self.handler.right()
+        return ret
+
+    def check_front(self):
+        sensor_data = self.handler.robot.receive()
+        print('Sensor data: ', sensor_data)
+        if (sensor_data[0] > 1 or sensor_data[0] < 0) and (sensor_data[1] > 1 or sensor_data[1] < 0) and (sensor_data[2] > 1 or sensor_data[2] < 0):
+            return True
+        else:
+            return False
+
+    def _do_RHR(self):
+        pass
+# ----------------------------------------------------------------------

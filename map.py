@@ -103,18 +103,21 @@ class Map:
 
         ret = False
         if (stat in self.mapStat):
-            if self.__map[y][x] != self.mapStat.index('free'):          # if the block to be changed is a free block
-                # if stat == 'obstacle':
-                #     if (self.__map[y][x] == self.mapStat.index('unexplored')):
-                #         self.__map[y][x] = self.mapStat.index(stat)
-                #     elif self.__map[y][x] == self.__preObsLimit:
-                #         self.__map[y][x] = self.mapStat.index(stat)
-                #     else:
-                #         self.__map[y][x] += 1
-                ret = True
-                self.__map[y][x] = self.mapStat.index(stat)
-            elif self.mapStat.index(stat) != 'free':
-                verbose( "Warning: intended box to be set is found to be free previously!", (y,x), tag="Map", lv='deepdebug' )
+            ret = True
+            self.__map[y][x] = self.mapStat.index(stat)
+
+            # if self.__map[y][x] != self.mapStat.index('free'):          # if the block to be changed is not a free block
+            #     # if stat == 'obstacle':
+            #     #     if (self.__map[y][x] == self.mapStat.index('unexplored')):
+            #     #         self.__map[y][x] = self.mapStat.index(stat)
+            #     #     elif self.__map[y][x] == self.__preObsLimit:
+            #     #         self.__map[y][x] = self.mapStat.index(stat)
+            #     #     else:
+            #     #         self.__map[y][x] += 1
+            #     ret = True
+            #     self.__map[y][x] = self.mapStat.index(stat)
+            # elif self.mapStat.index(stat) != 'free':
+            #     verbose( "Warning: intended box to be set is found to be free previously!", (y,x), tag="Map", lv='deepdebug' )
         else:
             verbose( "Error: set map wrong status!", tag="Map", lv='quiet' )
         return ret
@@ -141,6 +144,24 @@ class Map:
         for i in range(y-1, y+2):
             for j in range(x-1, x+2):
                 if not self.valid_range(i,j) or self.isObstacle(i,j) or not self.isExplored(i,j):
+                    return False
+        return True
+    # ----------------------------------------------------------------------
+
+
+    # ----------------------------------------------------------------------
+    #   Function possible_pos
+    # ----------------------------------------------------------------------
+    # parameter:
+    #   y   -   row position to be validated of robot
+    #   x   -   coloumn position to be validated of robot
+    # ----------------------------------------------------------------------
+    def possible_pos(self, y, x):
+        if not (0 < y < 14 and 0 < x < 19):
+            return False
+        for i in range(y-1, y+2):
+            for j in range(x-1, x+2):
+                if not self.valid_range(i,j) or self.isObstacle(i,j,False):
                     return False
         return True
     # ----------------------------------------------------------------------
