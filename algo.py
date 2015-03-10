@@ -356,7 +356,7 @@ class algoDFS(algoAbstract):
                 else:
                     self.lastCalibration += 1
 
-    def __calibrateable(self, y=None, x=None, roboDir=None):
+    def _calibrateable(self, y=None, x=None, roboDir=None):
         if (y==None) or (x==None) or (roboDir==None):
             [y,x] = self.map.get_robot_location()
             roboDir = self.map.get_robot_direction()
@@ -970,6 +970,7 @@ class RHR2(algoDFS):
                             )
 
         self.act = []
+        self.lastCalibration = [0, 0]
 
     def is_wall(self, x, y, idx):
         return (x == 1 and idx == 3) or (y == 1 and idx == 2) or (x == 13 and idx == 1) or (y == 18 and idx == 0)
@@ -1000,15 +1001,20 @@ class RHR2(algoDFS):
             self.stopFlag = True
             print("[Info] RHR exploration done!")
 
-        if self.is_corner(x, y, idx) or (self._are_all_obstacles(x, y, idx_right) and self.lastCalibration > config.maxCalibrationMove):
+        print("[Debug] All obstacles in right: ", self._are_all_obstacles(x, y, idx_right))
+        print("[Debug] Corner: ", self.is_corner(x, y, idx))
+
+        if self.is_corner(x, y, idx) or (self._are_all_obstacles(x, y, idx_right) and self.lastCalibration[1 - idx % 2] > config.maxCalibrationMove):
+            print("[Calibration] Start right calibration.")
             self.handler.command('R')
             self.handler.calibrateC()
             self.handler.command('L')
+            self.lastCalibration[1 - idx % 2] = 0
             # self.act = ['L', 'R']
             # Need to run this command twice
             # self.actExec(None)
             # self.actExec(None)
-            print("[Calibration] Right calibration Done.")
+            print("[Calibration] Right calibration done.")
 
         if not self.right():
             if not self.forward():
@@ -1067,6 +1073,70 @@ class RHR2(algoDFS):
             if self.map.isObstacle(i[0] + x, i[1] + y, False):
                 return False
         return True
+
+
+    # ------------------------------------------------------------------
+    # Duplicate of function in algoDFS with minor change
+    # ------------------------------------------------------------------
+    # Execute list of actions inside self.act
+    # Calling back caller on finish if simulator exist
+    # Auto calibration defined here
+    def actExec(self, caller=None, *args):
+        print('[Debug] lastCalib_NS: ', self.lastCalibration[0])
+        print('[Debug] lastCalib_EW: ', self.lastCalibration[1])
+        roboLoc = None
+        if self.map:
+            roboLoc = self.map.get_robot_location()
+        if caller:
+            verbose('actExec', roboLoc, caller.__name__, tag='Algo RHR2', lv='deepdebug', pre='  ')
+        else:
+            verbose('actExec', roboLoc, tag='Algo RHR2', lv='deepdebug', pre='  ')
+
+        # if currently at Goal points then set the flag
+        if self.map and (self.map.get_robot_location() == self.goalLocation):
+            self.goalVisited = True
+
+        idx = self.DIRECTIONS.index(self.handler.map.get_robot_direction())
+
+        # if simulator exists
+        if self.handler.simulator:
+            # Unfinished condition
+            if not self.stopFlag and self.act:
+                # Move
+                self.handler.command( self.act.pop() )
+                # if calibratable then do calibration
+                calib = self._calibrateable()
+                if calib[0]:
+                    print("[Calibration] Start front calibration.")
+                    self.lastCalibration[idx % 2] = 0
+                    if calib[0] == 'C':
+                        self.handler.calibrateC()
+                    elif calib[0] == 'Z':
+                        self.handler.calibrateZ()
+                    print("[Calibration] Front calibration done.")
+                else:
+                    self.lastCalibration[idx % 2] += 1
+                self.lastCalibration[1 - idx % 2] += 1
+                self.handler.simulator.master.after(config.simulator_mapfrequency, self.actExec, caller, *args)
+                return
+
+            # Finished
+            self.handler.simulator.master.after(0, caller, *args)
+
+        # if simulator doesn't exist
+        else:
+            while not self.stopFlag and self.act:
+                self.handler.command( self.act.pop() )
+                calib = self._calibrateable()
+                if calib[0]:
+                    self.lastCalibration = 0
+                    if calib[0] == 'C':
+                        self.handler.calibrateC()
+                    elif calib[0] == 'Z':
+                        self.handler.calibrateZ()
+                else:
+                    self.lastCalibration += 1
+
 
 
 # ----------------------------------------------------------------------

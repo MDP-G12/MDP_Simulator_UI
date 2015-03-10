@@ -7,7 +7,7 @@ simulator_mapfrequency  = 100        # simulator map update frequency in ms
 exploration_timeLimit   = 0
 exploration_covLimit    = 100        # in %
 
-maxCalibrationMove      = 3
+maxCalibrationMove      = 2
 noCalibrationLimit      = 5
 
 mapFullyExploredStart   = False
