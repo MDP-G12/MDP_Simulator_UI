@@ -366,7 +366,10 @@ class algoDFS(algoAbstract):
                 calib = self.__calibrateable()
                 if calib[0]:
                     self.lastCalibration = 0
-                    self.handler.calibrate(calib[1])
+                    if calib[0] == 'C':
+                        self.handler.calibrateC()
+                    elif calib[0] == 'Z':
+                        self.handler.calibrateZ()
                 else:
                     self.lastCalibration += 1
                 self.handler.simulator.master.after(config.simulator_mapfrequency, self.actExec, caller, *args)
@@ -382,7 +385,10 @@ class algoDFS(algoAbstract):
                 calib = self.__calibrateable()
                 if calib[0]:
                     self.lastCalibration = 0
-                    self.handler.calibrate(calib[1])
+                    if calib[0] == 'C':
+                        self.handler.calibrateC()
+                    elif calib[0] == 'Z':
+                        self.handler.calibrateZ()
                 else:
                     self.lastCalibration += 1
 
@@ -397,17 +403,20 @@ class algoDFS(algoAbstract):
         j   = self.Displacement[idx][2]
         mv  = self.locDisp[idx]
         ret = []
-        if ((self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and
-             self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown)) or
-            (self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and
-             self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown))):
-            ret.append(True)
+        if (self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and
+             self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown)):
+            ret.append('C')
+
+        elif (self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and
+              self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown)):
+            ret.append('Z')
+
         else:
             ret.append(False)
 
         # Distance Calibration
-        i = self.Displacement[idx][1]
-        ret.append(self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown))
+        # i = self.Displacement[idx][1]
+        # ret.append(self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown))
 
         # verbose("__calibrateable", ret, y, x, idx, i, j,
         #         self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown), self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown),
@@ -666,7 +675,7 @@ class algoDFS(algoAbstract):
 
 
     # BFS based on _do_findUnexplored to find nearest calibratable position within limit
-    def _do_findCalibration(self):
+    def _do_findCalibration(self, limit=config.maxCalibrationMove):
         map = self.map
         loc = map.get_robot_location()                                          # original location
         drcO= self.DIRECTIONS.index(map.get_robot_direction())                  # original direction
@@ -681,7 +690,7 @@ class algoDFS(algoAbstract):
         # the BFS
         q = queue.Queue()
         q.put((loc[0],loc[1],drc,-2))                       # push source node into queue
-        while (step <= config.maxCalibrationMove) and (not q.empty()) and (ret == None):
+        while (step <= limit) and (not q.empty()) and (ret == None):
             sz = q.qsize()
             # verbose('_gotoYX ({},{}): step {}; size {};'.format(y, x, step, sz), tag='Algo DFS', lv='debug')
             while sz > 0:
@@ -889,10 +898,21 @@ class algoRHR(algoDFS):
     def periodic_check(self):
         # finish the Hand Rule algorithm
         if self.check_pos():
-            self._do_BFS()
+            # self._do_BFS()
             return
 
         # TODO: Calibration after several continuous step without calibration
+        # if (self.lastCalibration > config.noCalibrationLimit):
+        #     print('lastCalibration:', self.lastCalibration);
+        #     self.act = ['L', 'R']
+        #     # if got place to calibrate within limit then go. Otherwise continue the algo
+        #     if self.act:
+        #         self.lastCalibration = config.noCalibrationLimit-3
+        #         self.actExec( self.periodic_check )
+        #         return
+        # if (self.lastCalibration > config.noCalibrationLimit):
+
+
         act = ( ['R'], ['M'], ['L'] )
 
         if self.side_flag and self.check_side():

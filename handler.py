@@ -88,15 +88,23 @@ class Handler:
         # print("[Map Lock] Released by ", threading.current_thread())
         # ===== ========= =====
 
-    def calibrate(self, distCalibrate=False):
+    def calibrateC(self, distCalibrate=False):
         verbose("Action: calibrate", tag='Handler')
         self.robot.send('C')
         tmp = self.robot.receive(convert=False)
         while not tmp or '[Cmd] C' not in tmp:
             tmp = self.robot.receive(convert=False)
         time.sleep(config.CWait)
-        if (distCalibrate):
-            self.calibDist()
+        # if (distCalibrate):
+        #     self.calibDist()
+    
+    def calibrateZ(self, distCalibrate=False):
+        verbose("Action: calibrate", tag='Handler')
+        self.robot.send('Z')
+        tmp = self.robot.receive(convert=False)
+        while not tmp or '[Cmd] Z' not in tmp:
+            tmp = self.robot.receive(convert=False)
+        time.sleep(config.CWait)
 
     def calibDist(self):
         verbose("Action: Calibrate Distance", tag='Handler')
