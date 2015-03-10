@@ -146,6 +146,24 @@ class Map:
     # ----------------------------------------------------------------------
 
 
+    # ----------------------------------------------------------------------
+    #   Function possible_pos
+    # ----------------------------------------------------------------------
+    # parameter:
+    #   y   -   row position to be validated of robot
+    #   x   -   coloumn position to be validated of robot
+    # ----------------------------------------------------------------------
+    def possible_pos(self, y, x):
+        if not (0 < y < 14 and 0 < x < 19):
+            return False
+        for i in range(y-1, y+2):
+            for j in range(x-1, x+2):
+                if not self.valid_range(i,j) or self.isObstacle(i,j,False):
+                    return False
+        return True
+    # ----------------------------------------------------------------------
+
+
 
     # ----------------------------------------------------------------------
     # map checking functions

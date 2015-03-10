@@ -2,19 +2,19 @@
 log_path                = "log/log.txt"
 log_path_full           = "log/log_full.txt"
 
-robot_simulation        = True
+robot_simulation        = False
 simulator_mapfrequency  = 100        # simulator map update frequency in ms
 exploration_timeLimit   = 0
 exploration_covLimit    = 100        # in %
 
-maxCalibrationMove      = 4
+maxCalibrationMove      = 3
 noCalibrationLimit      = 5
 
 mapFullyExploredStart   = False
 mapFileLocation         = None
 
 algoMapKnown            = True
-algoName                = 'BFS'
+algoName                = 'RHR'
 
 
 androListenInterval     = 100
@@ -43,16 +43,16 @@ rgrgPow = -1.093434639
 robot_detail = dict (
     size    = 3,
     loc     = [1,1],
-    drc     = 'E'
+    drc     = 'S'
 )
 
 sensor_nbr   = 5
 sensor_range = dict (
-    front_middle    = 4,
-    front_left      = 4,
-    front_right     = 4,
-    left            = 3,
-    right           = 3
+    front_middle    = 2,
+    front_left      = 2,
+    front_right     = 2,
+    left            = 2,
+    right           = 0
 )
 
 

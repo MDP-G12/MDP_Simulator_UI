@@ -117,19 +117,24 @@ class sensorConverter:
             self.__rgCon = rgCon
         if not rgPow:
             self.__rgPow = rgPow
+
+    def frMid(self, x):
+        if x < 1:
+            return config.sensor_range['front_middle']*10
+        return self.__lflfCon*x**self.__lflfPow
     
     def frLeft(self, x):
         if x < 1:
             return config.sensor_range['front_left']*10
-        return self.__lfCon*x**self.__lfPow
+        return self.__lfCon*x**self.__lfPow-3
     def frRight(self, x):
         if x < 1:
             return config.sensor_range['front_right']*10
-        return self.__rgCon*x**self.__rgPow
+        return self.__rgCon*x**self.__rgPow-3
     def lfMid(self, x):
         if x < 1:
             return config.sensor_range['left']*10
-        return self.__lflfCon*x**self.__lflfPow
+        return self.__rgrgCon*x**self.__rgrgPow
     def rgMid(self, x):
         if x < 1:
             return config.sensor_range['right']*10
@@ -140,7 +145,7 @@ class sensorConverter:
         ret = []
         while len(sensor_data_in_str) < config.sensor_nbr:
             sensor_data_in_str.append('0')
-        ret.append( self.distToBlock( float(sensor_data_in_str[0]), config.sensor_range['front_middle'] ) )
+        ret.append( self.distToBlock( self.frMid(  int(sensor_data_in_str[1]) ), config.sensor_range['front_middle' ] ) )
         ret.append( self.distToBlock( self.frLeft(  int(sensor_data_in_str[1]) ), config.sensor_range['front_left' ] ) )
         ret.append( self.distToBlock( self.frRight( int(sensor_data_in_str[2]) ), config.sensor_range['front_right'] ) )
         ret.append( self.distToBlock( self.lfMid( int(sensor_data_in_str[3]) ), config.sensor_range['left'] ) )
