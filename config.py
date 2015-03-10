@@ -14,7 +14,7 @@ mapFullyExploredStart   = False
 mapFileLocation         = None
 
 algoMapKnown            = True
-algoName                = 'RHR'
+algoName                = 'RHRRHR'
 
 
 androListenInterval     = 100

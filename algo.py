@@ -874,7 +874,7 @@ class algoRHR(algoDFS):
             raise Exception
 
     def explore(self):
-        verbose('exploring...', tag='algoRHR2')
+        verbose('exploring...', tag='algoRHR')
         self.stopFlag = False
         self.goalVisited    = False
         self.startReVisited = False
@@ -1029,9 +1029,9 @@ class RHR(algoDFS):
             self.handler.calibrate()
 
         if self.is_wall(x, y, d) and self.lastCalibration > config.maxCalibrationMove:
-            self.handler.command('R')
-            self.handler.calibrate()
-            self.handler.command('L')
+            # self.handler.command('R')
+            self.act = ['L', 'R']
+            self.actExec()
             self.lastCalibration = 0
             print("[Calibration] Calibration Done.")
 
@@ -1056,7 +1056,8 @@ class RHR(algoDFS):
             if not self.handler.map.possible_pos(nextX, nextY):
                 return False
             else:
-                self.handler.command('R')
+                self.act = ['R']
+                self.actExec()
                 self.right_flag = False
                 return True
         else:
@@ -1069,40 +1070,21 @@ class RHR(algoDFS):
         nextX = x + self.locDisp[drc][0]
         nextY = y + self.locDisp[drc][1]
         if self.handler.map.possible_pos(nextX, nextY):
-            self.handler.command('M')
+            self.act = ['M']
+            self.actExec()
             return True
         else:
             return False
 
     def left(self):
-        self.handler.command('L')
+        self.act = ['L']
+        self.actExec()
 
     def get_front_map(self):
         x, y = self.handler.map.get_robot_location()
         d = self.handler.map.get_robot_direction()
 
         return 0, 0, 0
-
-
-    # def exec(self):
-    #     if self.check_left() and self.left_flag:
-    #         self.handler.left()
-    #         print(" [Info] Stop turning left.")
-    #         self.left_flag = False
-    #     elif self.check_front():
-    #         self.handler.move()
-    #         self.left_flag = True
-    #     else:
-    #         self.handler.right()
-    #         self.left_flag = True
-    #     if not self.stopFlag:
-    #         self.handler.simulator.master.after(config.simulator_mapfrequency, self.exec)
-
-    # def findSP(self):
-    #     pass
-
-    # def run(self):
-    #     pass
 
     def find_wall(self):
         pass
@@ -1121,6 +1103,5 @@ class RHR(algoDFS):
         else:
             return False
 
-    def _do_RHR(self):
-        pass
+
 # ----------------------------------------------------------------------
