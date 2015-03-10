@@ -958,48 +958,57 @@ class RHR2(algoDFS):
         self.start_visited = 0
         self.start_coordinate = (1, 1)
         self.end_coordinate = (13, 18)
-        self.corner_coordinate = (self.start_coordinate, self.end_coordinate, (1, 18), (13, 1))
 
         self.DIRECTIONS  = ('N', 'E', 'S', 'W')
-        self.locDisp     = ((-1, 0),  ( 0, 1),  ( 1, 0),  ( 0,-1))
+        self.locDisp     = ((-1, 0),  (0, 1),  (1, 0),  (0, -1))
         self.locDisp_right = ((0, 1), (1, 0), (0, -1), (-1, 0))
+
+        self.Displacement = (   ((-2,-1), (-2, 0), (-2, 1)),   # North
+                                ((-1, 2), ( 0, 2), ( 1, 2)),   # East
+                                (( 2, 1), ( 2, 0), ( 2,-1)),   # South
+                                (( 1,-2), ( 0,-2), (-1,-2))    # West
+                            )
 
         self.act = []
 
-    def is_wall(self, x, y, d):
-        # return (x == 1 or x == 13) and (y == 1 or y == 18)
-        return (x == 1 and d == 'W') or (y == 1 and d == 'S') or (x == 13 and d == 'E') or (y == 18 and d == 'N')
+    def is_wall(self, x, y, idx):
+        return (x == 1 and idx == 3) or (y == 1 and idx == 2) or (x == 13 and idx == 1) or (y == 18 and idx == 0)
 
-    def is_corner(self, x, y):
-        return (x, y) in self.corner_coordinate
+    def is_corner(self, x, y, idx):
+        idx_right = (idx + 1) % 4
+        if self._are_all_obstacles(x, y, idx) and self._are_all_obstacles(x, y, idx_right):
+            return True
+        else:
+            return False
 
-    def is_calibrateable(self, x, y):
-        return False
-
+    # def is_calibrateable(self, x, y, idx):
+    #     if self._are_all_obstacles():
+    #         return False
 
     def explore(self):
         self.stopFlag = False
         self.exec()
 
     def exec(self):
-
         x, y = self.handler.get_robot_location()
-        d = self.handler.get_robot_direction()
+        idx = self.DIRECTIONS.index(self.handler.get_robot_direction())
+        idx_right = (idx + 1) % 4
+
         if (x, y) == self.start_coordinate:
             self.start_visited += 1
-        if self.start_visited > 2:
+        if self.start_visited > 1:
             self.stopFlag = True
+            print("[Info] RHR exploration done!")
 
-        # if self.is_calibrateable(x, y):
-        #     self.handler.calibrate()
-
-        if self.is_wall(x, y, d) and self.lastCalibration > config.maxCalibrationMove:
-            # self.handler.command('R')
-            self.act = ['L', 'R']
+        if self.is_corner(x, y, idx) or (self._are_all_obstacles(x, y, idx_right) and self.lastCalibration > config.maxCalibrationMove):
+            self.handler.command('R')
+            self.handler.calibrateC()
+            self.handler.command('L')
+            # self.act = ['L', 'R']
             # Need to run this command twice
-            self.actExec(None)
-            self.actExec(None)
-            print("[Calibration] Wall calibration Done.")
+            # self.actExec(None)
+            # self.actExec(None)
+            print("[Calibration] Right calibration Done.")
 
         if not self.right():
             if not self.forward():
@@ -1013,13 +1022,11 @@ class RHR2(algoDFS):
             return False
 
         x, y = self.handler.map.get_robot_location()
-        d = self.handler.map.get_robot_direction()
+        idx = self.DIRECTIONS.index(self.handler.map.get_robot_direction())
+        idx_right = self.DIRECTIONS.index(self.handler.map.get_robot_direction_right())
 
-        if not self.is_wall(x, y, d):
-            drc = self.DIRECTIONS.index(d)
-            nextX   = x + self.locDisp_right[drc][0]
-            nextY   = y + self.locDisp_right[drc][1]
-            if not self.handler.map.possible_pos(nextX, nextY):
+        if not self.is_wall(x, y, idx):
+            if not self._possible_right_turn(x, y, idx_right):
                 return False
             else:
                 self.act = ['R']
@@ -1031,11 +1038,8 @@ class RHR2(algoDFS):
 
     def forward(self):
         x, y = self.handler.map.get_robot_location()
-        d = self.handler.map.get_robot_direction()
-        drc = self.DIRECTIONS.index(d)
-        nextX = x + self.locDisp[drc][0]
-        nextY = y + self.locDisp[drc][1]
-        if self.handler.map.possible_pos(nextX, nextY):
+        idx = self.DIRECTIONS.index(self.handler.map.get_robot_direction())
+        if self._areFree(x, y, idx):
             self.act = ['M']
             self.actExec(None)
             return True
@@ -1046,13 +1050,23 @@ class RHR2(algoDFS):
         self.act = ['L']
         self.actExec(None)
 
-    def get_front_map(self):
-        x, y = self.handler.map.get_robot_location()
-        d = self.handler.map.get_robot_direction()
-
-        return 0, 0, 0
-
     def find_wall(self):
         pass
+
+    def _are_all_obstacles(self, x, y, idx):
+        # check for robot current position (x, y), whether it is possible to calibrate in direction d
+        # obstacles include wall
+        for i in self.Displacement[idx]:
+            if not self.map.isObstacle(i[0] + x, i[1] + y, False):
+                return False
+        return True
+
+    def _possible_right_turn(self, x, y, idx):
+        # check for robot position (x, y) and right direction, whether there are any explored obstacles in the right
+        for i in self.Displacement[idx]:
+            if self.map.isObstacle(i[0] + x, i[1] + y, False):
+                return False
+        return True
+
 
 # ----------------------------------------------------------------------
