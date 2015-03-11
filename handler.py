@@ -229,8 +229,10 @@ class Handler:
         sensor_nbr      = 5
 
         # sensor
+        ultra = 3
         idx = map.Map.DIRECTIONS.index(robot_direction)
         for i in range(sensor_nbr):
+            # print("[Debug] Sensor index: ", i)
             if idx_disp[i] < 0:
                 # diagonal sensor. front_right, front_left. using sensor_locd
                 sid =  (idx - idx_disp[i]) % 4
@@ -260,16 +262,20 @@ class Handler:
                 loc[1]  += xx
                 dis     -= 1
                 self.map.set_map(loc[0], loc[1], 'free')
+                if i != ultra:
+                    self.map.confirm(loc[0], loc[1])
 
             # set last block if obstacle
             if (dis == 1):  # special case for 0, since dis will be 0
                 loc[0]  += yy
                 loc[1]  += xx
                 dis     -= 1
-                if obs and not self.map.isFree(loc[0], loc[1], False):
+                if obs and not self.map.isConfirmed(loc[0], loc[1]):
                     self.map.set_map(loc[0], loc[1], 'obstacle')
                 else:
                     self.map.set_map(loc[0], loc[1], 'free')
+                    if i != ultra and not self.map.isConfirmed(loc[0], loc[1]):
+                        self.map.confirm(loc[0], loc[1])
 
         # update map data in RPi
         # p1, p2 = self.map.descripted_map()

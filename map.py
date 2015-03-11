@@ -42,8 +42,12 @@ class Map:
             self.__map          = deepcopy(config.map_detail['map'])
             self.__preObsLimit  = 3
 
-
-            self.__map_confirm  =  deepcopy(config.map_detail['map'])
+            # ----------------------------------------------------------------------
+            #   Map_confirm Legend:
+            #       0    - not confirmed
+            #       1    - confirmed (start/goal or verified by Infrared sensor as free)
+            # ----------------------------------------------------------------------
+            self.__map_confirm = deepcopy(config.map_detail['map'])
         else:
             # Not implemented. Will not use.
             raise Exception
@@ -200,6 +204,22 @@ class Map:
         if (self.__map[y][x] == 0):
             return (isMapKnown) and (self.__map_real[y][x] == 0);
         return self.__map[y][x] == 1
+
+    def isConfirmed(self, x, y):
+        if not (0 <= x <= 14 and 0 <= y <= 19):
+            return False
+        if self.__map_confirm[x][y]:
+            # print("[isConfirmed] (", x, ",", y, ") is confirmed.")
+            return True
+        else:
+            # print("[isConfirmed] (", x, ",", y, ") is not confirmed.")
+            return False
+
+    def confirm(self, x, y):
+        if not (0 <= x <= 14 and 0 <= y <= 19):
+            return
+        self.__map_confirm[x][y] = 1
+        # print("[Confirm] (", x, ",", y, ") is confirmed.")
 
     # to check whether the location is within range
     def valid_range(self, y, x):
