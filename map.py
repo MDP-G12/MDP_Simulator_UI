@@ -31,7 +31,7 @@ class Map:
             #       1 - obstacle
             # ----------------------------------------------------------------------
             self.__map_real     =  deepcopy(config.map_detail['map_real'])
-            
+
             # ----------------------------------------------------------------------
             #   Map Legend:
             #       0    - unexplored
@@ -41,6 +41,9 @@ class Map:
             # ----------------------------------------------------------------------
             self.__map          = deepcopy(config.map_detail['map'])
             self.__preObsLimit  = 3
+
+
+            self.__map_confirm  =  deepcopy(config.map_detail['map'])
         else:
             # Not implemented. Will not use.
             raise Exception

@@ -48,11 +48,11 @@ robot_detail = dict (
 
 sensor_nbr   = 5
 sensor_range = dict (
-    front_middle    = 3,
-    front_left      = 3,
-    front_right     = 3,
+    front_middle    = 1,
+    front_left      = 1,
+    front_right     = 1,
     left            = 7,
-    right           = 2
+    right           = 1
 )
 
 

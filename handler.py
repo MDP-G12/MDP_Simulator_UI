@@ -266,7 +266,7 @@ class Handler:
                 loc[0]  += yy
                 loc[1]  += xx
                 dis     -= 1
-                if obs:
+                if obs and not self.map.isFree(loc[0], loc[1], False):
                     self.map.set_map(loc[0], loc[1], 'obstacle')
                 else:
                     self.map.set_map(loc[0], loc[1], 'free')

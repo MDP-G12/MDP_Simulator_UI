@@ -327,7 +327,7 @@ class algoDFS(algoAbstract):
                 # Move
                 self.handler.command( self.act.pop() )
                 # if calibratable then do calibration
-                calib = self.__calibrateable()
+                calib = self._calibrateable()
                 if calib[0]:
                     self.lastCalibration = 0
                     if calib[0] == 'C':
@@ -346,7 +346,7 @@ class algoDFS(algoAbstract):
         else:
             while not self.stopFlag and self.act:
                 self.handler.command( self.act.pop() )
-                calib = self.__calibrateable()
+                calib = self._calibrateable()
                 if calib[0]:
                     self.lastCalibration = 0
                     if calib[0] == 'C':
@@ -365,15 +365,27 @@ class algoDFS(algoAbstract):
         # Orientation Calibration
         i   = self.Displacement[idx][0]
         j   = self.Displacement[idx][2]
+        # k   = self.Displacement[idx][1]
         mv  = self.locDisp[idx]
         ret = []
-        if (self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and
-             self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown)):
+        if self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and \
+                self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown):
             ret.append('C')
 
-        elif (self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and
-              self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown)):
+        elif self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and \
+                self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown) and \
+                self.map.isFree(i[0]+y, i[1]+x, False) and \
+                self.map.isFree(j[0]+y, j[1]+x, False):
             ret.append('Z')
+        # if self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and \
+        #         self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown) and \
+        #         self.map.isObstacle(k[0]+y, k[1]+x, config.algoMapKnown):
+        #     ret.append('C')
+        #
+        # elif self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and \
+        #         self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown) and \
+        #         self.map.isObstacle(k[0]+mv[0]+y, k[1]+mv[1]+x, config.algoMapKnown):
+        #     ret.append('Z')
 
         else:
             ret.append(False)
@@ -382,7 +394,7 @@ class algoDFS(algoAbstract):
         # i = self.Displacement[idx][1]
         # ret.append(self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown))
 
-        # verbose("__calibrateable", ret, y, x, idx, i, j,
+        # verbose("_calibrateable", ret, y, x, idx, i, j,
         #         self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown), self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown),
         #         tag='algoDFS', lv='debug')
 
@@ -668,7 +680,7 @@ class algoDFS(algoAbstract):
                 mvt[locY][locX][drc] = fr[3]
 
                 # Terminate condition
-                calib = self.__calibrateable( locY, locX, self.DIRECTIONS[drc] )
+                calib = self._calibrateable( locY, locX, self.DIRECTIONS[drc] )
                 if calib[0]:
                     ret = drc
                     break
@@ -1139,6 +1151,7 @@ class RHR2(algoDFS):
                     self.lastCalibration += 1
 
     def run(self):
+        self.stopFlag = False
         seq = self._gotoYX(13, 18, 'S')
         seq.reverse()
         print('[Command] ', seq)
