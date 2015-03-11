@@ -7,6 +7,7 @@ import robot_simulator
 import robot_connector
 import time
 
+
 class Handler:
     def __init__(self, simulator=None):
         self.simulator  = simulator
@@ -36,9 +37,10 @@ class Handler:
     # ----------------------------------------------------------------------
     # List of actions that robot can receive
     # ----------------------------------------------------------------------
-    def move(self):
-        verbose("Action: move forward", tag='Handler')
-        tmp = self.__do_move()
+    def move(self, cmd='1'):
+        verbose("Action: move forward "+cmd, tag='Handler')
+        n = ord(cmd) - ord('0')
+        tmp = self.__do_move(step=n)
         if tmp:
             self.__do_read()
         self.__update_map()
@@ -128,7 +130,12 @@ class Handler:
         elif cmd == 'E':
             self.calibDist()
         else:
-            verbose("Command: unknown command", cmd, tag='Handler')
+            cmd_ord = ord(cmd)
+            if ord('2') <= cmd_ord <= ord('B'):
+                self.move(cmd)
+            else:
+                verbose("Command: unknown command", cmd, tag='Handler')
+
 
     def explore(self):
         self.algo.explore()
@@ -154,7 +161,7 @@ class Handler:
                 print('\t', curmap[y])
 
     # sending signal to robot and set the new location to map class
-    def __do_move(self, forward=True):
+    def __do_move(self, forward=True, step=1):
         # Threading
         # map_info.map_lock.acquire()
         # verbose("Locked by "+threading.current_thread(),
@@ -164,24 +171,28 @@ class Handler:
         robot_location  = self.map.get_robot_location()
         robot_direction = self.map.get_robot_direction()
         if   robot_direction == 'N':
-                robot_next = [robot_location[0]-1, robot_location[1]]
+                robot_next = [robot_location[0]-step, robot_location[1]]
         elif robot_direction == 'S':
-                robot_next = [robot_location[0]+1, robot_location[1]]
+                robot_next = [robot_location[0]+step, robot_location[1]]
         elif robot_direction == 'W':
-                robot_next = [robot_location[0], robot_location[1]-1]
+                robot_next = [robot_location[0], robot_location[1]-step]
         elif robot_direction == 'E':
-                robot_next = [robot_location[0], robot_location[1]+1]
+                robot_next = [robot_location[0], robot_location[1]+step]
         else:
             verbose("ERROR: Direction undefined! __do_move",
                 tag='Handler', pre='   >> ', lv='quiet')
 
         # Validating the next position
+        print("[Debug] ", robot_next)
         if self.map.valid_pos(robot_next[0], robot_next[1]):
             # Updating robot position value
             self.map.set_robot_location( robot_next )
             # Send command to robot
             if forward:
-                self.robot.send('F')
+                if step == 1:
+                    self.robot.send('F')
+                else:
+                    self.robot.send(chr(ord('0')+step))
             else:
                 self.robot.send('B')
             return True

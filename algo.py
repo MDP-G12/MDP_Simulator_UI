@@ -742,10 +742,11 @@ class algoDFS(algoAbstract):
 
     def findSP(self):
         verbose('Entering find Shortest Path..', tag='algoDFS', lv='debug')
-        return self._gotoYX(13,18, loc=(1,1), drcO='E') + self._gotoYX(1,1,'E')
+        return self._gotoYX(13, 18, 'E') + self._gotoYX(1,1,'E')
 
     def run(self):
         self.act = self.findSP()
+        # print('[Command] ', self.act)
         self.stopFlag = False
         if self.handler.simulator:
             self.actExec(None)
@@ -1136,6 +1137,37 @@ class RHR2(algoDFS):
                         self.handler.calibrateZ()
                 else:
                     self.lastCalibration += 1
+
+    def run(self):
+        seq = self._gotoYX(13, 18, 'S')
+        seq.reverse()
+        print('[Command] ', seq)
+        command = []
+        l = 0
+        for i in range(len(seq)):
+            if seq[i] == 'M':
+                l += 1
+                if i == len(seq)-1 or seq[i] != seq[i+1]:
+                    if l == 1:
+                        # self.handler.command('M')
+                        command.append('M')
+                    else:
+                        # self.handler.command(chr(ord('1')+l))
+                        command.append(chr(ord('0')+l))
+                    l = 0
+            else:
+                command.append(seq[i])
+                # self.handler.command(seq[i])
+        print("[Command] ", command)
+        # for i in command:
+        #     self.handler.command(i)
+        command.reverse()
+        self.act = command
+        self.actExec(None)
+
+
+    # def _gotoYX(self, y, x, faceto=None, loc=None, drcO=None):
+
 
 
 

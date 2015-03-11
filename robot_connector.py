@@ -132,9 +132,9 @@ class sensorConverter:
             return config.sensor_range['front_right']*10
         return self.__rgCon*x**self.__rgPow-3
     def lfMid(self, x):
-        if x < 1:
-            return config.sensor_range['left']*10
-        return self.__rgrgCon*x**self.__rgrgPow
+        if x == -1:
+            return config.sensor_range['left']
+        return x
     def rgMid(self, x):
         if x < 1:
             return config.sensor_range['right']*10
@@ -145,10 +145,10 @@ class sensorConverter:
         ret = []
         while len(sensor_data_in_str) < config.sensor_nbr:
             sensor_data_in_str.append('0')
-        ret.append( self.distToBlock( self.frMid(  int(sensor_data_in_str[1]) ), config.sensor_range['front_middle' ] ) )
+        ret.append( self.distToBlock( self.frMid(  int(sensor_data_in_str[0]) ), config.sensor_range['front_middle' ] ) )
         ret.append( self.distToBlock( self.frLeft(  int(sensor_data_in_str[1]) ), config.sensor_range['front_left' ] ) )
         ret.append( self.distToBlock( self.frRight( int(sensor_data_in_str[2]) ), config.sensor_range['front_right'] ) )
-        ret.append( self.distToBlock( self.lfMid( int(sensor_data_in_str[3]) ), config.sensor_range['left'] ) )
+        ret.append( self.distToBlock( self.lfMid( float(sensor_data_in_str[3]) ), config.sensor_range['left'] ) )
         ret.append( self.distToBlock( self.rgMid( int(sensor_data_in_str[4]) ), config.sensor_range['right'] ) )
         return ret
 

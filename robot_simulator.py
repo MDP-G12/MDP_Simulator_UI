@@ -163,10 +163,12 @@ class RobotSimulator(Robot):
         return ret
 
     def send(self, msg, isByte=False):
+        print("[Debug] ", msg)
+        msg_str = msg
         if not isByte:
             msg = str.encode(msg)
         verbose("Sending message: \'{}\'".format(msg), tag='RoboSim')
-        if msg==b'I'  or  msg==b'F'  or  msg==b'L'  or  msg==b'R':
+        if msg==b'I'  or  msg==b'F'  or  msg==b'L'  or  msg==b'R' or (ord('2')<=ord(msg_str)<=ord('B')):
             self.buffer = [self.get_front_middle(),
                             self.get_front_left(),
                             self.get_front_right(),

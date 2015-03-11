@@ -51,8 +51,8 @@ sensor_range = dict (
     front_middle    = 3,
     front_left      = 3,
     front_right     = 3,
-    left            = 2,
-    right           = 0
+    left            = 7,
+    right           = 2
 )
 
 
