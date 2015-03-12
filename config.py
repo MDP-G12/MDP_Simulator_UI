@@ -27,17 +27,18 @@ androCmd = dict(
 CWait = 0.1
 EWait = 0.05
 
-# Front sensor
-lfCon = 8605.422262
-lfPow = -1.109343067
-rgCon = 8177.575259
-rgPow = -1.093434639
-
-# Side sensor 
-lflfCon =   16547.64293
-lflfPow =   -1.214602924
-rgrgCon = 8177.575259
-rgrgPow = -1.093434639
+# Sensor parameters (not used - another copy in sensor_converter)
+# fmk = 6546.34
+# fmb = -3.4404
+#
+# flk = 5618.1
+# flb = -5.8524
+#
+# frk = 6397.1
+# frb = -7.1601
+#
+# rk = 5624.5
+# rb = -1.8865
 
 
 robot_detail = dict (

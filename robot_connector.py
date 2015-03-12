@@ -98,58 +98,91 @@ class Connector(Robot):
 
 
 class sensorConverter:
-    __lfCon =   config.lfCon
-    __lfPow =   config.lfPow
-    __rgCon =   config.rgCon
-    __rgPow =   config.rgPow
-        
-    __lflfCon = config.lflfCon
-    __lflfPow = config.lflfPow
-    __rgrgCon = config.rgrgCon
-    __rgrgPow = config.rgrgPow
+    # __lfCon =   config.lfCon
+    # __lfPow =   config.lfPow
+    # __rgCon =   config.rgCon
+    # __rgPow =   config.rgPow
+    #
+    # __lflfCon = config.lflfCon
+    # __lflfPow = config.lflfPow
+    # __rgrgCon = config.rgrgCon
+    # __rgrgPow = config.rgrgPow
+    #
+    # def setParam(self, lfCon=None, lfPow=None, rgCon=None, rgPow=None):
+    #     if not lfCon:
+    #         self.__lfCon = lfCon
+    #     if not lfPow:
+    #         self.__lfPow = lfPow
+    #     if not rgCon:
+    #         self.__rgCon = rgCon
+    #     if not rgPow:
+    #         self.__rgPow = rgPow
 
-    def setParam(self, lfCon=None, lfPow=None, rgCon=None, rgPow=None):
-        if not lfCon:
-            self.__lfCon = lfCon
-        if not lfPow:
-            self.__lfPow = lfPow
-        if not rgCon:
-            self.__rgCon = rgCon
-        if not rgPow:
-            self.__rgPow = rgPow
+    # def frMid(self, x):
+    #     if x < 1:
+    #         return config.sensor_range['front_middle']*10
+    #     return self.__lflfCon*x**self.__lflfPow
+    #
+    # def frLeft(self, x):
+    #     if x < 1:
+    #         return config.sensor_range['front_left']*10
+    #     return self.__lfCon*x**self.__lfPow-3
+    # def frRight(self, x):
+    #     if x < 1:
+    #         return config.sensor_range['front_right']*10
+    #     return self.__rgCon*x**self.__rgPow-3
+    # def lfMid(self, x):
+    #     if x == -1:
+    #         return config.sensor_range['left']
+    #     return x
+    # def rgMid(self, x):
+    #     if x < 1:
+    #         return config.sensor_range['right']*10
+    #     return self.__rgrgCon*x**self.__rgrgPow
 
-    def frMid(self, x):
-        if x < 1:
-            return config.sensor_range['front_middle']*10
-        return self.__lflfCon*x**self.__lflfPow
-    
-    def frLeft(self, x):
-        if x < 1:
-            return config.sensor_range['front_left']*10
-        return self.__lfCon*x**self.__lfPow-3
-    def frRight(self, x):
-        if x < 1:
-            return config.sensor_range['front_right']*10
-        return self.__rgCon*x**self.__rgPow-3
-    def lfMid(self, x):
-        if x == -1:
-            return config.sensor_range['left']
+
+
+
+    def front_left(self, x, flk, flb):
+        return flk/x + flb
+
+    def front_middle(self, x, fmk, fmb):
+        return fmk/x + fmb
+
+    def front_right(self, x, frk, frb):
+        return frk/x + frb
+
+    def left(self, x):
         return x
-    def rgMid(self, x):
-        if x < 1:
-            return config.sensor_range['right']*10
-        return self.__rgrgCon*x**self.__rgrgPow
+
+    def right(self, x, rk, rb):
+        return rk/x + rb
+
 
     # create a list of 5 datas to be returned to handler
     def getReturnSensorList(self, sensor_data_in_str):
+
+
+        fmk = 6546.34
+        fmb = -3.4404
+
+        flk = 5618.1
+        flb = -5.8524
+
+        frk = 6397.1
+        frb = -7.1601
+
+        rk = 5624.5
+        rb = -1.8865
+
         ret = []
         while len(sensor_data_in_str) < config.sensor_nbr:
             sensor_data_in_str.append('0')
-        ret.append( self.distToBlock( self.frMid(  int(sensor_data_in_str[0]) ), config.sensor_range['front_middle' ] ) )
-        ret.append( self.distToBlock( self.frLeft(  int(sensor_data_in_str[1]) ), config.sensor_range['front_left' ] ) )
-        ret.append( self.distToBlock( self.frRight( int(sensor_data_in_str[2]) ), config.sensor_range['front_right'] ) )
-        ret.append( self.distToBlock( self.lfMid( float(sensor_data_in_str[3]) ), config.sensor_range['left'] ) )
-        ret.append( self.distToBlock( self.rgMid( int(sensor_data_in_str[4]) ), config.sensor_range['right'] ) )
+        ret.append( self.distToBlock( self.front_middle(  int(sensor_data_in_str[0]), fmk, fmb), config.sensor_range['front_middle' ] ) )
+        ret.append( self.distToBlock( self.front_left(  int(sensor_data_in_str[1]), flk, flb), config.sensor_range['front_left' ] ) )
+        ret.append( self.distToBlock( self.front_right( int(sensor_data_in_str[2]), frk, frb), config.sensor_range['front_right'] ) )
+        ret.append( self.distToBlock( self.left( float(sensor_data_in_str[3]) ), config.sensor_range['left'] ) )
+        ret.append( self.distToBlock( self.right( int(sensor_data_in_str[4]), rk, rb), config.sensor_range['right'] ) )
         return ret
 
     # ASSUMING obstacle will never be too close
@@ -172,4 +205,6 @@ class sensorConverter:
 
         verbose(dist, distCm, ret, maxRange, tag='distToBlock', pre='    ', lv='debug')
         return ret
+
+
 
