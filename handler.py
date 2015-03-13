@@ -246,7 +246,7 @@ class Handler:
         sensor_nbr      = 5
 
         # sensor
-        ultra = 10
+        ultra = [3, 4]
         idx = map.Map.DIRECTIONS.index(robot_direction)
         for i in range(sensor_nbr):
             # print("[Debug] Sensor index: ", i)
@@ -279,7 +279,7 @@ class Handler:
                 loc[1]  += xx
                 dis     -= 1
                 self.map.set_map(loc[0], loc[1], 'free')
-                if i != ultra:
+                if i not in ultra:
                     self.map.confirm(loc[0], loc[1])
 
             # set last block if obstacle
@@ -288,10 +288,11 @@ class Handler:
                 loc[1]  += xx
                 dis     -= 1
                 if obs and not self.map.isConfirmed(loc[0], loc[1]):
+                # if obs:
                     self.map.set_map(loc[0], loc[1], 'obstacle')
                 else:
                     self.map.set_map(loc[0], loc[1], 'free')
-                    if i != ultra and not self.map.isConfirmed(loc[0], loc[1]):
+                    if i not in ultra and not self.map.isConfirmed(loc[0], loc[1]):
                         self.map.confirm(loc[0], loc[1])
 
         # update map data in RPi

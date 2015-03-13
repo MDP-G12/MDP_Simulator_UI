@@ -151,7 +151,7 @@ class sensorConverter:
     def front_middle(self, x, fmk, fmb):
         if x == 0:
             return config.sensor_range['front_middle']*10+10
-        return fmk/x + fmb
+        return fmk/x + fmb - 4
 
     def front_right(self, x, frk, frb):
         if x == 0:
@@ -203,7 +203,7 @@ class sensorConverter:
         # 2: 12 - 22 cm,                15
         # 3: 22 - 32 cm,                25
         # 4: 32 - 42 cm, and so on      35
-        blockRangeLimit = [11, 21, 31, 41, 51, 61]
+        blockRangeLimit = [12, 22, 32, 42, 52, 62]
         ret = 1
         for i in blockRangeLimit:
             if distCm < i:
