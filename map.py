@@ -187,14 +187,14 @@ class Map:
     def isExplored(self, y, x):
         if not self.valid_range(y,x):
             # verbose('WARNING: isExplored Out of Index!', (y, x), tag='Map', pre='  ', lv='debug')
-            return True;
+            return True
         return (self.__map[y][x] != 0) and (self.__map[y][x] != 3)
 
     def isObstacle(self, y, x, isMapKnown=True):
         if not self.valid_range(y,x):
-            return True;
+            return True
         if (self.__map[y][x] == 0):
-            return (isMapKnown) and (self.__map_real[y][x] == 1);
+            return (isMapKnown) and (self.__map_real[y][x] == 1)
         return self.__map[y][x] == 2
 
     def isFree(self, y, x, isMapKnown=True):
@@ -202,7 +202,7 @@ class Map:
             return False;
         # verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
         if (self.__map[y][x] == 0):
-            return (isMapKnown) and (self.__map_real[y][x] == 0);
+            return (isMapKnown) and (self.__map_real[y][x] == 0)
         return self.__map[y][x] == 1
 
     def isConfirmed(self, x, y):

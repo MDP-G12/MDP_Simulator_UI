@@ -144,36 +144,45 @@ class sensorConverter:
 
 
     def front_left(self, x, flk, flb):
+        if x == 0:
+            return config.sensor_range['front_left']*10+10
         return flk/x + flb
 
     def front_middle(self, x, fmk, fmb):
+        if x == 0:
+            return config.sensor_range['front_middle']*10+10
         return fmk/x + fmb
 
     def front_right(self, x, frk, frb):
+        if x == 0:
+            return config.sensor_range['front_right']*10+10
         return frk/x + frb
 
     def left(self, x):
+        if x == -1:
+            return config.sensor_range['left']*10+10
         return x
 
-    def right(self, x, rk, rb):
-        return rk/x + rb
+    def right(self, x):
+        if x == -1:
+            return config.sensor_range['right']*10+10
+        return x
 
 
     # create a list of 5 datas to be returned to handler
     def getReturnSensorList(self, sensor_data_in_str):
 
+        fmk = 6823.7
+        fmb = -1.8237
 
-        fmk = 6546.34
-        fmb = -3.4404
+        flk = 5788.3
+        flb = -6.0785
 
-        flk = 5618.1
-        flb = -5.8524
+        frk = 5913.7
+        frb = -6.0658
 
-        frk = 6397.1
-        frb = -7.1601
-
-        rk = 5624.5
-        rb = -1.8865
+        # rk = 6414.3
+        # rb = -1.1096
 
         ret = []
         while len(sensor_data_in_str) < config.sensor_nbr:
@@ -181,8 +190,8 @@ class sensorConverter:
         ret.append( self.distToBlock( self.front_middle(  int(sensor_data_in_str[0]), fmk, fmb), config.sensor_range['front_middle' ] ) )
         ret.append( self.distToBlock( self.front_left(  int(sensor_data_in_str[1]), flk, flb), config.sensor_range['front_left' ] ) )
         ret.append( self.distToBlock( self.front_right( int(sensor_data_in_str[2]), frk, frb), config.sensor_range['front_right'] ) )
-        ret.append( self.distToBlock( self.left( float(sensor_data_in_str[3]) ), config.sensor_range['left'] ) )
-        ret.append( self.distToBlock( self.right( int(sensor_data_in_str[4]), rk, rb), config.sensor_range['right'] ) )
+        ret.append( self.distToBlock( self.left ( float(sensor_data_in_str[3]) ), config.sensor_range['left'] ) )
+        ret.append( self.distToBlock( self.right( float(sensor_data_in_str[4]) ), config.sensor_range['right']) )
         return ret
 
     # ASSUMING obstacle will never be too close
@@ -194,7 +203,7 @@ class sensorConverter:
         # 2: 12 - 22 cm,                15
         # 3: 22 - 32 cm,                25
         # 4: 32 - 42 cm, and so on      35
-        blockRangeLimit = [12, 22, 32, 42, 52, 62]
+        blockRangeLimit = [11, 21, 31, 41, 51, 61]
         ret = 1
         for i in blockRangeLimit:
             if distCm < i:

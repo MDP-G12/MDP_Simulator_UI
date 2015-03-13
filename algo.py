@@ -365,18 +365,19 @@ class algoDFS(algoAbstract):
         # Orientation Calibration
         i   = self.Displacement[idx][0]
         j   = self.Displacement[idx][2]
-        # k   = self.Displacement[idx][1]
+        k   = self.Displacement[idx][1]
         mv  = self.locDisp[idx]
         ret = []
-        if self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and \
-                self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown):
+        if self.map.isObstacle(i[0]+y, i[1]+x, False) and \
+                self.map.isObstacle(j[0]+y, j[1]+x, False) and \
+                self.map.isObstacle(k[0]+y, k[1]+x, False):
             ret.append('C')
 
-        elif self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and \
-                self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown) and \
-                self.map.isFree(i[0]+y, i[1]+x, False) and \
-                self.map.isFree(j[0]+y, j[1]+x, False):
-            ret.append('Z')
+        # elif self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and \
+        #         self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown) and \
+        #         self.map.isFree(i[0]+y, i[1]+x, False) and \
+        #         self.map.isFree(j[0]+y, j[1]+x, False):
+        #     ret.append('Z')
         # if self.map.isObstacle(i[0]+y, i[1]+x, config.algoMapKnown) and \
         #         self.map.isObstacle(j[0]+y, j[1]+x, config.algoMapKnown) and \
         #         self.map.isObstacle(k[0]+y, k[1]+x, config.algoMapKnown):
@@ -1008,11 +1009,19 @@ class RHR2(algoDFS):
         idx = self.DIRECTIONS.index(self.handler.get_robot_direction())
         idx_right = (idx + 1) % 4
 
-        if (x, y) == self.start_coordinate:
+        if (x, y) == self.start_coordinate and idx == 2:
             self.start_visited += 1
         if self.start_visited > 1:
             self.stopFlag = True
             print("[Info] RHR exploration done!")
+            # time.sleep(5)
+            # Adjust direction for fastest path
+            # self.act = self._gotoYX(1, 1, 'S')
+            # self.actExec(None)
+            self.start_visited = -1
+            if config.android_controller:
+                if self.handler.listen_to_android() == 'run':
+                    self.handler.algo.run()
 
         print("[Debug] All obstacles in right: ", self._are_all_obstacles(x, y, idx_right))
         print("[Debug] Corner: ", self.is_corner(x, y, idx))
@@ -1020,7 +1029,8 @@ class RHR2(algoDFS):
         if self.is_corner(x, y, idx) or (self._are_all_obstacles(x, y, idx_right) and self.lastCalibration[1 - idx % 2] > config.maxCalibrationMove):
             print("[Calibration] Start right calibration.")
             self.handler.command('R')
-            self.handler.calibrateC()
+            if self._calibrateable()[0]:
+                self.handler.calibrateC()
             self.handler.command('L')
             self.lastCalibration[1 - idx % 2] = 0
             # self.act = ['L', 'R']
@@ -1106,8 +1116,8 @@ class RHR2(algoDFS):
             verbose('actExec', roboLoc, tag='Algo RHR2', lv='deepdebug', pre='  ')
 
         # if currently at Goal points then set the flag
-        if self.map and (self.map.get_robot_location() == self.goalLocation):
-            self.goalVisited = True
+        # if self.map and (self.map.get_robot_location() == self.goalLocation):
+        #     self.goalVisited = True
 
         idx = self.DIRECTIONS.index(self.handler.map.get_robot_direction())
 
@@ -1172,14 +1182,24 @@ class RHR2(algoDFS):
                 command.append(seq[i])
                 # self.handler.command(seq[i])
         print("[Command] ", command)
+        last_command = command[len(command)-1]
+        if last_command == 'R' or last_command == "L":
+            command = command[:len(command)-1]
+        print("[New Command] ", command)
+
+        last_command = command[len(command)-1]
+        command = command[:len(command)-1]
+
         # for i in command:
         #     self.handler.command(i)
         command.reverse()
         self.act = command
-        self.actExec(None)
+        while self.act:
+            self.actExec(None)
+        self.handler.command(last_command)
+        self.stopFlag = True
 
 
-    # def _gotoYX(self, y, x, faceto=None, loc=None, drcO=None):
 
 
 

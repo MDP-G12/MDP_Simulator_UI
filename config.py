@@ -2,7 +2,7 @@
 log_path                = "log/log.txt"
 log_path_full           = "log/log_full.txt"
 
-robot_simulation        = True
+robot_simulation        = False
 simulator_mapfrequency  = 100        # simulator map update frequency in ms
 exploration_timeLimit   = 0
 exploration_covLimit    = 100        # in %
@@ -211,3 +211,5 @@ map_detail 	= dict(
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
                 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1]]
 )
+
+android_controller = True

@@ -19,12 +19,24 @@ class Handler:
             self.robot = robot_simulator.RobotSimulator(self)
         else:
             self.robot = robot_connector.Connector()
-            self.robot.androListen( simulator, self.algo.explore, self.algo.run )
+            # self.robot.androListen( simulator, self.algo.explore, self.algo.run )
 
         time.sleep(0.1)
         self.robot.send('I')
         self.__do_read()
-        time.clock()
+
+        # time.clock()
+
+    def listen_to_android(self):
+        command = self.robot.receive(False)
+        # print(command)
+        if command and 'explore' in command:
+            return 'explore'
+        elif command and 'run' in command:
+            return 'run'
+        else:
+            print("[Error] Data received: ", command, ", expecting next command from android.")
+            return self.listen_to_android()
 
     def get_robot_location(self):
         return self.map.get_robot_location()
@@ -92,6 +104,10 @@ class Handler:
 
     def calibrateC(self, distCalibrate=False):
         verbose("Action: calibrate", tag='Handler')
+        verbose("Current Map:", tag='Handler', lv='deepdebug', pre='  ')
+        curmap = self.map.get_map()
+        for y in range(self.map.height):
+            verbose(curmap[y], tag=None, lv='deepdebug')
         self.robot.send('C')
         tmp = self.robot.receive(convert=False)
         while not tmp or '[Cmd] C' not in tmp:
@@ -101,6 +117,7 @@ class Handler:
         #     self.calibDist()
     
     def calibrateZ(self, distCalibrate=False):
+        return
         verbose("Action: calibrate", tag='Handler')
         self.robot.send('Z')
         tmp = self.robot.receive(convert=False)
@@ -155,10 +172,10 @@ class Handler:
     def __update_map(self):
         if self.simulator:
             self.simulator.update_map()
-        if (verbose("Current Map:", tag='Handler', lv='deepdebug', pre='  ')):
-            curmap = self.map.get_map()
-            for y in range(self.map.height):
-                print('\t', curmap[y])
+        verbose("Current Map:", tag='Handler', lv='deepdebug', pre='  ')
+        curmap = self.map.get_map()
+        for y in range(self.map.height):
+            verbose(curmap[y], tag=None, lv='deepdebug')
 
     # sending signal to robot and set the new location to map class
     def __do_move(self, forward=True, step=1):
@@ -229,7 +246,7 @@ class Handler:
         sensor_nbr      = 5
 
         # sensor
-        ultra = 3
+        ultra = 10
         idx = map.Map.DIRECTIONS.index(robot_direction)
         for i in range(sensor_nbr):
             # print("[Debug] Sensor index: ", i)

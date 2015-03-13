@@ -19,8 +19,11 @@ class Simulator:
         self.master.title(title)
         self.master.resizable(0, 0)
         self.handler = handler.Handler(self)
+
+
         self.map     = self.handler.map
         self.algo    = self.handler.algo
+
 
         self.master.lift()
 
@@ -137,6 +140,9 @@ class Simulator:
         self.master.bind("<Down>", lambda e: self.back())
         self.master.bind("C", lambda e: self.handler.calibrate())
         self.master.bind("E", lambda e: self.handler.calibDist())
+
+        if config.android_controller and self.handler.listen_to_android() == 'explore':
+            self.algo.explore()
 
         self.master.mainloop()
 
@@ -283,6 +289,11 @@ class Simulator:
         # update the change
         self.robot_location  = next_robot_location
         self.robot_direction = next_robot_direction
+
+
+
+
+
     # ----------------------------------------------------------------------
 
 
