@@ -363,15 +363,18 @@ class algoDFS(algoAbstract):
         idx     = self.DIRECTIONS.index( roboDir )
         
         # Orientation Calibration
-        i   = self.Displacement[idx][0]
-        j   = self.Displacement[idx][2]
+        # i   = self.Displacement[idx][0]
+        # j   = self.Displacement[idx][2]
         k   = self.Displacement[idx][1]
-        mv  = self.locDisp[idx]
+        # mv  = self.locDisp[idx]
         ret = []
-        if self.map.isObstacle(i[0]+y, i[1]+x, False) and \
-                self.map.isObstacle(j[0]+y, j[1]+x, False) and \
-                self.map.isObstacle(k[0]+y, k[1]+x, False):
+
+        if self.map.isObstacle(k[0]+y, k[1]+x, False):
             ret.append('C')
+        # if self.map.isObstacle(i[0]+y, i[1]+x, False) and \
+        #         self.map.isObstacle(j[0]+y, j[1]+x, False) and \
+        #         self.map.isObstacle(k[0]+y, k[1]+x, False):
+        #     ret.append('C')
 
         # elif self.map.isObstacle(i[0]+mv[0]+y, i[1]+mv[1]+x, config.algoMapKnown) and \
         #         self.map.isObstacle(j[0]+mv[0]+y, j[1]+mv[1]+x, config.algoMapKnown) and \
@@ -1023,21 +1026,27 @@ class RHR2(algoDFS):
                 if self.handler.listen_to_android() == 'run':
                     self.handler.algo.run()
 
-        print("[Debug] All obstacles in right: ", self._are_all_obstacles(x, y, idx_right))
-        print("[Debug] Corner: ", self.is_corner(x, y, idx))
+        # print("[Debug] All obstacles in right: ", self._are_all_obstacles(x, y, idx_right))
+        # print("[Debug] Corner: ", self.is_corner(x, y, idx))
 
-        if self.is_corner(x, y, idx) or (self._are_all_obstacles(x, y, idx_right) and self.lastCalibration[1 - idx % 2] > config.maxCalibrationMove):
-            print("[Calibration] Start right calibration.")
-            self.handler.command('R')
-            if self._calibrateable()[0]:
-                self.handler.calibrateC()
-            self.handler.command('L')
-            self.lastCalibration[1 - idx % 2] = 0
-            # self.act = ['L', 'R']
-            # Need to run this command twice
-            # self.actExec(None)
-            # self.actExec(None)
-            print("[Calibration] Right calibration done.")
+        if self.lastCalibration[1 - idx % 2] > config.maxCalibrationMove:
+            if self._calibrateable(x, y, self.DIRECTIONS[idx_right])[0]:
+                print("[Calibration] Start right calibration.")
+                self.handler.command('R')
+                if self._calibrateable()[0]:
+                    self.handler.calibrateC()
+                self.handler.command('L')
+                self.lastCalibration[1 - idx % 2] = 0
+                print("[Calibration] Right calibration done.")
+            elif self._calibrateable(x, y, self.handler.map.get_robot_direction_left())[0]:
+                print("[Calibration] Start left calibration.")
+                print("Debug: ", x, " ", y, " ", self.handler.map.get_robot_direction(), " ", self.handler.map.get_robot_direction_left())
+                self.handler.command('L')
+                if self._calibrateable()[0]:
+                    self.handler.calibrateC()
+                self.handler.command('R')
+                self.lastCalibration[1 - idx % 2] = 0
+                print("[Calibration] Left calibration done.")
 
         if not self.right():
             if not self.forward():

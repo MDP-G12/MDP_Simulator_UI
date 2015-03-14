@@ -163,7 +163,7 @@ class RobotSimulator(Robot):
         return ret
 
     def send(self, msg, isByte=False):
-        print("[Debug] ", msg)
+        # print("[Debug] ", msg)
         msg_str = msg
         if not isByte:
             msg = str.encode(msg)

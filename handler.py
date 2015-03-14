@@ -200,7 +200,7 @@ class Handler:
                 tag='Handler', pre='   >> ', lv='quiet')
 
         # Validating the next position
-        print("[Debug] ", robot_next)
+        # print("[Debug] ", robot_next)
         if self.map.valid_pos(robot_next[0], robot_next[1]):
             # Updating robot position value
             self.map.set_robot_location( robot_next )
