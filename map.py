@@ -48,6 +48,14 @@ class Map:
             #       1    - confirmed (start/goal or verified by Infrared sensor as free)
             # ----------------------------------------------------------------------
             self.__map_confirm = deepcopy(config.map_detail['map'])
+            # ----------------------------------------------------------------------
+            #   Map_algo Legend:
+            #       0    - unexplored
+            #       1    - explored; free
+            #       2    - explored; obstacle
+            #       3..3 - unexplored; pre-obstacle
+            # ----------------------------------------------------------------------
+            self.__map_algo = deepcopy(config.map_detail['map'])
         else:
             # Not implemented. Will not use.
             raise Exception
@@ -129,8 +137,24 @@ class Map:
             verbose( "Error: set map wrong status!", tag="Map", lv='quiet' )
         return ret
 
+    def set_map_algo(self, y, x, stat):
+        if not self.valid_range(y, x):
+            verbose( "Warning: map to be set is out of bound!", (y, x), tag="Map", lv='debug' )
+            return False
+
+        ret = False
+        if (stat in self.mapStat):
+            ret = True
+            self.__map_algo[y][x] = self.mapStat.index(stat)
+        else:
+            verbose( "Error: set map wrong status!", tag="Map", lv='quiet' )
+        return ret
+
     def get_map(self):
         return self.__map
+
+    def get_map_algo(self):
+        return self.__map_algo
 
     # Comparing the values of 2D arrays, cmpmap with own map. True if values are same
     def isSameMap(self, cmpmap):
@@ -197,13 +221,28 @@ class Map:
             return (isMapKnown) and (self.__map_real[y][x] == 1)
         return self.__map[y][x] == 2
 
+    def isObstacle_algo(self, y, x, isMapKnown=True):
+        if not self.valid_range(y,x):
+            return True
+        if (self.__map_algo[y][x] == 0):
+            return (isMapKnown) and (self.__map_real[y][x] == 1)
+        return self.__map_algo[y][x] == 2
+
     def isFree(self, y, x, isMapKnown=True):
         if not self.valid_range(y,x):
-            return False;
+            return False
         # verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
         if (self.__map[y][x] == 0):
             return (isMapKnown) and (self.__map_real[y][x] == 0)
         return self.__map[y][x] == 1
+
+    def isFree_algo(self, y, x, isMapKnown=True):
+        if not self.valid_range(y,x):
+            return False
+        # verbose( "isFree({0},{1}): {2}; real:{3}".format(y,x,self.__map[y][x],self.__map_real[y][x]), lv='deepdebug' )
+        if (self.__map_algo[y][x] == 0):
+            return (isMapKnown) and (self.__map_real[y][x] == 0)
+        return self.__map_algo[y][x] == 1
 
     def isConfirmed(self, x, y):
         if not (0 <= x <= 14 and 0 <= y <= 19):

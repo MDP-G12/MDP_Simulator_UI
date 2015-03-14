@@ -991,13 +991,13 @@ class RHR2(algoDFS):
 
     def is_wall(self, x, y, idx):
         return (x == 1 and idx == 3) or (y == 1 and idx == 2) or (x == 13 and idx == 1) or (y == 18 and idx == 0)
-
-    def is_corner(self, x, y, idx):
-        idx_right = (idx + 1) % 4
-        if self._are_all_obstacles(x, y, idx) and self._are_all_obstacles(x, y, idx_right):
-            return True
-        else:
-            return False
+    #
+    # def is_corner(self, x, y, idx):
+    #     idx_right = (idx + 1) % 4
+    #     if self._are_all_obstacles(x, y, idx) and self._are_all_obstacles(x, y, idx_right):
+    #         return True
+    #     else:
+    #         return False
 
     # def is_calibrateable(self, x, y, idx):
     #     if self._are_all_obstacles():
@@ -1006,53 +1006,6 @@ class RHR2(algoDFS):
     def explore(self):
         self.stopFlag = False
         self.exec()
-
-    def exec(self):
-        x, y = self.handler.get_robot_location()
-        idx = self.DIRECTIONS.index(self.handler.get_robot_direction())
-        idx_right = (idx + 1) % 4
-
-        if (x, y) == self.start_coordinate and idx == 2:
-            self.start_visited += 1
-        if self.start_visited > 1:
-            self.stopFlag = True
-            print("[Info] RHR exploration done!")
-            # time.sleep(5)
-            # Adjust direction for fastest path
-            # self.act = self._gotoYX(1, 1, 'S')
-            # self.actExec(None)
-            self.start_visited = -1
-            if config.android_controller:
-                if self.handler.listen_to_android() == 'run':
-                    self.handler.algo.run()
-
-        # print("[Debug] All obstacles in right: ", self._are_all_obstacles(x, y, idx_right))
-        # print("[Debug] Corner: ", self.is_corner(x, y, idx))
-
-        if self.lastCalibration[1 - idx % 2] > config.maxCalibrationMove:
-            if self._calibrateable(x, y, self.DIRECTIONS[idx_right])[0]:
-                print("[Calibration] Start right calibration.")
-                self.handler.command('R')
-                if self._calibrateable()[0]:
-                    self.handler.calibrateC()
-                self.handler.command('L')
-                self.lastCalibration[1 - idx % 2] = 0
-                print("[Calibration] Right calibration done.")
-            elif self._calibrateable(x, y, self.handler.map.get_robot_direction_left())[0]:
-                print("[Calibration] Start left calibration.")
-                print("Debug: ", x, " ", y, " ", self.handler.map.get_robot_direction(), " ", self.handler.map.get_robot_direction_left())
-                self.handler.command('L')
-                if self._calibrateable()[0]:
-                    self.handler.calibrateC()
-                self.handler.command('R')
-                self.lastCalibration[1 - idx % 2] = 0
-                print("[Calibration] Left calibration done.")
-
-        if not self.right():
-            if not self.forward():
-                self.left()
-        if not self.stopFlag:
-            self.handler.simulator.master.after(config.simulator_mapfrequency, self.exec)
 
     def right(self):
         if not self.right_flag:
@@ -1095,17 +1048,25 @@ class RHR2(algoDFS):
         # check for robot current position (x, y), whether it is possible to calibrate in direction d
         # obstacles include wall
         for i in self.Displacement[idx]:
-            if not self.map.isObstacle(i[0] + x, i[1] + y, False):
+            if not self.map.isObstacle_algo(i[0] + x, i[1] + y, False):
+                return False
+        return True
+
+    def _areFree(self, y, x, idx, mvt=0):
+        # Matrix computation to get the boxes given the direction
+        for i in self.Displacement[idx]:
+            if not self.map.isFree_algo( i[0] + y + self.locDisp[idx][0]*mvt,
+                                    i[1] + x + self.locDisp[idx][1]*mvt,
+                                    config.algoMapKnown):
                 return False
         return True
 
     def _possible_right_turn(self, x, y, idx):
         # check for robot position (x, y) and right direction, whether there are any explored obstacles in the right
         for i in self.Displacement[idx]:
-            if self.map.isObstacle(i[0] + x, i[1] + y, False):
+            if self.map.isObstacle_algo(i[0] + x, i[1] + y, False):
                 return False
         return True
-
 
     # ------------------------------------------------------------------
     # Duplicate of function in algoDFS with minor change
@@ -1168,6 +1129,80 @@ class RHR2(algoDFS):
                         self.handler.calibrateZ()
                 else:
                     self.lastCalibration += 1
+
+    def _calibrateable(self, y=None, x=None, roboDir=None):
+        if (y==None) or (x==None) or (roboDir==None):
+            [y,x] = self.map.get_robot_location()
+            roboDir = self.map.get_robot_direction()
+        idx     = self.DIRECTIONS.index( roboDir )
+
+        # Orientation Calibration
+        # i   = self.Displacement[idx][0]
+        # j   = self.Displacement[idx][2]
+        k   = self.Displacement[idx][1]
+        # mv  = self.locDisp[idx]
+        ret = []
+
+        if self.map.isObstacle_algo(k[0]+y, k[1]+x, False):
+            ret.append('C')
+
+        else:
+            ret.append(False)
+
+        return ret
+
+    def exec(self):
+        x, y = self.handler.get_robot_location()
+        idx = self.DIRECTIONS.index(self.handler.get_robot_direction())
+        idx_right = (idx + 1) % 4
+
+        if (x, y) == self.start_coordinate and idx == 2:
+            self.start_visited += 1
+        if self.start_visited > 1:
+            self.stopFlag = True
+            print("[Info] RHR exploration done!")
+            for i in range(15):
+                print()
+                for j in range(20):
+                    print(self.handler.map.get_map_algo()[i][j], " ", end="")
+            # time.sleep(5)
+            # Adjust direction for fastest path
+            # self.act = self._gotoYX(1, 1, 'S')
+            # self.actExec(None)
+            self.start_visited = -1
+            if config.android_controller:
+                if self.handler.listen_to_android() == 'run':
+                    self.handler.algo.run()
+
+        # print("[Debug] All obstacles in right: ", self._are_all_obstacles(x, y, idx_right))
+        # print("[Debug] Corner: ", self.is_corner(x, y, idx))
+
+        if self.lastCalibration[1 - idx % 2] > config.maxCalibrationMove:
+            if self._calibrateable(x, y, self.DIRECTIONS[idx_right])[0]:
+                print("[Calibration] Start right calibration.")
+                self.handler.command('R')
+                if self._calibrateable()[0]:
+                    self.handler.calibrateC()
+                self.handler.command('L')
+                self.lastCalibration[1 - idx % 2] = 0
+                print("[Calibration] Right calibration done.")
+            elif self._calibrateable(x, y, self.handler.map.get_robot_direction_left())[0]:
+                print("[Calibration] Start left calibration.")
+                print("Debug: ", x, " ", y, " ", self.handler.map.get_robot_direction(), " ", self.handler.map.get_robot_direction_left())
+                self.handler.command('L')
+                if self._calibrateable()[0]:
+                    self.handler.calibrateC()
+                self.handler.command('R')
+                self.lastCalibration[1 - idx % 2] = 0
+                print("[Calibration] Left calibration done.")
+
+        if not self.right():
+            if not self.forward():
+                self.left()
+        if not self.stopFlag:
+            self.handler.simulator.master.after(config.simulator_mapfrequency, self.exec)
+
+    # ------------------------------------------------------------------
 
     def run(self):
         self.stopFlag = False

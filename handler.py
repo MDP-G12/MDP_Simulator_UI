@@ -280,6 +280,7 @@ class Handler:
                 dis     -= 1
                 self.map.set_map(loc[0], loc[1], 'free')
                 if i not in ultra:
+                    self.map.set_map_algo(loc[0], loc[1], 'free')
                     self.map.confirm(loc[0], loc[1])
 
             # set last block if obstacle
@@ -290,9 +291,12 @@ class Handler:
                 if obs and not self.map.isConfirmed(loc[0], loc[1]):
                 # if obs:
                     self.map.set_map(loc[0], loc[1], 'obstacle')
+                    if i not in ultra:
+                        self.map.set_map_algo(loc[0], loc[1], 'obstacle')
                 else:
                     self.map.set_map(loc[0], loc[1], 'free')
-                    if i not in ultra and not self.map.isConfirmed(loc[0], loc[1]):
+                    if i not in ultra:
+                        self.map.set_map_algo(loc[0], loc[1], 'free')
                         self.map.confirm(loc[0], loc[1])
 
         # update map data in RPi
